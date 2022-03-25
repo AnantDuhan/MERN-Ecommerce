@@ -12,9 +12,9 @@ const productRoute = require('./routes/product');
 const userRoute = require('./routes/user');
 const orderRoute = require('./routes/order');
 
-app.use("/api/v1", productRoute);
-app.use("/api/v1", userRoute);
-app.use("/api/v1", orderRoute);
+app.use('/api/v1', productRoute);
+app.use('/api/v1', userRoute);
+app.use('/api/v1', orderRoute);
 
 app.use(async (ctx, next) => {
     ctx.response.headers.set('Access-Control-Allow-Origin', '*');
