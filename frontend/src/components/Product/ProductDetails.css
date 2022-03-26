@@ -23,7 +23,9 @@
 }
 
 .CarouselImage {
-  width: 20vmax;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: fill;
 }
 
 .detailsBlock-1 > h2 {
@@ -153,7 +155,7 @@
 }
 
 .reviewsHeading {
-  color: #000000be;
+  color: #000000;
   font: 500 1.4vmax "Roboto";
   text-align: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.226);
