@@ -6,6 +6,8 @@ import Home from './components/Home/Home';
 import Footer from './components/layout/Footer/Footer';
 import Header from './components/layout/Header/Header';
 import ProductDetails from './components/Product/ProductDetails';
+import Products from './components/Product/Products';
+import Search from './components/Product/Search';
 
 import './App.css';
 
@@ -22,8 +24,12 @@ function App() {
         <div>
             <Header />
             <Routes>
-                <Route path="/" element={<Home />} exact/>
-                <Route path="/product/:id" element={<ProductDetails />} exact/>
+                <Route path="/" element={<Home />} exact />
+                <Route path="/product/:id" element={<ProductDetails />} exact />
+                <Route path="/products" element={<Products />} exact />
+                <Route path="/products/:keyword" element={<Products />} exact />
+
+                <Route path="/search" element={<Search />} exact />
             </Routes>
             <Footer />
         </div>
