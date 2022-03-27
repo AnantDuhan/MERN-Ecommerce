@@ -1,6 +1,6 @@
 import { Rating } from '@material-ui/lab';
 import React, { Fragment, useEffect } from 'react';
-import { useAlert } from 'react-alert'
+import { useAlert } from 'react-alert';
 import Carousel from 'react-material-ui-carousel';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -10,14 +10,16 @@ import Loader from '../layout/Loader/Loader';
 import ReviewCard from './ReviewCard';
 
 import './ProductDetails.css';
+import MetaData from '../layout/MetaData';
 
 const ProductDetails = () => {
-
     const dispatch = useDispatch();
     const { id } = useParams();
     const alert = useAlert();
 
-    const { product, loading, error } = useSelector(state => state.productDetails)
+    const { product, loading, error } = useSelector(
+        (state) => state.productDetails
+    );
 
     useEffect(() => {
         if (error) {
@@ -25,20 +27,21 @@ const ProductDetails = () => {
             dispatch(clearErrors());
         }
         dispatch(getProductDetails(id));
-    }, [dispatch, id, error, alert])
+    }, [dispatch, id, error, alert]);
 
     const options = {
         value: product.ratings,
         readOnly: true,
         precision: 0.5,
     };
-    
+
     return (
         <Fragment>
             {loading ? (
                 <Loader />
             ) : (
                 <Fragment>
+                    <MetaData title={`${product.name} -- ECOMMERCE`} />
                     <div className="ProductDetails">
                         <div>
                             <Carousel>
