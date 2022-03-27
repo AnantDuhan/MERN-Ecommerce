@@ -16,12 +16,12 @@ app.use('/api/v1', productRoute);
 app.use('/api/v1', userRoute);
 app.use('/api/v1', orderRoute);
 
-app.use(async (ctx, next) => {
-    ctx.response.headers.set('Access-Control-Allow-Origin', '*');
-    ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-    await next();
-})
+// app.use(async (ctx, next) => {
+//     ctx.response.headers.set('Access-Control-Allow-Origin', '*');
+//     ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//     ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+//     await next();
+// });
 
 // middleware for error
 app.use(errorMiddleware);
