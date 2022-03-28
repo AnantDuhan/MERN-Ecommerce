@@ -26,13 +26,13 @@ const LoginSignup = () => {
     const registerTab = useRef(null);
     const switcherTab = useRef(null);
 
-    const [loginEmail, setLoginEmail] = useState('');
-    const [loginPassword, setLoginPassword] = useState('');
+    const [loginEmail, setLoginEmail] = useState("");
+    const [loginPassword, setLoginPassword] = useState("");
 
     const [user, setUser] = useState({
-        name: '',
-        email: '',
-        password: '',
+        name: "",
+        email: "",
+        password: "",
     });
 
     const { name, email, password } = user; 
@@ -55,7 +55,7 @@ const LoginSignup = () => {
         myForm.set('password', password);
         myForm.set('avatar', avatar);
         dispatch(register(myForm));
-    }
+    };
     
     const registerDataChange = (e) => {
         if (e.target.name === 'avatar') {
@@ -66,9 +66,9 @@ const LoginSignup = () => {
                     setAvatar(reader.result);
                 }
             };
-            reader.readAsDataURL(e.target.value[0]);
+            reader.readAsDataURL(e.target.files[0]);
         } else {
-            setUser({ ...user, [e.target.name]: e.target.value })
+            setUser({ ...user, [e.target.name]: e.target.value });
         }
     };
 
