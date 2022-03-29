@@ -1,3 +1,10 @@
+/***
+ * @Author:xxx
+ * @Date:2022-03-29 10:39:45
+ * @LastModifiedBy:xxx
+ * @Last Modified time:2022-03-29 10:39:45
+ */
+
 import FaceIcon from '@material-ui/icons/Face';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
@@ -26,16 +33,16 @@ const LoginSignup = () => {
     const registerTab = useRef(null);
     const switcherTab = useRef(null);
 
-    const [loginEmail, setLoginEmail] = useState("");
-    const [loginPassword, setLoginPassword] = useState("");
+    const [loginEmail, setLoginEmail] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
 
     const [user, setUser] = useState({
-        name: "",
-        email: "",
-        password: "",
+        name: '',
+        email: '',
+        password: '',
     });
 
-    const { name, email, password } = user; 
+    const { name, email, password } = user;
 
     const [avatar, setAvatar] = useState('/Profile.png');
     const [avatarPreview, setAvatarPreview] = useState('/Profile.png');
@@ -56,11 +63,11 @@ const LoginSignup = () => {
         myForm.set('avatar', avatar);
         dispatch(register(myForm));
     };
-    
+
     const registerDataChange = (e) => {
         if (e.target.name === 'avatar') {
-            const reader = new FileReader();
-            reader.onLoad = () => {
+            let reader = new FileReader();
+            reader.onLoadend = () => {
                 if (reader.readyState === 2) {
                     setAvatarPreview(reader.result);
                     setAvatar(reader.result);
