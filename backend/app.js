@@ -4,11 +4,14 @@ const app = express();
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const cors = require('cors');
 const errorMiddleware = require('./middleware/error');
 
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload());
 
 // Route Imports
@@ -20,12 +23,14 @@ app.use('/api/v1', productRoute);
 app.use('/api/v1', userRoute);
 app.use('/api/v1', orderRoute);
 
-// app.use(async (ctx, next) => {
-//     ctx.response.headers.set('Access-Control-Allow-Origin', '*');
-//     ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-//     ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-//     await next();
-// });
+// CORS
+app.use(async (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Methods', '*');
+    return next();
+});
 
 // middleware for error
 app.use(errorMiddleware);

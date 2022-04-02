@@ -2,7 +2,7 @@ const app = require('./app');
 
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary');
 
 // Handling Uncaught Exceptions
 process.on('uncaughtException', (err) => {
@@ -20,7 +20,8 @@ connectDB();
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
 });
 
 const server = app.listen(process.env.PORT, () => {
