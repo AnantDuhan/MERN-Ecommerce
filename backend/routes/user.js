@@ -14,6 +14,7 @@ const {
    deleteUser,
 } = require('../controllers/user');
 const { isAuthUser, authRoles } = require('../middleware/auth');
+
 const router = express.Router();
 
 router.route('/register').post(registerUser);
@@ -35,15 +36,9 @@ router.route('/me/update').put(isAuthUser, updateProfile);
 router.route('/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 
 router
-   .route('/admin/user/:id')
-   .get(isAuthUser, authRoles('admin'), getSingleUser);
-
-router
-   .route('/admin/user/:id')
-   .put(isAuthUser, authRoles('admin'), updateUserRole);
-   
-router
-   .route('/admin/user/:id')
-   .delete(isAuthUser, authRoles('admin'), deleteUser);
+    .route('/admin/user/:id')
+    .get(isAuthUser, authRoles('admin'), getSingleUser)
+    .put(isAuthUser, authRoles('admin'), updateUserRole)
+    .delete(isAuthUser, authRoles('admin'), deleteUser);
 
 module.exports = router;

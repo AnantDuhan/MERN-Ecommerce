@@ -9,19 +9,22 @@ const cloudinary = require('cloudinary');
 // Register our user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 
-   const myCloud = await cloudinary.uploader.upload(req.body.avatar, {
+   const file = req.files.image
+   console.log(file);
+
+   const myCloud = await cloudinary.v2.uploader.upload(file.tempFilePath, {
       folder: "avatars",
-      resourcetype: "image",
       width: 150,
       crop: "scale",
-      override: true
+      public_id: `${Date.now()}`,
+      resource_type: "auto"
    });
 
    const { name, email, password } = req.body;
    const user = await User.create({
-      name: name,
-      email: email,
-      password: password,
+      name,
+      email,
+      password,
       avatar: {
          public_id: myCloud.public_id,
          url: myCloud.secure_url,

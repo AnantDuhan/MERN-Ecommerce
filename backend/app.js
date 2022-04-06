@@ -10,9 +10,9 @@ const errorMiddleware = require('./middleware/error');
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(fileUpload());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload({ useTempFiles: true }));
 
 // Route Imports
 const productRoute = require('./routes/product');
