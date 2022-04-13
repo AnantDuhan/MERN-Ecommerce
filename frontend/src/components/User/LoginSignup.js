@@ -1,10 +1,3 @@
-/***
- * @Author:xxx
- * @Date:2022-03-29 10:39:45
- * @LastModifiedBy:xxx
- * @Last Modified time:2022-03-29 10:39:45
- */
-
 import FaceIcon from '@material-ui/icons/Face';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
@@ -16,6 +9,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { clearErrors, login, register } from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
+
+import FormData from 'form-data';
 
 import './LoginSignup.css';
 
@@ -55,7 +50,7 @@ const LoginSignup = () => {
     const registerSubmit = (e) => {
         e.preventDefault();
 
-        const myForm = new FormData();
+        let myForm = new FormData();
 
         myForm.set('name', name);
         myForm.set('email', email);
@@ -87,7 +82,7 @@ const LoginSignup = () => {
         if (isAuthenticated) {
             navigate('/account');
         }
-    }, [dispatch, error, alert, isAuthenticated]);
+    }, [dispatch, error, alert, isAuthenticated, navigate]);
 
     const switchTabs = (e, tab) => {
         if (tab === 'login') {
