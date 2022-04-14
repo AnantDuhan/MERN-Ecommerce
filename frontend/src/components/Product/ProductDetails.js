@@ -1,5 +1,5 @@
 import { Rating } from '@material-ui/lab';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useAlert } from 'react-alert';
 import Carousel from 'react-material-ui-carousel';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,6 +34,25 @@ const ProductDetails = () => {
         readOnly: true,
         precision: 0.5,
     };
+
+    const [quantity, setQuantity] = useState(1);
+
+    const increaseQuantity = () => {
+
+        if (product.stock <= quantity)
+            return;
+
+        const qty = quantity + 1;
+        setQuantity(qty);
+    }
+
+    const decreaseQuantity = () => {
+        if (1 >= quantity)
+            return;
+
+        const qty = quantity - 1;
+        setQuantity(qty);
+    }
 
     return (
         <Fragment>
@@ -70,9 +89,9 @@ const ProductDetails = () => {
                                 <h1>{`₹${product.price}`}</h1>
                                 <div className="detailsBlock-3-1">
                                     <div className="detailsBlock-3-1-1">
-                                        <button>-</button>
-                                        <input value="1" type="number" />
-                                        <button>+</button>
+                                        <button onClick={decreaseQuantity}>-</button>
+                                        <input readOnly value={quantity} type="number" />
+                                        <button onClick={increaseQuantity}>+</button>
                                     </div>
                                     <button>Add to Cart</button>
                                 </div>
