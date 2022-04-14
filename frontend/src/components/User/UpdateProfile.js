@@ -8,7 +8,7 @@ import { clearErrors, updateProfile, loadUser } from '../../actions/userAction';
 import { useAlert } from 'react-alert';
 import { UPDATE_PROFILE_RESET } from '../../constants/userConstants';
 import MetaData from '../layout/MetaData';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 const UpdateProfile = () => {
     const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const UpdateProfile = () => {
     let navigate = useNavigate();
 
     const { user } = useSelector((state) => state.user);
-    const { error, isUpdated, loading } = useSelector((state) => state.user);
+    const { error, isUpdated, loading } = useSelector((state) => state.profile);
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
