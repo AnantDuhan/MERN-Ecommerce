@@ -7,12 +7,13 @@ import { useAlert } from 'react-alert';
 import MetaData from '../layout/MetaData';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 const ResetPassword = ({ match }) => {
     const dispatch = useDispatch();
     const alert = useAlert();
     let navigate = useNavigate();
+    const { token } = useParams();
 
     const { error, success, loading } = useSelector(
         (state) => state.forgotPassword
@@ -29,7 +30,7 @@ const ResetPassword = ({ match }) => {
         myForm.set('password', password);
         myForm.set('confirmPassword', confirmPassword);
 
-        dispatch(resetPassword(match.params.token, myForm));
+        dispatch(resetPassword(token, myForm));
     };
 
     useEffect(() => {

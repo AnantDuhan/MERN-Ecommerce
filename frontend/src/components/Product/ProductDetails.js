@@ -11,6 +11,7 @@ import ReviewCard from './ReviewCard';
 
 import './ProductDetails.css';
 import MetaData from '../layout/MetaData';
+import { addItemsToCart } from '../../actions/cartAction'
 
 const ProductDetails = () => {
     const dispatch = useDispatch();
@@ -44,7 +45,7 @@ const ProductDetails = () => {
 
         const qty = quantity + 1;
         setQuantity(qty);
-    }
+    };
 
     const decreaseQuantity = () => {
         if (1 >= quantity)
@@ -52,6 +53,11 @@ const ProductDetails = () => {
 
         const qty = quantity - 1;
         setQuantity(qty);
+    };
+
+    const addToCartHandler = () => {
+        dispatch(addItemsToCart(id, quantity));
+        alert.success("Items Added To Cart.");
     }
 
     return (
@@ -89,11 +95,21 @@ const ProductDetails = () => {
                                 <h1>{`₹${product.price}`}</h1>
                                 <div className="detailsBlock-3-1">
                                     <div className="detailsBlock-3-1-1">
-                                        <button onClick={decreaseQuantity}>-</button>
-                                        <input readOnly value={quantity} type="number" />
-                                        <button onClick={increaseQuantity}>+</button>
+                                        <button onClick={decreaseQuantity}>
+                                            -
+                                        </button>
+                                        <input
+                                            readOnly
+                                            value={quantity}
+                                            type="number"
+                                        />
+                                        <button onClick={increaseQuantity}>
+                                            +
+                                        </button>
                                     </div>
-                                    <button>Add to Cart</button>
+                                    <button onClick={addToCartHandler}>
+                                        Add to Cart
+                                    </button>
                                 </div>
                                 <p>
                                     Status:{' '}

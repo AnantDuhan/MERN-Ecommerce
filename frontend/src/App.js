@@ -24,6 +24,7 @@ import ForgotPassword from './components/User/ForgotPassword';
 import ResetPassword from './components/User/ResetPassword';
 import LoginSignup from './components/User/LoginSignup';
 import Profile from './components/User/Profile';
+import Cart from './components/Cart/Cart';
 
 function App() {
     const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -98,8 +99,10 @@ function App() {
                             element={<ResetPassword />}
                             exact
                         />
-                            
+
                         <Route path="/login" element={<LoginSignup />} exact />
+
+                        <Route path="/cart" element={<Cart />} exact />
                     </Routes>
                     <Footer />
                 </Fragment>
