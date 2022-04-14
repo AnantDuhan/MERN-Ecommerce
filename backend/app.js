@@ -11,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(fileUpload({ useTempFiles: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(fileUpload());
 
 // Route Imports
 const productRoute = require('./routes/product');

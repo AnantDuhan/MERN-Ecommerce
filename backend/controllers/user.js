@@ -4,21 +4,15 @@ const User = require('../models/user');
 const sendToken = require('../utils/jwtToken');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
-const cloudinary = require('cloudinary');
+const { cloudinary } = require('cloudinary').v2;
 
 // Register our user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 
-   const file = req.files.image
-   console.log(file);
-
-   const myCloud = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: "avatars",
-      width: 150,
-      crop: "scale",
-      public_id: `${Date.now()}`,
-      resource_type: "auto"
    });
+
 
    const { name, email, password } = req.body;
    const user = await User.create({
@@ -177,7 +171,18 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
     email: req.body.email
   };
   
-  // cloudinary will be added later
+   if (req.body.avatar !== "") {
+      const user = await User.findById(req.user.id);
+      const imageId = user.avatar.public_id;
+      await cloudinary.v2.uploader.destroy(req.body.avatar, {
+         folder: "avatars"
+      });
+      newUserData.avatar = {
+         public_id: myCloud.public_id,
+         url: myCloud.secure_url
+      }
+  }
+   
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
     runValidators: true,
