@@ -1,11 +1,14 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 import WebFont from 'webfontloader';
 
 import { loadUser } from './actions/userAction';
 import Cart from './components/Cart/Cart';
+import ConfirmOrder from './components/Cart/ConfirmOrder';
+import OrderSuccess from './components/Cart/OrderSuccess';
 import Shipping from './components/Cart/Shipping';
+import Payment from './components/Cart/Payment';
 import Home from './components/Home/Home';
 import About from './components/layout/About/About';
 import Contact from './components/layout/Contact/Contact';
@@ -23,22 +26,39 @@ import ResetPassword from './components/User/ResetPassword';
 import UpdatePassword from './components/User/UpdatePassword';
 import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
+import axios from 'axios';
+
+// import { Elements } from '@stripe/react-stripe-js';
+// import { loadStripe } from '@stripe/stripe-js';
 
 import './App.css';
+// import ProtectedRoute from './components/Route/ProtectedRoute';
 
 function App() {
+
+    const { loading } = useSelector((state) => state.user);
     const { isAuthenticated, user } = useSelector((state) => state.user);
 
-    React.useEffect(() => {
+    const [stripeApiKey, setStripeApiKey] = useState("");
+
+    async function getStripeApiKey() {
+        const { data } = await axios.get('/api/v1/stripeapikey');
+
+        setStripeApiKey(data.stripeApiKey);
+    }
+    
+
+    useEffect(() => {
         WebFont.load({
             google: {
                 families: ['Roboto', 'Droid Sans', 'Chilanka'],
             },
         });
         store.dispatch(loadUser());
+        getStripeApiKey();
     }, []);
 
-    const { loading } = useSelector((state) => state.user);
+    // window.addEventListener('contextmenu', (e) => e.preventDefault());
 
     return (
         <div>
@@ -48,6 +68,17 @@ function App() {
                 <Fragment>
                     <Header />
                     {isAuthenticated && <UserOptions user={user} />}
+                    {/* {stripeApiKey && (
+                    <Elements stripe={loadStripe(stripeApiKey)}>
+                        { isAuthenticated && (
+                            <Route
+                                path="/process/payment"
+                                element={<Payment />}
+                                exact
+                            />
+                        )}
+                    </Elements>
+                    )} */}
                     <Routes>
                         <Route path="/" element={<Home />} exact />
                         <Route
@@ -61,13 +92,9 @@ function App() {
                             element={<Products />}
                             exact
                         />
-
                         <Route path="/search" element={<Search />} exact />
-
                         <Route path="/about" element={<About />} exact />
-
                         <Route path="/contact" element={<Contact />} exact />
-
                         {isAuthenticated && (
                             <Route
                                 path="/account"
@@ -75,7 +102,6 @@ function App() {
                                 exact
                             />
                         )}
-
                         {isAuthenticated && (
                             <Route
                                 path="/me/update"
@@ -83,7 +109,6 @@ function App() {
                                 exact
                             />
                         )}
-
                         {isAuthenticated && (
                             <Route
                                 path="/password/update"
@@ -91,23 +116,18 @@ function App() {
                                 exact
                             />
                         )}
-
                         <Route
                             path="/password/forgot"
                             element={<ForgotPassword />}
                             exact
                         />
-
                         <Route
                             path="/password/reset/:token"
                             element={<ResetPassword />}
                             exact
                         />
-
                         <Route path="/login" element={<LoginSignup />} exact />
-
                         <Route path="/cart" element={<Cart />} exact />
-
                         {isAuthenticated && (
                             <Route
                                 path="/shipping"
@@ -115,17 +135,21 @@ function App() {
                                 exact
                             />
                         )}
-                            
                         {isAuthenticated && (
                             <Route
-                                path='/order/comfirm'
+                                path="/order/confirm"
                                 element={<ConfirmOrder />}
                                 exact
                             />
                         )}
 
-                        
-
+                        {isAuthenticated && (
+                            <Route
+                                path="/success"
+                                element={<OrderSuccess />}
+                                exact
+                            />
+                        )}
                     </Routes>
                     <Footer />
                 </Fragment>

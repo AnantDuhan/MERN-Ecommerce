@@ -3,16 +3,35 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
 
 import { cartReducer } from './reducers/cartReducer';
+import {
+    allOrdersReducer,
+    myOrdersReducer,
+    newOrderReducer,
+    orderDetailsReducer,
+    orderReducer,
+} from './reducers/orderReducer';
 import { productDetailsReducer, productsReducer } from './reducers/productReducer';
 import { forgotPasswordReducer, profileReducer, userReducer } from './reducers/userReducer';
 
 const reducer = combineReducers({
+    // product reducer
     products: productsReducer,
     productDetails: productDetailsReducer,
+
+    // user reducer
     user: userReducer,
     profile: profileReducer,
     forgotPassword: forgotPasswordReducer,
+
+    // cart reducer
     cart: cartReducer,
+
+    // order reducer
+    newOrder: newOrderReducer,
+    myOrders: myOrdersReducer,
+    allOrders: allOrdersReducer,
+    order: orderReducer,
+    orderDetails: orderDetailsReducer,
 });
 
 let initialState = {

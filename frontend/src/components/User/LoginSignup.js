@@ -4,7 +4,7 @@ import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import { clearErrors, login, register } from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
@@ -14,11 +14,12 @@ import FormData from 'form-data';
 
 import './LoginSignup.css';
 
-const LoginSignup = ({ location }) => {
+const LoginSignup = () => {
     const dispatch = useDispatch();
     const alert = useAlert();
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { loading, error, isAuthenticated } = useSelector(
         (state) => state.user
@@ -74,7 +75,7 @@ const LoginSignup = ({ location }) => {
         }
     };
 
-    const redirect = location.search ? location.search.split('=')[1] : '/account';
+    const redirect = location.search ? location.search.split("=")[1] : '/account';
 
     useEffect(() => {
         if (error) {

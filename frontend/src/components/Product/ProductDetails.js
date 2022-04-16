@@ -74,11 +74,12 @@ const ProductDetails = () => {
                                     product.images.map((item, i) => (
                                         <img
                                             className="CarouselImage"
-                                            key={item.url}
+                                            key={i}
                                             src={item.url}
                                             alt={`${i} Slide`}
                                         />
-                                    ))}
+                                    ))
+                                }
                             </Carousel>
                         </div>
 
