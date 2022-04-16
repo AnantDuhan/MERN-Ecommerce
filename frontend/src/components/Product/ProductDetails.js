@@ -108,7 +108,9 @@ const ProductDetails = () => {
                                             +
                                         </button>
                                     </div>
-                                    <button onClick={addToCartHandler}>
+                                        <button
+                                            disabled={product.Stock < 1 ? true : false}
+                                            onClick={addToCartHandler}>
                                         Add to Cart
                                     </button>
                                 </div>
