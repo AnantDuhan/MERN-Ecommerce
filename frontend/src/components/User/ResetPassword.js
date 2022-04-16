@@ -1,18 +1,20 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import './ResetPassword.css';
-import Loader from '../layout/Loader/Loader';
-import { useDispatch, useSelector } from 'react-redux';
-import { clearErrors, resetPassword } from '../../actions/userAction';
-import { useAlert } from 'react-alert';
-import MetaData from '../layout/MetaData';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useAlert } from 'react-alert';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
+
+import { clearErrors, resetPassword } from '../../actions/userAction';
+import Loader from '../layout/Loader/Loader';
+import MetaData from '../layout/MetaData';
+
+import './ResetPassword.css';
 
 const ResetPassword = ({ match }) => {
     const dispatch = useDispatch();
     const alert = useAlert();
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const { token } = useParams();
 
     const { error, success, loading } = useSelector(

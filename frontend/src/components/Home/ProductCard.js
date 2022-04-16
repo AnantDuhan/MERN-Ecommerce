@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
     const options = {
+        size: 'small',
         value: product.ratings,
         readOnly: true,
         precision: 0.5,
@@ -14,9 +15,8 @@ const ProductCard = ({ product }) => {
             <img src={product.images[0].url} alt={product.name} />
             <p>{product.name}</p>
             <div>
-                <Rating {...options} />{" "}
+                <Rating {...options} />
                 <span className="productCardSpan">
-                    {" "}
                     ({product.numOfReviews} Reviews)
                 </span>
             </div>

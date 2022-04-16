@@ -1,36 +1,25 @@
-/***
- * @Author:xxx
- * @Date:2022-04-15 10:58:38
- * @LastModifiedBy:xxx
- * @Last Modified time:2022-04-15 10:58:38
- */
-
-import React, { Fragment, useEffect, useRef } from 'react';
-import CheckoutSteps from '../Cart/CheckoutSteps';
-import { useSelector, useDispatch } from 'react-redux';
-import MetaData from '../layout/MetaData';
 import { Typography } from '@material-ui/core';
-import { useAlert } from 'react-alert';
-import {
-    CardNumberElement,
-    CardCvcElement,
-    CardExpiryElement,
-    useStripe,
-    useElements,
-} from '@stripe/react-stripe-js';
-import axios from 'axios';
-import './Payment.css';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
 import EventIcon from '@material-ui/icons/Event';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { createOrder, clearErrors } from '../../actions/orderAction';
+import { CardCvcElement, CardExpiryElement, CardNumberElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import axios from 'axios';
+import React, { Fragment, useEffect, useRef } from 'react';
+import { useAlert } from 'react-alert';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+
+import { clearErrors, createOrder } from '../../actions/orderAction';
+import CheckoutSteps from '../Cart/CheckoutSteps';
+import MetaData from '../layout/MetaData';
+
+import './Payment.css';
 
 const Payment = () => {
 
     const orderInfo = JSON.parse(sessionStorage.getItem('orderInfo'));
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const alert = useAlert();
     const stripe = useStripe();

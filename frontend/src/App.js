@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
@@ -7,8 +8,8 @@ import { loadUser } from './actions/userAction';
 import Cart from './components/Cart/Cart';
 import ConfirmOrder from './components/Cart/ConfirmOrder';
 import OrderSuccess from './components/Cart/OrderSuccess';
-import Shipping from './components/Cart/Shipping';
 import Payment from './components/Cart/Payment';
+import Shipping from './components/Cart/Shipping';
 import Home from './components/Home/Home';
 import About from './components/layout/About/About';
 import Contact from './components/layout/Contact/Contact';
@@ -16,6 +17,8 @@ import Footer from './components/layout/Footer/Footer';
 import Header from './components/layout/Header/Header';
 import UserOptions from './components/layout/Header/UserOptions';
 import Loader from './components/layout/Loader/Loader';
+import MyOrders from './components/Order/MyOrders';
+import OrderDetails from './components/Order/OrderDetails';
 import ProductDetails from './components/Product/ProductDetails';
 import Products from './components/Product/Products';
 import Search from './components/Product/Search';
@@ -26,12 +29,12 @@ import ResetPassword from './components/User/ResetPassword';
 import UpdatePassword from './components/User/UpdatePassword';
 import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
-import axios from 'axios';
 
 // import { Elements } from '@stripe/react-stripe-js';
 // import { loadStripe } from '@stripe/stripe-js';
 
 import './App.css';
+
 // import ProtectedRoute from './components/Route/ProtectedRoute';
 
 function App() {
@@ -135,6 +138,23 @@ function App() {
                                 exact
                             />
                         )}
+
+                        {isAuthenticated && (
+                            <Route
+                                path="/success"
+                                element={<OrderSuccess />}
+                                exact
+                            />
+                        )}
+
+                        {isAuthenticated && (
+                            <Route
+                                path="/orders"
+                                element={<MyOrders />}
+                                exact
+                            />
+                        )}
+
                         {isAuthenticated && (
                             <Route
                                 path="/order/confirm"
@@ -142,11 +162,10 @@ function App() {
                                 exact
                             />
                         )}
-
                         {isAuthenticated && (
                             <Route
-                                path="/success"
-                                element={<OrderSuccess />}
+                                path="/order/:id"
+                                element={<OrderDetails />}
                                 exact
                             />
                         )}
