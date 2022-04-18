@@ -33,7 +33,7 @@ const About = () => {
                           Visit Instagram
                       </Button>
                       <span>
-                          This is a sample wesbite made by @anantduhan. I'm a
+                          This is a MERN stack Ecommerce website made by <a href="https://www.linkedin.com/in/anantduhan/">@anantduhan</a>. I'm a
                           MERN Stack Developer and CSE 3rd Year Student at SRM
                           University
                       </span>

@@ -18,7 +18,6 @@ const UserOptions = ({ user }) => {
     const [open, setOpen] = useState(false);
     const alert = useAlert();
     const dispatch = useDispatch();
-
     const navigate = useNavigate();
 
     const { cartItems } = useSelector((state) => state.cart);
@@ -47,7 +46,7 @@ const UserOptions = ({ user }) => {
     }
 
     function dashboard() {
-        navigate('/dashboard');
+        navigate('/admin/dashboard');
     }
 
     function orders() {
