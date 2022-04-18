@@ -1,12 +1,13 @@
 # ECOMMERCE - MERN
 ![ecommerce](/frontend/src/images/logo.png)
 ## Demo
-This application will be deployed on Heroku soon. You can check it out :smile [here](https://github.com/AnantDuhan/MERN-Ecommerce.git)
+This application will be deployed on Heroku soon. You can check it out :smile: [here](https://github.com/AnantDuhan/MERN-Ecommerce.git).<br>
+<br>
 This is a FULL Stack Ecommerce website which includes all the features that a Ecommerce website will usually have. It comes with a Admin Dashboard and Enabled Payment using Stripe.
 
-1. Buyers browse the store categories, products and brands
-2. Admins manage and control the entire store components 
-
+1. Buyers browse the store categories, products and brands.
+2. Buyers can filter price, rating, categories for more confined search.
+3. Admins manage and control the entire store components.
 
 * features:
   * Node provides the backend environment for this application
@@ -56,8 +57,14 @@ $ npm run production
 
 ## Run the application for development
 
+**for frontend**
 ```
 $ npm start
+```
+
+**for backend**
+```
+$ npm run dev
 ```
 
 ## Run the application for production
