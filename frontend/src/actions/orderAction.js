@@ -59,7 +59,7 @@ export const myOrders = () => async (dispatch) => {
     }
 };
 
-// Get All Orders (admin)
+// Get All Orders - admin
 export const getAllOrders = () => async (dispatch) => {
     try {
         dispatch({ type: ALL_ORDERS_REQUEST });
