@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Sidebar from './Sidebar.js';
+// import Sidebar from './Sidebar.js';
 import './Dashboard.css';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -64,9 +64,9 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="dashboard">
+        <div>
             <MetaData title="Dashboard - Admin Panel" />
-            <Sidebar />
+            {/* <Sidebar /> */}
 
             <div className="dashboardContainer">
                 <Typography component="h1">Dashboard</Typography>

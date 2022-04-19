@@ -16,6 +16,7 @@
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.26.0",
+    "chart.js": "^3.7.1",
     "cloudinary": "^1.29.0",
     "cors": "^2.8.5",
     "country-state-city": "^3.0.1",
@@ -24,6 +25,7 @@
     "react": "^18.0.0",
     "react-alert": "^7.0.3",
     "react-alert-template-basic": "^1.0.2",
+    "react-chartjs-2": "^4.1.0",
     "react-dom": "^18.0.0",
     "react-helmet": "^6.1.0",
     "react-icons": "^4.3.1",
@@ -64,18 +66,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://127.0.0.1:4000",
-  "main": "index.js",
-  "devDependencies": {},
-  "author": "Anant Duhan",
-  "license": "ISC",
-  "description": "MERN Stack Ecommerce website",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AnantDuhan/MERN-Ecommerce.git"
-  },
-  "bugs": {
-    "url": "https://github.com/AnantDuhan/MERN-Ecommerce/issues"
-  },
-  "homepage": "https://github.com/AnantDuhan/MERN-Ecommerce#readme"
+  "proxy": "http://127.0.0.1:4000"
 }

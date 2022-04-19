@@ -63,7 +63,7 @@ const LoginSignup = () => {
     const registerDataChange = (e) => {
         if (e.target.name === 'avatar') {
             let reader = new FileReader();
-            reader.onLoadend = () => {
+            reader.onLoad = () => {
                 if (reader.readyState === 2) {
                     setAvatarPreview(reader.result);
                     setAvatar(reader.result);
@@ -85,6 +85,9 @@ const LoginSignup = () => {
         if (isAuthenticated) {
             navigate(redirect);
         }
+        // if (user) {
+        //     setAvatar(user.avatar.url)
+        // }
     }, [dispatch, error, alert, isAuthenticated, navigate, redirect]);
 
     const switchTabs = (e, tab) => {

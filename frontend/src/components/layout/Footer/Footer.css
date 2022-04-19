@@ -62,12 +62,20 @@ footer {
 .rightFooter > a {
   text-decoration: none;
   font-size: 1.3vmax;
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", "Calibri", "Trebuchet MS", sans-serif;
   color: white;
   transition: all 0.5s;
   margin: 0.5vmax;
 }
 
-.rightFooter > a:hover {
+.rightFooter > .instagram > a:hover {
   color: #eb4034;
+}
+
+.rightFooter > .facebook > a:hover {
+  color: #2724f4;
+}
+
+.rightFooter > .snapchat > a:hover {
+  color: #f1fd0c;
 }

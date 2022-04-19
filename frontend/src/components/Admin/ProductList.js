@@ -13,7 +13,7 @@ import { Button } from '@material-ui/core';
 import MetaData from '../layout/MetaData';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import SideBar from './Sidebar.js';
+// import Sidebar from './Sidebar.js';
 import { DELETE_PRODUCT_RESET } from '../../constants/productConstants';
 
 const ProductList = () => {
@@ -119,9 +119,9 @@ const ProductList = () => {
 
     return (
         <Fragment>
-            <MetaData title="Dashboard" />
-            <div className="dashboard">
-                <SideBar />
+            <MetaData title={`ALL PRODUCTS - Admin`} />
+            {/* <div className="dashboard"> */}
+                {/* <Sidebar /> */}
                 <div className="productListContainer">
                     <h1 id="productListHeading">ALL PRODUCTS</h1>
 
@@ -134,7 +134,7 @@ const ProductList = () => {
                         autoHeight
                     />
                 </div>
-            </div>
+            {/* </div> */}
         </Fragment>
     );
 };

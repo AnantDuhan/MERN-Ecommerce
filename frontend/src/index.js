@@ -1,18 +1,9 @@
-/***
- * @Author:xxx
- * @Date:2022-04-13 11:40:07
- * @LastModifiedBy:xxx
- * @Last Modified time:2022-04-13 11:40:07
- */
-
 import React from 'react';
 import { Provider as AlertProvider, positions, transitions } from 'react-alert';
 import AlertTemplate from 'react-alert-template-basic';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-
-// import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
 import store from './store';
