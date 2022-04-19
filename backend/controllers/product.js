@@ -1,8 +1,8 @@
-const Product = require('../models/productModel');
-const ErrorHander = require('../utils/errorhander');
+const Product = require('../models/product');
+const ErrorHandler = require('../utils/errorhandler');
 const catchAsyncErrors = require('../middleware/catchAsyncErrors');
 const ApiFeatures = require('../utils/apifeatures');
-const cloudinary = require('cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 // Create Product -- Admin
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
@@ -89,7 +89,7 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
     let product = await Product.findById(req.params.id);
 
     if (!product) {
-        return next(new ErrorHander('Product not found', 404));
+        return next(new ErrorHandler('Product not found', 404));
     }
 
     // Images Start Here
@@ -213,7 +213,7 @@ exports.deleteReview = catchAsyncErrors(async (req, res, next) => {
     const product = await Product.findById(req.query.productId);
 
     if (!product) {
-        return next(new ErrorHander('Product not found', 404));
+        return next(new ErrorHandler('Product not found', 404));
     }
 
     const reviews = product.reviews.filter(

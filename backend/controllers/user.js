@@ -66,6 +66,7 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
 // forgot password
 exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
    const user = await User.findOne({ email: req.body.email });
+
    if (!user) {
       return next(new ErrorHandler('User not found', 404));
    }
@@ -147,7 +148,9 @@ exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
 // update User password
 exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
    const user = await User.findById(req.user.id).select('+password');
+
    const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+
    if (!isPasswordMatched) {
       return next(new ErrorHandler('Old Password is incorrect', 400));
    }
@@ -157,6 +160,7 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
    }
 
    user.password = req.body.newPassword;
+
    await user.save();
 
    sendToken(user, 200, res);
@@ -171,8 +175,12 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
   
    if (req.body.avatar !== "") {
       const user = await User.findById(req.user.id);
+
       const imageId = user.avatar.public_id;
-      await cloudinary.v2.uploader.destroy(req.body.avatar, {
+
+      await cloudinary.v2.uploader.destroy(imageId);
+
+      await cloudinary.v2.uploader.upload(req.body.avatar, {
          folder: "avatars"
       });
       newUserData.avatar = {
@@ -243,7 +251,11 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 
   if (!user) {
     return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`));
-  }
+   }
+   
+   const imageId = user.avatar.public_id;
+
+   await cloudinary.v2.uploader.destroy(imageId);
 
   await user.remove();
 

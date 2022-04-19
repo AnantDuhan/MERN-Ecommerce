@@ -1,6 +1,7 @@
 # dependencies
 /node_modules
 /frontend/node_modules
+/.vscode/settings.json
 
 # misc
 /backend/config/config.env

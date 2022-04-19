@@ -1,7 +1,7 @@
 # ECOMMERCE - MERN
 ![ecommerce](/frontend/src/images/logo.png)
 ## Demo
-This application will be deployed on Heroku soon. You can check it out :smile: [here](https://github.com/AnantDuhan/MERN-Ecommerce.git).<br>
+This application will be deployed on Heroku soon. You can check it out :smile: [here]().<br>
 <br>
 This is a FULL Stack Ecommerce website which includes all the features that a Ecommerce website will usually have. It comes with a Admin Dashboard and Enabled Payment using Stripe.
 

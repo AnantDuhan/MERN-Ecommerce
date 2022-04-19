@@ -20,11 +20,8 @@ router.route('/orders/me').get(isAuthUser, myOrders);
 router.route('/admin/orders').get(isAuthUser, authRoles('admin'), getAllOrders);
 
 router
-   .route('/admin/order/:id')
-   .put(isAuthUser, authRoles('admin'), updateOrder);
-
-router
-   .route('/admin/order/:id')
-   .delete(isAuthUser, authRoles('admin'), deleteOrder);
+    .route('/admin/order/:id')
+    .put(isAuthUser, authRoles('admin'), updateOrder)
+    .delete(isAuthUser, authRoles('admin'), deleteOrder);
 
 module.exports = router;
