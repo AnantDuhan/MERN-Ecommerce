@@ -40,7 +40,7 @@ const LoginSignup = () => {
 
     const { name, email, password } = user;
 
-    const [avatar, setAvatar] = useState('/Profile.png');
+    const [avatar, setAvatar] = useState();
     const [avatarPreview, setAvatarPreview] = useState('/Profile.png');
 
     const loginSubmit = (e) => {
@@ -51,18 +51,19 @@ const LoginSignup = () => {
     const registerSubmit = (e) => {
         e.preventDefault();
 
-        let myForm = new FormData();
+        const myForm = new FormData();
 
-        myForm.set('name', name);
-        myForm.set('email', email);
-        myForm.set('password', password);
-        myForm.set('avatar', avatar);
+        myForm.set("name", name);
+        myForm.set("email", email);
+        myForm.set("password", password);
+        myForm.set("avatar", avatar);
         dispatch(register(myForm));
     };
 
     const registerDataChange = (e) => {
-        if (e.target.name === 'avatar') {
-            let reader = new FileReader();
+        if (e.target.name === "avatar") {
+            const reader = new FileReader();
+
             reader.onLoad = () => {
                 if (reader.readyState === 2) {
                     setAvatarPreview(reader.result);
@@ -85,9 +86,6 @@ const LoginSignup = () => {
         if (isAuthenticated) {
             navigate(redirect);
         }
-        // if (user) {
-        //     setAvatar(user.avatar.url)
-        // }
     }, [dispatch, error, alert, isAuthenticated, navigate, redirect]);
 
     const switchTabs = (e, tab) => {

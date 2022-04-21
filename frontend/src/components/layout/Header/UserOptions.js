@@ -70,22 +70,22 @@ const UserOptions = ({ user }) => {
         <Fragment>
             <Backdrop open={open} style={{ zIndex: '10' }} />
             <SpeedDial
-                ariaLabel="SpeedDial tooltip example"
+                ariaLabel='SpeedDial tooltip example'
                 onClose={() => setOpen(false)}
                 onOpen={() => setOpen(true)}
                 style={{ zIndex: '11' }}
                 open={open}
-                direction="down"
-                className="speedDial"
+                direction='down'
+                className='speedDial'
                 icon={
                     <img
-                        className="speedDialIcon"
+                        className='speedDialIcon'
                         src={user.avatar.url ? user.avatar.url : '/Profile.png'}
-                        alt="Profile"
+                        alt='Profile'
                     />
                 }
             >
-                {options.map((item) => (
+                {options.map(item => (
                     <SpeedDialAction
                         key={item.name}
                         icon={item.icon}
