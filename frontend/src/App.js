@@ -178,8 +178,8 @@ function App() {
                                 element={<OrderDetails />}
                                 exact
                             />
-                            )}
-                            
+                        )}
+
                         {/* Admin Routes */}
                         {isAuthenticated && (
                             <Route

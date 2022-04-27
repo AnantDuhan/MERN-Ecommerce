@@ -4,12 +4,13 @@ const User = require('../models/user');
 const sendToken = require('../utils/jwtToken');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
-const { cloudinary } = require('cloudinary');
+const { cloudinary } = require('cloudinary').v2;
 
 // Register our user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 
    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+   // const myCloud = await cloudinary.uploader.upload(req.body.avatar, {
       folder: "avatars"
    });
 
@@ -179,8 +180,10 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
       const imageId = user.avatar.public_id;
 
       await cloudinary.v2.uploader.destroy(imageId);
+      // await cloudinary.uploader.destroy(imageId);
 
       await cloudinary.v2.uploader.upload(req.body.avatar, {
+      // await cloudinary.uploader.upload(req.body.avatar, {
          folder: "avatars"
       });
       newUserData.avatar = {
@@ -247,7 +250,6 @@ exports.updateUserRole = catchAsyncErrors(async (req, res, next) => {
 exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
   
   const user = await User.findById(req.params.id);
-  // will remove cloudinary later
 
   if (!user) {
     return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`));
@@ -256,6 +258,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
    const imageId = user.avatar.public_id;
 
    await cloudinary.v2.uploader.destroy(imageId);
+   // await cloudinary.uploader.destroy(imageId);
 
   await user.remove();
 

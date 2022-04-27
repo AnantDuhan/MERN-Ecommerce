@@ -11,61 +11,64 @@ const About = () => {
     window.location = "https://instagram.com/anantduhan_";
   };
   return (
-      <div className="aboutSection">
+      <div className='aboutSection'>
           <div></div>
-          <div className="aboutSectionGradient"></div>
-          <div className="aboutSectionContainer">
-              <Typography component="h1">About Us</Typography>
+          <div className='aboutSectionGradient'></div>
+          <div className='aboutSectionContainer'>
+              <Typography component='h1'>About Us</Typography>
 
               <div>
                   <div>
                       <Avatar
                           style={{
-                              width: '10vmax',
-                              height: '10vmax',
-                              margin: '2vmax 0',
+                              width: '13vmax',
+                              height: '13vmax',
+                              margin: '2vmax 0'
                           }}
-                          src="https://res.cloudinary.com/anantduhan/image/upload/v1649785048/avatars/IMG_20210707_093203_ul0asd.jpg"
-                          alt="Founder"
+                          src='https://res.cloudinary.com/anantduhan/image/upload/v1651066064/avatars/WhatsApp_Image_2022-04-27_at_6.19.23_PM_zislxv.jpg'
+                          alt='Founder'
                       />
                       <Typography>Anant Duhan</Typography>
-                      <Button onClick={visitInstagram} color="primary">
+                      <Button onClick={visitInstagram} color='primary'>
                           Visit Instagram
                       </Button>
                       <span>
-                          This is a MERN stack Ecommerce website made by <a href="https://www.linkedin.com/in/anantduhan/">@anantduhan</a>. I'm a
-                          MERN Stack Developer and CSE 3rd Year Student at SRM
-                          University
+                          This is a MERN stack Ecommerce website made by{' '}
+                          <a href='https://www.linkedin.com/in/anantduhan/'>
+                              @anantduhan
+                          </a>
+                          . I'm a MERN Stack Developer and CSE 3rd Year Student
+                          at SRM University
                       </span>
                   </div>
-                  <div className="aboutSectionContainer2">
-                      <Typography component="h2">Our Brands</Typography>
+                  <div className='aboutSectionContainer2'>
+                      <Typography component='h2'>Our Brands</Typography>
                       <a
-                          href="https://www.youtube.com/channel/AnantDuhan"
-                          target="blank"
+                          href='https://www.youtube.com/channel/AnantDuhan'
+                          target='blank'
                       >
-                          <YouTubeIcon className="youtubeSvgIcon" />
+                          <YouTubeIcon className='youtubeSvgIcon' />
                       </a>
 
                       <a
-                          href="https://instagram.com/anantduhan_"
-                          target="blank"
+                          href='https://instagram.com/anantduhan_'
+                          target='blank'
                       >
-                          <InstagramIcon className="instagramSvgIcon" />
+                          <InstagramIcon className='instagramSvgIcon' />
                       </a>
 
                       <a
-                          href="https://facebook.com/anantduhan12"
-                          target="blank"
+                          href='https://facebook.com/anantduhan12'
+                          target='blank'
                       >
-                          <FacebookIcon className="facebookSvgIcon" />
+                          <FacebookIcon className='facebookSvgIcon' />
                       </a>
 
                       <a
-                          href="https://www.linkedin.com/in/anantduhan/"
-                          target="blank"
+                          href='https://www.linkedin.com/in/anantduhan/'
+                          target='blank'
                       >
-                          <LinkedInIcon className="linkedinSvgIcon" />
+                          <LinkedInIcon className='linkedinSvgIcon' />
                       </a>
                   </div>
               </div>

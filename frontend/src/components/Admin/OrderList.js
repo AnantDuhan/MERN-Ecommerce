@@ -95,7 +95,7 @@ const dispatch = useDispatch();
                                 'id'
                             )}`}
                         >
-                            <EditIcon />
+                            <EditIcon className="editIcon" />
                         </Link>
 
                         <Button
@@ -105,7 +105,7 @@ const dispatch = useDispatch();
                                 )
                             }
                         >
-                            <DeleteIcon />
+                            <DeleteIcon className="deleteIcon"/>
                         </Button>
                     </Fragment>
                 );

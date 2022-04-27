@@ -2,7 +2,7 @@ const Product = require('../models/product');
 const ErrorHandler = require('../utils/errorhandler');
 const catchAsyncErrors = require('../middleware/catchAsyncErrors');
 const ApiFeatures = require('../utils/apifeatures');
-const cloudinary = require('cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 // Create Product -- Admin
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
@@ -18,6 +18,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
 
     for (let i = 0; i < images.length; i++) {
         const result = await cloudinary.v2.uploader.upload(images[i], {
+        // const result = await cloudinary.uploader.upload(images[i], {
             folder: 'products'
         });
 
@@ -111,6 +112,7 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
 
         for (let i = 0; i < images.length; i++) {
             const result = await cloudinary.v2.uploader.upload(images[i], {
+            // const result = await cloudinary.uploader.upload(images[i], {
                 folder: 'products'
             });
 
@@ -146,6 +148,7 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
     // Deleting Images from cloudinary
     for (let i = 0; i < product.images.length; i++) {
         await cloudinary.v2.uploader.destroy(product.images[i].public_id);
+        // await cloudinary.uploader.destroy(product.images[i].public_id);
     }
 
     await product.remove();

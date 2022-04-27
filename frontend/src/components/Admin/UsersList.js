@@ -88,24 +88,26 @@ const UsersList = () => {
             renderCell: params => {
                 return (
                     <Fragment>
-                        <Link
-                            to={`/admin/user/${params.getValue(
-                                params.id,
-                                'id'
-                            )}`}
-                        >
-                            <EditIcon />
-                        </Link>
+                        <div className='actions'>
+                            <Link
+                                to={`/admin/user/${params.getValue(
+                                    params.id,
+                                    'id'
+                                )}`}
+                            >
+                                <EditIcon className='editIcon' />
+                            </Link>
 
-                        <Button
-                            onClick={() =>
-                                deleteUserHandler(
-                                    params.getValue(params.id, 'id')
-                                )
-                            }
-                        >
-                            <DeleteIcon />
-                        </Button>
+                            <Button
+                                onClick={() =>
+                                    deleteUserHandler(
+                                        params.getValue(params.id, 'id')
+                                    )
+                                }
+                            >
+                                <DeleteIcon className='deleteIcon' />
+                            </Button>
+                        </div>
                     </Fragment>
                 );
             }

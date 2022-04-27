@@ -39,8 +39,16 @@
   color: tomato;
 }
 
-.productListTable button:hover {
+.editIcon:hover {
+  color:green;
+}
+
+.deleteIcon:hover {
   color: rgb(236, 30, 30);
+}
+
+.actions {
+  align-items: center;
 }
 
 .MuiDataGrid-columnHeader div {

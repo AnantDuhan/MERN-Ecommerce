@@ -56,21 +56,31 @@ const LoginSignup = () => {
         myForm.set("name", name);
         myForm.set("email", email);
         myForm.set("password", password);
-        myForm.set("avatar", avatar);
+        avatar.forEach(avatar => {
+            myForm.append('avatar', avatar);
+        })
         dispatch(register(myForm));
     };
 
     const registerDataChange = (e) => {
-        if (e.target.name === "avatar") {
-            const reader = new FileReader();
 
-            reader.onLoad = () => {
-                if (reader.readyState === 2) {
-                    setAvatarPreview(reader.result);
-                    setAvatar(reader.result);
-                }
-            };
-            reader.readAsDataURL(e.target.files[0]);
+        if (e.target.name === "avatar") {
+            const files = Array.from(e.target.files);
+
+            setAvatar([]);
+            setAvatarPreview([]);
+
+            files.forEach(file => {
+                const reader = new FileReader();
+
+                reader.onLoad = () => {
+                    if (reader.readyState === 2) {
+                        setAvatarPreview(old => [...old, reader.result]);
+                        setAvatar(old => [...old, reader.result]);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
         } else {
             setUser({ ...user, [e.target.name]: e.target.value });
         }
