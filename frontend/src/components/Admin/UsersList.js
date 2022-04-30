@@ -1,16 +1,19 @@
-import React, { Fragment, useEffect } from 'react';
-import { DataGrid } from '@material-ui/data-grid';
-import './ProductList.css';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
-import EditIcon from '@material-ui/icons/Edit';
+import { DataGrid } from '@material-ui/data-grid';
 import DeleteIcon from '@material-ui/icons/Delete';
-// import SideBar from './Sidebar';
-import { getAllUsers, clearErrors, deleteUser } from '../../actions/userAction';
+import EditIcon from '@material-ui/icons/Edit';
+import React, { Fragment, useEffect } from 'react';
+import { useAlert } from 'react-alert';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { clearErrors, deleteUser, getAllUsers } from '../../actions/userAction';
 import { DELETE_USER_RESET } from '../../constants/userConstants';
+import MetaData from '../layout/MetaData';
+
+// import SideBar from './Sidebar';
+
+import './ProductList.css';
 
 const UsersList = () => {
     const dispatch = useDispatch();
@@ -130,8 +133,8 @@ const UsersList = () => {
         <Fragment>
             <MetaData title={`ALL USERS - Admin`} />
 
-            {/* <div className='dashboard'> */}
-                {/* <SideBar /> */}
+            {/* <div className='dashboard'>
+                <SideBar /> */}
                 <div className='productListContainer'>
                     <h1 id='productListHeading'>ALL USERS</h1>
 

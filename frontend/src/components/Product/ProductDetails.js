@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import Carousel from 'react-material-ui-carousel';
 import './ProductDetails.css';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -39,8 +38,8 @@ const ProductDetails = () => {
     const options = {
         size: 'large',
         value: product.ratings,
-        readOnly: true,
-        precision: 0.5
+        readOnly: false,
+        precision: 0.2
     };
 
     const [quantity, setQuantity] = useState(1);
@@ -110,17 +109,16 @@ const ProductDetails = () => {
                     <MetaData title={`${product.name} -- ECOMMERCE`} />
                     <div className='ProductDetails'>
                         <div>
-                            <Carousel>
-                                {product.images &&
-                                    product.images.map((item, i) => (
-                                        <img
-                                            className='CarouselImage'
-                                            key={i}
-                                            src={item.url}
-                                            alt={`${i} Slide`}
-                                        />
-                                    ))}
-                            </Carousel>
+                            {product.images &&
+                                product.images.map((item, i) => (
+                                    <img
+                                        className='CarouselImage'
+                                        key={i}
+                                        src={item.url}
+                                        alt={`${i} Slide`}
+                                    />
+                                ))
+                            }
                         </div>
 
                         <div>
@@ -237,7 +235,8 @@ const ProductDetails = () => {
                                         key={review._id}
                                         review={review}
                                     />
-                                ))}
+                                ))
+                            }
                         </div>
                     ) : (
                         <p className='noReviews'>No Reviews Yet</p>

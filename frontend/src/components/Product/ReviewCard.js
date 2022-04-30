@@ -7,8 +7,8 @@ const ReviewCard = ({ review }) => {
   const options = {
         size: 'large',
         value: review.rating,
-        readOnly: true,
-        precision: 0.5,
+        readOnly: false,
+        precision: 0.2,
     };
 
   return (

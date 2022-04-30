@@ -1,26 +1,23 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PersonIcon from '@material-ui/icons/Person';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useAlert } from 'react-alert';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import { clearErrors, getUserDetails, updateUser } from '../../actions/userAction';
 // import SideBar from './Sidebar';
 import { UPDATE_USER_RESET } from '../../constants/userConstants';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-    getUserDetails,
-    updateUser,
-    clearErrors
-} from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
+import MetaData from '../layout/MetaData';
 
 const UpdateUser = () => {
     const dispatch = useDispatch();
     const alert = useAlert();
     const navigate = useNavigate();
-    const id = useParams();
+    const { id } = useParams();
 
     const { loading, error, user } = useSelector(state => state.userDetails);
 

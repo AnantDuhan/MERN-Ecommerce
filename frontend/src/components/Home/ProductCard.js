@@ -6,8 +6,8 @@ const ProductCard = ({ product }) => {
     const options = {
         size: 'small',
         value: product.ratings,
-        readOnly: true,
-        precision: 0.5,
+        readOnly: false,
+        precision: 0.2,
     };
 
     return (
