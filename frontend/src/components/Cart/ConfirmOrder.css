@@ -9,30 +9,30 @@
   border-left: 1px solid rgba(0, 0, 0, 0.247);
 }
 
-.confirmshippingArea {
+.confirmShippingArea {
   padding: 5vmax;
   padding-bottom: 0%;
 }
 
-.confirmshippingArea > p {
+.confirmShippingArea > p {
   font: 400 1.8vmax "Roboto";
 }
 
-.confirmshippingAreaBox,
+.confirmShippingAreaBox,
 .confirmCartItemsContainer {
   margin: 2vmax;
 }
 
-.confirmshippingAreaBox > div {
+.confirmShippingAreaBox > div {
   display: flex;
   margin: 1vmax 0;
 }
 
-.confirmshippingAreaBox > div > p {
+.confirmShippingAreaBox > div > p {
   font: 400 1vmax "Roboto";
   color: black;
 }
-.confirmshippingAreaBox > div > span {
+.confirmShippingAreaBox > div > span {
   margin: 0 1vmax;
   font: 100 1vmax "Roboto";
   color: #575757;
