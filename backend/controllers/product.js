@@ -18,7 +18,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
 
     for (let i = 0; i < images.length; i++) {
         const result = await cloudinary.v2.uploader.upload(images[i], {
-            folder: 'products',
+            folder: 'products'
         });
 
         imagesLinks.push({
@@ -40,7 +40,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
 
 // get all products
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
-    const resultPerPage = 10;
+    const resultPerPage = process.env.RESULT_PER_PAGE;
     const productsCount = await Product.countDocuments();
 
     const apiFeature = new ApiFeatures(Product.find(), req.query)
@@ -48,7 +48,7 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
         .filter();
 
     let products = await apiFeature.query;
-    
+
     let filteredProductsCount = products.length;
 
     apiFeature.pagination(resultPerPage);
@@ -115,7 +115,7 @@ exports.updateProduct = catchAsyncErrors(async (req, res, next) => {
 
         for (let i = 0; i < images.length; i++) {
             const result = await cloudinary.v2.uploader.upload(images[i], {
-            // const result = await cloudinary.uploader.upload(images[i], {
+                // const result = await cloudinary.uploader.upload(images[i], {
                 folder: 'products'
             });
 
