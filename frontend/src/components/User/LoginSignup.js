@@ -96,7 +96,7 @@ const LoginSignup = () => {
         if (isAuthenticated) {
             navigate(redirect);
         }
-    }, [dispatch, error, alert, isAuthenticated, navigate, redirect]);
+    }, [dispatch, error, alert, navigate, isAuthenticated, redirect]);
 
     const switchTabs = (e, tab) => {
         if (tab === 'login') {

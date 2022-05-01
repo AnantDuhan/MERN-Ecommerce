@@ -201,6 +201,7 @@ const ProductDetails = () => {
                                 onChange={e => setRating(e.target.value)}
                                 value={rating}
                                 size='large'
+                                precision='0.2'
                             />
 
                             <textarea

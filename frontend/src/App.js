@@ -16,7 +16,6 @@ import Contact from './components/layout/Contact/Contact';
 import Footer from './components/layout/Footer/Footer';
 import Header from './components/layout/Header/Header';
 import UserOptions from './components/layout/Header/UserOptions';
-import Loader from './components/layout/Loader/Loader';
 import MyOrders from './components/Order/MyOrders';
 import OrderDetails from './components/Order/OrderDetails';
 import ProductDetails from './components/Product/ProductDetails';
@@ -43,227 +42,195 @@ import ProductReviews from './components/Admin/ProductReviews';
 
 // import { Elements } from '@stripe/react-stripe-js';
 // import { loadStripe } from '@stripe/stripe-js';
-// import ProtectedRoute from './components/Route/ProtectedRoute';
 
 function App() {
+    const { isAuthenticated, user } = useSelector(state => state.user);
 
-    const { loading } = useSelector((state) => state.user);
-    const { isAuthenticated, user } = useSelector((state) => state.user);
+    const [stripeApiKey, setStripeApiKey] = useState('');
 
-    // const { pathname } = window.location;
+    // const stripePromise = loadStripe(process.env.STRIPE_API_KEY);
 
-    const [stripeApiKey, setStripeApiKey] = useState("");
+    // const options = {
+    //     client_secret: '{{CLIENT_SECRET}}'
+    // }
 
     async function getStripeApiKey() {
         const { data } = await axios.get('/api/v1/stripeapikey');
 
         setStripeApiKey(data.stripeApiKey);
     }
-    
 
     useEffect(() => {
         WebFont.load({
             google: {
-                families: ['Roboto', 'Droid Sans', 'Chilanka'],
-            },
+                families: ['Roboto', 'Droid Sans', 'Chilanka']
+            }
         });
         store.dispatch(loadUser());
         getStripeApiKey();
     }, []);
 
-    window.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('contextmenu', e => e.preventDefault());
 
     return (
-        <div>
-            {loading ? (
-                <Loader />
-            ) : (
-                <Fragment>
-                    <Header />
-                    {isAuthenticated && <UserOptions user={user} />}
-                    {/* {stripeApiKey && (
-                    <Elements stripe={loadStripe(stripeApiKey)}>
-                        { isAuthenticated && (
-                            <Route
-                                path="/process/payment"
-                                element={<Payment />}
-                                exact
-                            />
-                        )}
-                    </Elements>
-                    )} */}
-                    <Routes>
-                        <Route path='/' element={<Home />} exact />
+        <Fragment>
+            <Header />
+            {isAuthenticated && <UserOptions user={user} />}
+            {/* {stripeApiKey && (
+                <Elements stripe={stripePromise} options={options}>
+                    {isAuthenticated && (
                         <Route
-                            path='/product/:id'
-                            element={<ProductDetails />}
+                            path='/process/payment'
+                            element={<Payment />}
                             exact
                         />
-                        <Route path='/products' element={<Products />} exact />
-                        <Route
-                            path='/products/:keyword'
-                            element={<Products />}
-                            exact
-                        />
-                        <Route path='/search' element={<Search />} exact />
-                        <Route path='/about' element={<About />} exact />
-                        <Route path='/contact' element={<Contact />} exact />
-                        {isAuthenticated && (
-                            <Route
-                                path='/account'
-                                element={<Profile />}
-                                exact
-                            />
-                        )}
-                        {isAuthenticated && (
-                            <Route
-                                path='/me/update'
-                                element={<UpdateProfile />}
-                                exact
-                            />
-                        )}
-                        {isAuthenticated && (
-                            <Route
-                                path='/password/update'
-                                element={<UpdatePassword />}
-                                exact
-                            />
-                        )}
-                        <Route
-                            path='/password/forgot'
-                            element={<ForgotPassword />}
-                            exact
-                        />
-                        <Route
-                            path='/password/reset/:token'
-                            element={<ResetPassword />}
-                            exact
-                        />
-                        <Route path='/login' element={<LoginSignup />} exact />
-                        <Route path='/cart' element={<Cart />} exact />
-                        {isAuthenticated && (
-                            <Route
-                                path='/shipping'
-                                element={<Shipping />}
-                                exact
-                            />
-                        )}
+                    )}
+                </Elements>
+            )} */}
+            <Routes>
+                <Route path='/' element={<Home />} exact />
+                <Route path='/product/:id' element={<ProductDetails />} exact />
+                <Route path='/products' element={<Products />} exact />
+                <Route path='/products/:keyword' element={<Products />} exact />
+                <Route path='/search' element={<Search />} exact />
+                <Route path='/about' element={<About />} exact />
+                <Route path='/contact' element={<Contact />} exact />
+                {isAuthenticated && (
+                    <Route path='/account' element={<Profile />} exact />
+                )}
+                {isAuthenticated && (
+                    <Route
+                        path='/me/update'
+                        element={<UpdateProfile />}
+                        exact
+                    />
+                )}
+                {isAuthenticated && (
+                    <Route
+                        path='/password/update'
+                        element={<UpdatePassword />}
+                        exact
+                    />
+                )}
+                <Route
+                    path='/password/forgot'
+                    element={<ForgotPassword />}
+                    exact
+                />
+                <Route
+                    path='/password/reset/:token'
+                    element={<ResetPassword />}
+                    exact
+                />
+                <Route path='/login' element={<LoginSignup />} exact />
+                <Route path='/cart' element={<Cart />} exact />
+                {isAuthenticated && (
+                    <Route path='/shipping' element={<Shipping />} exact />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                path='/success'
-                                element={<OrderSuccess />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route path='/success' element={<OrderSuccess />} exact />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                path='/orders'
-                                element={<MyOrders />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route path='/orders' element={<MyOrders />} exact />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                path='/order/confirm'
-                                element={<ConfirmOrder />}
-                                exact
-                            />
-                        )}
-                        {isAuthenticated && (
-                            <Route
-                                path='/order/:id'
-                                element={<OrderDetails />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        path='/order/confirm'
+                        element={<ConfirmOrder />}
+                        exact
+                    />
+                )}
+                {isAuthenticated && (
+                    <Route path='/order/:id' element={<OrderDetails />} exact />
+                )}
 
-                        {/* Admin Routes */}
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/dashboard'
-                                element={<Dashboard />}
-                                exact
-                            />
-                        )}
+                {/* Admin Routes */}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/dashboard'
+                        element={<Dashboard />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/products'
-                                element={<ProductList />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/products'
+                        element={<ProductList />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/product'
-                                element={<NewProduct />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/product'
+                        element={<NewProduct />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/product/:id'
-                                element={<UpdateProduct />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/product/:id'
+                        element={<UpdateProduct />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/orders'
-                                element={<OrderList />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/orders'
+                        element={<OrderList />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/order/:id'
-                                element={<ProcessOrder />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/order/:id'
+                        element={<ProcessOrder />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/users'
-                                element={<UsersList />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/users'
+                        element={<UsersList />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/user/:id'
-                                element={<UpdateUser />}
-                                exact
-                            />
-                        )}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/user/:id'
+                        element={<UpdateUser />}
+                        exact
+                    />
+                )}
 
-                        {isAuthenticated && (
-                            <Route
-                                isAdmin={true}
-                                path='/admin/reviews'
-                                element={<ProductReviews />}
-                                exact
-                            />
-                        )}
-                        {/*  */}
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/reviews'
+                        element={<ProductReviews />}
+                        exact
+                    />
+                )}
+                {/*  */}
 
-                        {/* <Route
+                {/* <Route
                             element={
                                 this.location.pathname ===
                                 '/process/payment' ? null : (
@@ -272,13 +239,11 @@ function App() {
                             }
                         /> */}
 
-                        {/* Page Not Found Route */}
-                        <Route path='*' element={<NotFound />} />
-                    </Routes>
-                    <Footer />
-                </Fragment>
-            )}
-        </div>
+                {/* Page Not Found Route */}
+                <Route path='*' element={<NotFound />} />
+            </Routes>
+            <Footer />
+        </Fragment>
     );
 }
 

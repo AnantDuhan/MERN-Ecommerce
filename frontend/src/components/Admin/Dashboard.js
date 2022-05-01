@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import './Dashboard.css';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import 'chart.js/auto';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAdminProduct } from '../../actions/productAction';

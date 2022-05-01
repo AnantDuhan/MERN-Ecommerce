@@ -1,6 +1,7 @@
 const express = require('express');
 const {
    getAllProducts,
+   getAdminProducts,
    createProduct,
    updateProduct,
    deleteProduct,
@@ -16,6 +17,10 @@ const router = express.Router();
 router.route('/products').get(getAllProducts);
 
 router
+    .route('/admin/products')
+    .get(isAuthUser, authRoles('admin'), getAdminProducts);
+
+router
    .route('/admin/product/new')
    .post(isAuthUser, authRoles('admin'), createProduct);
 
@@ -29,9 +34,9 @@ router.route('/product/:id').get(getProductDetails);
 
 router.route('/review').put(isAuthUser, createProductReview);
 
-router.route('/reviews').get(getProductReviews);
-
-router.route('/reviews').delete(isAuthUser, deleteReview);
-
+router
+    .route('/reviews')
+    .get(getProductReviews)
+    .delete(isAuthUser, deleteReview);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 import { Typography } from '@material-ui/core';
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
