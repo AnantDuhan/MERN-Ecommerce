@@ -1,4 +1,4 @@
-.LoginSignUpContainer {
+.SignUpContainer {
   width: 100vw;
   height: 100vh;
   max-width: 100%;
@@ -11,18 +11,18 @@
   left: 0;
 }
 
-.LoginSignUpBox {
+.SignUpBox {
   background-color: white;
   width: 25vw;
   height: 70vh;
   box-sizing: border-box;
   overflow: hidden;
 }
-.login_signUp_toggle {
+.signUp_toggle {
   display: flex;
   height: 3vmax;
 }
-.login_signUp_toggle > p {
+.signUp_toggle > p {
   color: rgba(0, 0, 0, 0.678);
   font: 300 1vmax "Roboto";
   transition: all 0.5s;
@@ -31,11 +31,11 @@
   place-items: center;
   width: 100%;
 }
-.login_signUp_toggle > p:hover {
+.signUp_toggle > p:hover {
   color: tomato;
 }
 
-.LoginSignUpBox > div > button {
+.SignUpBox > div > button {
   background-color: tomato;
   height: 3px;
   width: 50%;
@@ -43,7 +43,6 @@
   transition: all 0.5s;
 }
 
-.loginForm,
 .signUpForm {
   display: flex;
   flex-direction: column;
@@ -55,17 +54,12 @@
   transition: all 0.5s;
 }
 
-.signUpForm {
-  transform: translateY(-100%) translateX(-100vmax);
-}
-
-.loginForm > div,
 .signUpForm > div {
   display: flex;
   width: 100%;
   align-items: center;
 }
-.loginForm > div > input,
+
 .signUpForm > div > input {
   padding: 1vmax 4vmax;
   padding-right: 1vmax;
@@ -77,7 +71,6 @@
   outline: none;
 }
 
-.loginForm > div > svg,
 .signUpForm > div > svg {
   position: absolute;
   transform: translateX(1vmax);
@@ -124,7 +117,6 @@
   background-color: rgb(235, 235, 235);
 }
 
-.loginBtn,
 .signUpBtn {
   border: none;
   background-color: tomato;
@@ -139,33 +131,17 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.219);
 }
 
-.loginBtn:hover,
 .signUpBtn:hover {
   background-color: rgb(179, 66, 46);
 }
 
-.shiftToLeft {
-  transform: translateX(-100%);
-}
-.shiftToNeutral {
-  transform: translateX(0%);
-}
-
-.shiftToNeutralForm {
-  transform: translateX(0%) translateY(-100%);
-}
-
-.shiftToRight {
-  transform: translateX(100%);
-}
-
 @media screen and (max-width: 600px) {
-  .LoginSignUpContainer {
+  .SignUpContainer {
     background-color: white;
   }
-  .LoginSignUpBox {
-    width: 100vw;
-    height: 95vh;
+  .SignUpBox {
+    width: 110vw;
+    height: 45vh;
   }
   .login_signUp_toggle {
     height: 5vmax;
@@ -174,25 +150,19 @@
     font: 300 1.5vmax "Roboto";
   }
 
-  .loginForm,
   .signUpForm {
     padding: 5vmax;
   }
 
-  .loginForm > div > input,
   .signUpForm > div > input {
     padding: 2.5vmax 5vmax;
     font: 300 1.7vmax cursive;
   }
 
-  .loginForm > div > svg,
   .signUpForm > div > svg {
     font-size: 2.8vmax;
   }
 
-  .loginForm > a {
-    font: 500 1.8vmax "Gill Sans";
-  }
 
   #registerImage > img {
     width: 8vmax;
@@ -204,7 +174,6 @@
     font: 400 1.8vmax cursive;
   }
 
-  .loginBtn,
   .signUpBtn {
     font: 300 1.9vmax "Roboto";
     padding: 1.8vmax;
