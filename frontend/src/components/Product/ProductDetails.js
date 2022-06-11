@@ -154,13 +154,14 @@ const ProductDetails = () => {
                                             product.Stock < 1 ? true : false
                                         }
                                         onClick={addToCartHandler}
+                                        className='submitReview'
                                     >
                                         Add to Cart
                                     </button>
                                 </div>
 
                                 <p>
-                                    Status:
+                                    Status: {' '}
                                     <b
                                         className={
                                             product.Stock < 1
@@ -169,8 +170,8 @@ const ProductDetails = () => {
                                         }
                                     >
                                         {product.Stock < 1
-                                            ? 'OutOfStock'
-                                            : 'InStock'}
+                                            ? 'Out Of Stock'
+                                            : 'In Stock'}
                                     </b>
                                 </p>
                             </div>

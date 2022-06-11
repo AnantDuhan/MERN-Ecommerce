@@ -14,17 +14,6 @@ const options = {
     transition: transitions.SCALE,
 };
 
-// ReactDOM.render(
-//     <BrowserRouter>
-//         <Provider store={store}>
-//             <AlertProvider template={AlertTemplate} {...options}>
-//                 <App />
-//             </AlertProvider>
-//         </Provider>
-//     </BrowserRouter>,
-//     document.getElementById('root')
-// );
-
 const container = document.getElementById('root');
 const rootContainer = ReactDOM.createRoot(container);
 rootContainer.render(
@@ -33,6 +22,6 @@ rootContainer.render(
             <AlertProvider template={AlertTemplate} {...options}>
                 <App />
             </AlertProvider>
-        </Provider>
+        </Provider> 
     </BrowserRouter>
 );

@@ -22,7 +22,8 @@ const categories = [
     'Camera',
     'SmartPhones',
     'Tracksuit',
-    'Jeans'
+    'Jeans',
+    'Liquor'
 ];
 
 const Products = () => {

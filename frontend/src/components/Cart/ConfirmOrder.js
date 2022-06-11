@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import CheckoutSteps from '../Cart/CheckoutSteps';
 import { useSelector } from 'react-redux';
 import MetaData from '../layout/MetaData';
@@ -6,10 +6,12 @@ import './ConfirmOrder.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 
-const ConfirmOrder = ({ history }) => {
+const ConfirmOrder = () => {
     const { shippingInfo, cartItems } = useSelector(state => state.cart);
     const { user } = useSelector(state => state.user);
     const navigate = useNavigate();
+
+    const [couponCode, setCouponCode] = useState();
 
     const subtotal = cartItems.reduce(
         (acc, item) => acc + item.quantity * item.price,
@@ -20,7 +22,11 @@ const ConfirmOrder = ({ history }) => {
 
     const tax = subtotal * 0.18;
 
+    let applyCouponCode;
+
     const totalPrice = subtotal + tax + shippingCharges;
+    
+    // let finalPrice = totalPrice * 0.95;
 
     const address = `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state}, ${shippingInfo.pinCode}, ${shippingInfo.country}`;
 
@@ -29,13 +35,20 @@ const ConfirmOrder = ({ history }) => {
             subtotal,
             shippingCharges,
             tax,
-            totalPrice
+            totalPrice,
+            // finalPrice,
+            // applyCouponCode
         };
 
         sessionStorage.setItem('orderInfo', JSON.stringify(data));
 
         navigate('/process/payment');
     };
+
+    // const couponCodeApplied = () => {
+        
+    //     finalPrice = couponCode === 'FIRST05' ? totalPrice - (totalPrice * 0.05) : totalPrice;
+    // }
 
     return (
         <Fragment>
@@ -82,7 +95,7 @@ const ConfirmOrder = ({ history }) => {
                 {/*  */}
                 <div>
                     <div className='orderSummary'>
-                        <Typography>Order Summery</Typography>
+                        <Typography>Order Summary</Typography>
                         <div>
                             <div>
                                 <p>Subtotal:</p>
@@ -95,6 +108,15 @@ const ConfirmOrder = ({ history }) => {
                             <div>
                                 <p>GST:</p>
                                 <span>₹{tax}</span>
+                            </div>
+                            <div>
+                                <input
+                                    placeholder="Coupon Code"
+                                    className="couponCode"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value)}
+                                />
+                                <button className="couponCodeButton">Apply</button>
                             </div>
                         </div>
 

@@ -7,7 +7,7 @@ import {
     getAdminProduct,
     deleteProduct
 } from '../../actions/productAction';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
 import MetaData from '../layout/MetaData';
@@ -20,7 +20,6 @@ const ProductList = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const alert = useAlert();
-    const { id } = useParams();
 
     const { error, products } = useSelector(state => state.products);
 
@@ -123,19 +122,19 @@ const ProductList = () => {
             <MetaData title={`ALL PRODUCTS - Admin`} />
             {/* <div className="dashboard"> */}
             {/* <Sidebar /> */}
-            <div className='productListContainer'>
-                <h1 id='productListHeading'>ALL PRODUCTS</h1>
+                <div className='productListContainer'>
+                    <h1 id='productListHeading'>ALL PRODUCTS</h1>
 
-                <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    pageSize={10}
-                    rowsPerPageOptions={[10]}
-                    disableSelectionOnClick
-                    className='productListTable'
-                    autoHeight
-                />
-            </div>
+                    <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        disableSelectionOnClick
+                        className='productListTable'
+                        autoHeight
+                    />
+                </div>
             {/* </div> */}
         </Fragment>
     );

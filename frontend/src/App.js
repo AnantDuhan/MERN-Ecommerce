@@ -5,6 +5,15 @@ import { Route, Routes } from 'react-router-dom';
 import WebFont from 'webfontloader';
 
 import { loadUser } from './actions/userAction';
+import Dashboard from './components/Admin/Dashboard';
+import NewProduct from './components/Admin/NewProduct';
+import OrderList from './components/Admin/OrderList';
+import ProcessOrder from './components/Admin/ProcessOrder';
+import ProductList from './components/Admin/ProductList';
+import ProductReviews from './components/Admin/ProductReviews';
+import UpdateProduct from './components/Admin/UpdateProduct';
+import UpdateUser from './components/Admin/UpdateUser';
+import UsersList from './components/Admin/UsersList';
 import Cart from './components/Cart/Cart';
 import ConfirmOrder from './components/Cart/ConfirmOrder';
 import OrderSuccess from './components/Cart/OrderSuccess';
@@ -16,32 +25,38 @@ import Contact from './components/layout/Contact/Contact';
 import Footer from './components/layout/Footer/Footer';
 import Header from './components/layout/Header/Header';
 import UserOptions from './components/layout/Header/UserOptions';
+import NotFound from './components/layout/Not-Found/NotFound';
 import MyOrders from './components/Order/MyOrders';
 import OrderDetails from './components/Order/OrderDetails';
 import ProductDetails from './components/Product/ProductDetails';
 import Products from './components/Product/Products';
 import Search from './components/Product/Search';
 import ForgotPassword from './components/User/ForgotPassword';
-import LoginSignup from './components/User/LoginSignup';
+import Login from './components/User/Login';
+// import LoginSignup from './components/User/LoginSignup';
 import Profile from './components/User/Profile';
 import ResetPassword from './components/User/ResetPassword';
+import Signup from './components/User/Signup';
 import UpdatePassword from './components/User/UpdatePassword';
 import UpdateProfile from './components/User/UpdateProfile';
-import Dashboard from './components/Admin/Dashboard';
 import store from './store';
+
 import './App.css';
-import NotFound from './components/layout/Not-Found/NotFound';
-import ProductList from './components/Admin/ProductList';
-import NewProduct from './components/Admin/NewProduct';
-import UpdateProduct from './components/Admin/UpdateProduct';
-import OrderList from './components/Admin/OrderList';
-import ProcessOrder from './components/Admin/ProcessOrder';
-import UsersList from './components/Admin/UsersList';
-import UpdateUser from './components/Admin/UpdateUser';
-import ProductReviews from './components/Admin/ProductReviews';
 
 // import { Elements } from '@stripe/react-stripe-js';
 // import { loadStripe } from '@stripe/stripe-js';
+/*
+TODO: #1 Not able to upload image in register page
+
+TODO: #2 Payment Page Not Found
+
+TODO: #3 Not able to reset password
+
+TODO: #4 Coupon Code not working properly
+
+TODO: #5 Sidebar for Admin Dashboard Not Visible
+
+*/
 
 function App() {
     const { isAuthenticated, user } = useSelector(state => state.user);
@@ -77,7 +92,7 @@ function App() {
             <Header />
             {isAuthenticated && <UserOptions user={user} />}
             {/* {stripeApiKey && (
-                <Elements stripe={stripePromise} options={options}>
+                <Elements stripe={stripePromise}>
                     {isAuthenticated && (
                         <Route
                             path='/process/payment'
@@ -122,7 +137,9 @@ function App() {
                     element={<ResetPassword />}
                     exact
                 />
-                <Route path='/login' element={<LoginSignup />} exact />
+                <Route path='/login' element={<Login />} exact />
+                <Route path='/register' element={<Signup />} exact />
+
                 <Route path='/cart' element={<Cart />} exact />
                 {isAuthenticated && (
                     <Route path='/shipping' element={<Shipping />} exact />

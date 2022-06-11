@@ -105,7 +105,28 @@
   font: 300 1vmax "Roboto";
   justify-content: space-between;
   border-top: 1px solid rgba(0, 0, 0, 0.363);
-  padding: 2vmax 0;
+  padding: 1vmax 0;
+}
+
+.couponCode {
+  width: 100%;
+  border: none;
+  color:rgba(0, 0, 0, 0.7);
+  font: 400 1vmax "Roboto";
+  padding: 1vmax;
+}
+
+.couponCodeButton {
+  background-color: tomato;
+  color: white;
+  font: 400 1vmax "Roboto";
+  cursor: pointer;
+  border: none;
+  padding: 1vmax;
+}
+
+.couponCodeButton > button:hover {
+  background-color: rgb(192, 71, 50);
 }
 
 .orderSummary > button {

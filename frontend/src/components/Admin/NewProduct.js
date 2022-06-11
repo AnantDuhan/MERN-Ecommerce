@@ -42,7 +42,8 @@ const NewProduct = () => {
         'Camera',
         'SmartPhones',
         'Tracksuit',
-        'Jeans'
+        'Jeans',
+        'Liquor'
     ];
 
     useEffect(() => {
