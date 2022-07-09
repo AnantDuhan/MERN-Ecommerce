@@ -9,25 +9,28 @@ const { cloudinary } = require('cloudinary');
 // Register our user
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
 
-   let avatar = [];
+   let images = [];
 
-   if(typeof req.body.avatar === 'string') {
-      avatar.push(req.body.avatar);
+   if(typeof req.body.images === 'string') {
+      images.push(req.body.images);
    } else {
-      avatar = req.body.avatar;
+      images = req.body.images;
    }
    
    let avatarLink = [];
-   const myCloud = await cloudinary.v2.uploader.upload(avatar, {
-      folder: 'avatars'
-   });
 
-   avatarLink.push({
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url
-   });
+   for (let i = 0; i < images.length; i++) {
+       const result = await cloudinary.v2.uploader.upload(images[i], {
+           folder: 'avatar'
+       });
+
+       avatarLink.push({
+           public_id: result.public_id,
+           url: result.secure_url
+       });
+   }
    
-   req.body.avatar = avatarLink;
+   req.body.images = avatarLink;
 
    const { name, email, password } = req.body;
    const user = await User.create({
@@ -90,13 +93,11 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
    const resetPasswordURL = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
-   const message = `Your password reset token is:- \n\n ${resetPasswordURL} \n\n If you have not requested this email then, please ignore it.`;
-
    try {
       await sendEmail({
-         email: user.email,
-         subject: `Password Recovery - Ecommerce`,
-         message,
+          email: user.email,
+          subject: `Password Recovery - Ecommerce`,
+          html: `Your password reset token is:- \n\n ${resetPasswordURL} \n\n If you have not requested this email then, please ignore it.`
       });
 
       res.status(200).json({

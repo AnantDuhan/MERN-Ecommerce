@@ -9,40 +9,42 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please Enter Your Name'],
         maxLength: [30, 'Name cannot exceed 30 characters'],
-        minLength: [4, 'Name must be atleast of 4 characters long'],
+        minLength: [4, 'Name must be atleast of 4 characters long']
     },
     email: {
         type: String,
         required: [true, 'Please Enter Your Email'],
         unique: true,
-        validate: [validator.isEmail, 'Please Enter a valid Email'],
+        validate: [validator.isEmail, 'Please Enter a valid Email']
     },
     password: {
         type: String,
         required: [true, 'Please Enter Your Password'],
         minLength: [4, 'Password must be atleast of 8 characters long'],
-        select: false,
+        select: false
     },
-    avatar: {
-        public_id: {
-            type: String,
-            // required: true,
-        },
-        url: {
-            type: String,
-            // required: true,
-        },
-    },
+    avatar: [
+        {
+            public_id: {
+                type: String
+                // required: true,
+            },
+            url: {
+                type: String
+                // required: true,
+            }
+        }
+    ],
     role: {
         type: String,
-        default: 'user',
+        default: 'user'
     },
     createdAt: {
         type: Date,
-        default: Date.now,
+        default: Date.now
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date,
+    resetPasswordExpire: Date
 });
 
 userSchema.pre('save', async function (next) {
@@ -57,11 +59,11 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.getJWTToken = function () {
     return jwt.sign(
         {
-            id: this._id,
+            id: this._id
         },
         process.env.JWT_SECRET_KEY,
         {
-            expiresIn: process.env.JWT_EXPIRES_IN,
+            expiresIn: process.env.JWT_EXPIRES_IN
         }
     );
 };
