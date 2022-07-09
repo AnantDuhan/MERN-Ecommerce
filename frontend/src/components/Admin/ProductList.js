@@ -1,25 +1,22 @@
-import React, { Fragment, useEffect } from 'react';
-import { DataGrid } from '@material-ui/data-grid';
-import './ProductList.css';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    clearErrors,
-    getAdminProduct,
-    deleteProduct
-} from '../../actions/productAction';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
-import EditIcon from '@material-ui/icons/Edit';
+import { DataGrid } from '@material-ui/data-grid';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import React, { Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { clearErrors, deleteProduct, getAdminProduct } from '../../actions/productAction';
 // import Sidebar from './Sidebar.js';
 import { DELETE_PRODUCT_RESET } from '../../constants/productConstants';
+import MetaData from '../layout/MetaData';
+
+import './ProductList.css';
 
 const ProductList = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const alert = useAlert();
 
     const { error, products } = useSelector(state => state.products);
 
@@ -33,23 +30,23 @@ const ProductList = () => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (deleteError) {
-            alert.error(deleteError);
+            toast.error(deleteError);
             dispatch(clearErrors());
         }
 
         if (isDeleted) {
-            alert.success('Product Deleted Successfully');
+            toast.success('Product Deleted Successfully');
             navigate('/admin/dashboard');
             dispatch({ type: DELETE_PRODUCT_RESET });
         }
 
         dispatch(getAdminProduct());
-    }, [dispatch, alert, error, deleteError, navigate, isDeleted]);
+    }, [dispatch, error, deleteError, navigate, isDeleted]);
 
     const columns = [
         { field: 'id', headerName: 'Product ID', minWidth: 200, flex: 0.5 },

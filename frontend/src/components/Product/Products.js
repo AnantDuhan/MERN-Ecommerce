@@ -1,15 +1,15 @@
+import Slider from '@material-ui/core/Slider';
+import Typography from '@material-ui/core/Typography';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import Pagination from 'react-js-pagination';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, getProduct } from '../../actions/productAction';
 import ProductCard from '../Home/ProductCard';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 
 import './Products.css';
 
@@ -28,7 +28,6 @@ const categories = [
 
 const Products = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
 
     const [currentPage, setCurrentPage] = useState(1);
     const [price, setPrice] = useState([0, 40000]);
@@ -49,11 +48,11 @@ const Products = () => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
         dispatch(getProduct(keyword, currentPage, price, category, ratings));
-    }, [dispatch, keyword, currentPage, price, category, ratings, alert, error]);
+    }, [dispatch, keyword, currentPage, price, category, ratings, error]);
 
     let count = filteredProductsCount;
 

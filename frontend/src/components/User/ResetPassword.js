@@ -1,9 +1,9 @@
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
+import { toast } from 'react-toastify';
 
 import { clearErrors, resetPassword } from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
@@ -13,7 +13,6 @@ import './ResetPassword.css';
 
 const ResetPassword = ({ match }) => {
     const dispatch = useDispatch();
-    const alert = useAlert();
     const navigate = useNavigate();
     const { token } = useParams();
 
@@ -37,16 +36,16 @@ const ResetPassword = ({ match }) => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (success) {
-            alert.success('Password Updated Successfully');
+            toast.success('Password Updated Successfully');
 
             navigate('/login');
         }
-    }, [dispatch, error, alert, navigate, success]);
+    }, [dispatch, error, navigate, success]);
 
     return (
         <Fragment>

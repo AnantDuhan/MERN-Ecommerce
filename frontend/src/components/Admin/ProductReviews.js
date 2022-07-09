@@ -1,25 +1,22 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { DataGrid } from '@material-ui/data-grid';
-import './ProductReviews.css';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    clearErrors,
-    getAllReviews,
-    deleteReviews
-} from '../../actions/productAction';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
+import { DataGrid } from '@material-ui/data-grid';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Star from '@material-ui/icons/Star';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { clearErrors, deleteReviews, getAllReviews } from '../../actions/productAction';
 // import Sidebar from './Sidebar';
 import { DELETE_REVIEW_RESET } from '../../constants/productConstants';
+import MetaData from '../layout/MetaData';
+
+import './ProductReviews.css';
 
 const ProductReviews = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const alert = useAlert();
 
     const { error: deleteError, isDeleted } = useSelector(
         state => state.review
@@ -45,21 +42,21 @@ const ProductReviews = () => {
             dispatch(getAllReviews(productId));
         }
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (deleteError) {
-            alert.error(deleteError);
+            toast.error(deleteError);
             dispatch(clearErrors());
         }
 
         if (isDeleted) {
-            alert.success('Review Deleted Successfully');
+            toast.success('Review Deleted Successfully');
             navigate('/admin/reviews');
             dispatch({ type: DELETE_REVIEW_RESET });
         }
-    }, [dispatch, alert, error, deleteError, navigate, isDeleted, productId]);
+    }, [dispatch, error, deleteError, navigate, isDeleted, productId]);
 
     const columns = [
         { field: 'id', headerName: 'Review ID', minWidth: 200, flex: 0.5 },

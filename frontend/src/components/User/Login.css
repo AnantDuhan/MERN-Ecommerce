@@ -107,6 +107,21 @@
   background-color: rgb(179, 66, 46);
 }
 
+/* .registerLink {
+    position: absolute;
+    left: 593px;
+    top: 376px;
+} */
+
+.togglePasswordBtn {
+      position: fixed;
+    transform: translateX(1vmax);
+    font-size: 1.6vmax;
+    color: rgba(0, 0, 0, 0.623);
+    right: 615px;
+    top: 305px;
+}
+
 @media screen and (max-width: 600px) {
   .LoginContainer {
     background-color: white;
@@ -143,4 +158,10 @@
     font: 300 1.9vmax "Roboto";
     padding: 1.8vmax;
   }
+
+  /* .registerLink {
+    position: absolute;
+    left: 346px;
+    top: 344px;
+  } */
 }

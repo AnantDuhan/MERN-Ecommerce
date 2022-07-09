@@ -1,25 +1,21 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    clearErrors,
-    updateProduct,
-    getProductDetails
-} from '../../actions/productAction';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
-import DescriptionIcon from '@material-ui/icons/Description';
-import StorageIcon from '@material-ui/icons/Storage';
-import SpellcheckIcon from '@material-ui/icons/Spellcheck';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import DescriptionIcon from '@material-ui/icons/Description';
+import SpellcheckIcon from '@material-ui/icons/Spellcheck';
+import StorageIcon from '@material-ui/icons/Storage';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { clearErrors, getProductDetails, updateProduct } from '../../actions/productAction';
 // import Sidebar from './Sidebar';
 import { UPDATE_PRODUCT_RESET } from '../../constants/productConstants';
+import MetaData from '../layout/MetaData';
 
 const UpdateProduct = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -65,23 +61,22 @@ const UpdateProduct = () => {
             setOldImages(product.images);
         }
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (updateError) {
-            alert.error(updateError);
+            toast.error(updateError);
             dispatch(clearErrors());
         }
 
         if (isUpdated) {
-            alert.success('Product Updated Successfully');
+            toast.success('Product Updated Successfully');
             navigate('/admin/products');
             dispatch({ type: UPDATE_PRODUCT_RESET });
         }
     }, [
         dispatch,
-        alert,
         error,
         navigate,
         isUpdated,

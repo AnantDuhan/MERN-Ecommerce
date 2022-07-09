@@ -3,9 +3,9 @@ import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PersonIcon from '@material-ui/icons/Person';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, getUserDetails, updateUser } from '../../actions/userAction';
 // import SideBar from './Sidebar';
@@ -15,7 +15,6 @@ import MetaData from '../layout/MetaData';
 
 const UpdateUser = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -42,21 +41,21 @@ const UpdateUser = () => {
             setRole(user.role);
         }
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (updateError) {
-            alert.error(updateError);
+            toast.error(updateError);
             dispatch(clearErrors());
         }
 
         if (isUpdated) {
-            alert.success('User Updated Successfully');
+            toast.success('User Updated Successfully');
             navigate('/admin/users');
             dispatch({ type: UPDATE_USER_RESET });
         }
-    }, [dispatch, alert, error, navigate, isUpdated, updateError, user, userId]);
+    }, [dispatch, error, navigate, isUpdated, updateError, user, userId]);
 
     const updateUserSubmitHandler = e => {
         e.preventDefault();

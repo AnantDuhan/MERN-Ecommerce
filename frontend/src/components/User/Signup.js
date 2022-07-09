@@ -3,9 +3,9 @@ import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import FormData from 'form-data';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, register } from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
@@ -15,7 +15,6 @@ import './Signup.css';
 
 const LoginSignup = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -78,13 +77,13 @@ const LoginSignup = () => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
         if (isAuthenticated) {
             navigate(redirect);
         }
-    }, [dispatch, error, alert, navigate, isAuthenticated, redirect]);
+    }, [dispatch, error, navigate, isAuthenticated, redirect]);
 
     return (
         <Fragment>
@@ -146,7 +145,7 @@ const LoginSignup = () => {
                                 <div id='registerImage'>
                                     <img
                                         src={avatarPreview}
-                                        alt='Avatar Preview'
+                                        alt='avatar'
                                     />
                                     <input
                                         type='file'
@@ -154,7 +153,7 @@ const LoginSignup = () => {
                                         accept='image/*'
                                         onChange={registerDataChange}
                                     />
-                                </div>
+                                    </div>
                                 <input
                                     type='submit'
                                     value='Register'

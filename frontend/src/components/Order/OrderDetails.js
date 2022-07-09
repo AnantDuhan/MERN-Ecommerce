@@ -1,12 +1,14 @@
-import React, { Fragment, useEffect } from 'react';
-import './OrderDetails.css';
-import { useSelector, useDispatch } from 'react-redux';
-import MetaData from '../layout/MetaData';
-import { Link, useParams } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
-import { getOrderDetails, clearErrors } from '../../actions/orderAction';
+import React, { Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { clearErrors, getOrderDetails } from '../../actions/orderAction';
 import Loader from '../layout/Loader/Loader';
-import { useAlert } from 'react-alert';
+import MetaData from '../layout/MetaData';
+
+import './OrderDetails.css';
 
 const OrderDetails = () => {
     const { order, error, loading } = useSelector(
@@ -14,17 +16,16 @@ const OrderDetails = () => {
     );
 
     const dispatch = useDispatch();
-    const alert = useAlert();
     const { id } = useParams();
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         dispatch(getOrderDetails(id));
-    }, [dispatch, alert, error, id]);
+    }, [dispatch, error, id]);
 
     return (
         <Fragment>

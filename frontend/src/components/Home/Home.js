@@ -1,7 +1,8 @@
 import React, { Fragment, useEffect } from 'react';
-import { useAlert } from 'react-alert';
-import { useDispatch, useSelector } from 'react-redux';
 import { CgMouse } from 'react-icons/cg'
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+
 import { clearErrors, getProduct } from '../../actions/productAction';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
@@ -10,17 +11,16 @@ import ProductCard from './ProductCard';
 import './Home.css';
 
 const Home = () => {
-    const alert = useAlert();
     const dispatch = useDispatch();
     const { loading, error, products } = useSelector((state) => state.products);
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
         dispatch(getProduct());
-    }, [dispatch, error, alert]);
+    }, [dispatch, error]);
 
     return (
         <Fragment>

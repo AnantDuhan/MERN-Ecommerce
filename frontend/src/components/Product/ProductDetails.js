@@ -1,30 +1,21 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import './ProductDetails.css';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    clearErrors,
-    getProductDetails,
-    newReview
-} from '../../actions/productAction';
-import ReviewCard from './ReviewCard';
-import Loader from '../layout/Loader/Loader';
-import { useAlert } from 'react-alert';
-import MetaData from '../layout/MetaData';
-import { addItemsToCart } from '../../actions/cartAction';
-import {
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Button
-} from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import { Rating } from '@material-ui/lab';
-import { NEW_REVIEW_RESET } from '../../constants/productConstants';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { addItemsToCart } from '../../actions/cartAction';
+import { clearErrors, getProductDetails, newReview } from '../../actions/productAction';
+import { NEW_REVIEW_RESET } from '../../constants/productConstants';
+import Loader from '../layout/Loader/Loader';
+import MetaData from '../layout/MetaData';
+import ReviewCard from './ReviewCard';
+
+import './ProductDetails.css';
 
 const ProductDetails = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
     const { id } = useParams();
 
     const { product, loading, error } = useSelector(
@@ -63,7 +54,7 @@ const ProductDetails = () => {
 
     const addToCartHandler = () => {
         dispatch(addItemsToCart(id, quantity));
-        alert.success('Item Added To Cart');
+        toast.success('Item Added To Cart');
     };
 
     const submitReviewToggle = () => {
@@ -84,21 +75,21 @@ const ProductDetails = () => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (reviewError) {
-            alert.error(reviewError);
+            toast.error(reviewError);
             dispatch(clearErrors());
         }
 
         if (success) {
-            alert.success('Review Submitted Successfully');
+            toast.success('Review Submitted Successfully');
             dispatch({ type: NEW_REVIEW_RESET });
         }
         dispatch(getProductDetails(id));
-    }, [dispatch, id, error, alert, reviewError, success]);
+    }, [dispatch, id, error, reviewError, success]);
 
     return (
         <Fragment>

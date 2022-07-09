@@ -2,9 +2,9 @@ import Typography from "@material-ui/core/Typography";
 import { DataGrid } from "@material-ui/data-grid";
 import LaunchIcon from "@material-ui/icons/Launch";
 import React, { Fragment, useEffect } from "react";
-import { useAlert } from "react-alert";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, myOrders } from "../../actions/orderAction";
 import Loader from "../layout/Loader/Loader";
@@ -16,20 +16,19 @@ const MyOrders = () => {
 
     const dispatch = useDispatch();
     const { id } = useParams();
-    const alert = useAlert();
 
     const { loading, error, orders } = useSelector((state) => state.myOrders);
     const { user } = useSelector((state) => state.user);
 
     const columns = [
-        { field: 'id', headerName: 'Order ID', minWidth: 300, flex: 1 },
+        { field: 'id', headerName: 'Order ID', minWidth: 180, flex: 0.8 },
         {
             field: 'status',
             headerName: 'Status',
             minWidth: 150,
             flex: 0.5,
             cellClassName: (params) => {
-                return params.getValue(id, 'status') === 'Delivered'
+                return params.getValue(params.id, 'status') === 'Delivered'
                     ? 'greenColor'
                     : 'redColor';
             },
@@ -57,54 +56,56 @@ const MyOrders = () => {
             sortable: false,
             renderCell: (params) => {
                 return (
-                    <Link to={`/order/${params.getValue( id, 'id')}`}>
+                    <Link to={`/order/${params.getValue(params.id, 'id')}`}>
                         <LaunchIcon />
                     </Link>
                 );
             },
         },
     ];
+
     const rows = [];
 
-    orders && orders.forEach((item, index) => {
-        rows.push({
-            itemsQty: item.orderItems.length,
-            id: item._id,
-            status: item.orderStatus,
-            amount: item.totalPrice,
+    orders &&
+        orders.forEach((item, index) => {
+            rows.push({
+                itemsQty: item.orderItems.length,
+                id: item._id,
+                status: item.orderStatus,
+                amount: item.totalPrice,
+            });
         });
-    });
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         dispatch(myOrders());
-    }, [dispatch, alert, error]);
+    }, [dispatch, error]);
 
-  return (
-      <Fragment>
-          <MetaData title={`${user.name} - Orders`} />
-          {loading ? (
-              <Loader />
-          ) : (
-                  <div className="myOrdersPage">
-                      <DataGrid
-                          rows={rows}
-                          columns={columns}
-                          pageSize= {10}
-                          disableSelectionOnClick
-                          className="myOrdersTable"
-                          autoHeight
-                      />
+    return (
+        <Fragment>
+            <MetaData title={`${user.name} - Orders`} />
+            {loading ? (
+                <Loader />
+            ) : (
+                <div className="myOrdersPage">
+                    <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        pageSize={10}
+                        disableSelectionOnClick
+                        className="myOrdersTable"
+                        autoHeight
+                    />
 
-                      <Typography id="myOrdersHeading">{user.name}'s Orders</Typography>
-              </div>
-          )}
-    </Fragment>
-  )
-}
+                    <Typography id="myOrdersHeading">{user.name}'s Orders</Typography>
+                </div>
+            )}
+        </Fragment>
+    );
+};
 
 export default MyOrders;

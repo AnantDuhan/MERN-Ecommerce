@@ -6,9 +6,9 @@ import PersonIcon from '@material-ui/icons/Person';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { SpeedDial, SpeedDialAction } from '@material-ui/lab';
 import React, { Fragment, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { logout } from '../../../actions/userAction';
 
@@ -16,7 +16,6 @@ import './Header.css';
 
 const UserOptions = ({ user }) => {
     const [open, setOpen] = useState(false);
-    const alert = useAlert();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -63,7 +62,7 @@ const UserOptions = ({ user }) => {
 
     function logoutUser() {
         dispatch(logout());
-        alert.success('Logout Successfully');
+        toast.success('Logout Successfully');
     }
 
     return (

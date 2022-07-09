@@ -17,7 +17,7 @@ import UsersList from './components/Admin/UsersList';
 import Cart from './components/Cart/Cart';
 import ConfirmOrder from './components/Cart/ConfirmOrder';
 import OrderSuccess from './components/Cart/OrderSuccess';
-// import Payment from './components/Cart/Payment';
+import Payment from './components/Cart/Payment';
 import Shipping from './components/Cart/Shipping';
 import Home from './components/Home/Home';
 import About from './components/layout/About/About';
@@ -43,19 +43,19 @@ import store from './store';
 
 import './App.css';
 
-// import { Elements } from '@stripe/react-stripe-js';
-// import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
 /*
-TODO: #1 Not able to upload image in register page
+    TODO: #1 Not able to upload image in register page
 
-TODO: #2 Payment Page Not Found
+    TODO: #2 Payment Page Not Found
 
-TODO: #3 Not able to reset password
+    TODO: #3 Not able to reset password
 
-TODO: #4 Coupon Code not working properly
+    TODO: #4 Coupon Code not working properly
 
-TODO: #5 Sidebar for Admin Dashboard Not Visible
-
+    TODO: #5 Sidebar for Admin Dashboard Not Visible
 */
 
 function App() {
@@ -63,7 +63,7 @@ function App() {
 
     const [stripeApiKey, setStripeApiKey] = useState('');
 
-    // const stripePromise = loadStripe(process.env.STRIPE_API_KEY);
+    const stripePromise = loadStripe(process.env.STRIPE_API_KEY);
 
     // const options = {
     //     client_secret: '{{CLIENT_SECRET}}'
@@ -91,17 +91,19 @@ function App() {
         <Fragment>
             <Header />
             {isAuthenticated && <UserOptions user={user} />}
-            {/* {stripeApiKey && (
+            {stripeApiKey && (
                 <Elements stripe={stripePromise}>
-                    {isAuthenticated && (
-                        <Route
-                            path='/process/payment'
-                            element={<Payment />}
-                            exact
-                        />
-                    )}
+                    <Routes>
+                        {isAuthenticated && (
+                            <Route
+                                path='/process/payment'
+                                element={<Payment />}
+                                exact
+                            />
+                        )}
+                    </Routes>
                 </Elements>
-            )} */}
+            )}
             <Routes>
                 <Route path='/' element={<Home />} exact />
                 <Route path='/product/:id' element={<ProductDetails />} exact />

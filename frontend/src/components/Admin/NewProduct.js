@@ -5,9 +5,9 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import SpellcheckIcon from '@material-ui/icons/Spellcheck';
 import StorageIcon from '@material-ui/icons/Storage';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, createProduct } from '../../actions/productAction';
 // import Sidebar from './Sidebar';
@@ -19,7 +19,6 @@ import './NewProduct.css';
 const NewProduct = () => {
 
     const dispatch = useDispatch();
-    const alert = useAlert();
     const navigate = useNavigate();
 
     const { loading, error, success } = useSelector(state => state.newProduct);
@@ -48,16 +47,16 @@ const NewProduct = () => {
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (success) {
-            alert.success('Product Created Successfully');
+            toast.success('Product Created Successfully');
             navigate('/admin/dashboard');
             dispatch({ type: NEW_PRODUCT_RESET });
         }
-    }, [dispatch, alert, error, navigate, success]);
+    }, [dispatch, error, navigate, success]);
 
     const createProductSubmitHandler = e => {
         e.preventDefault();

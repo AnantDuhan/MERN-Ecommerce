@@ -1,9 +1,9 @@
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useAlert } from 'react-alert';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { clearErrors, login } from '../../actions/userAction';
 import Loader from '../layout/Loader/Loader';
@@ -13,34 +13,48 @@ import './Login.css';
 
 const LoginSignup = () => {
     const dispatch = useDispatch();
-    const alert = useAlert();
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const { loading, error, isAuthenticated } = useSelector(
-        (state) => state.user
+        state => state.user
     );
 
-    const [loginEmail, setLoginEmail] = useState('');
-    const [loginPassword, setLoginPassword] = useState('');
+    const [emailInput, setEmailInput] = useState('');
+    const [passwordType, setPasswordType] = useState('password');
+    const [passwordInput, setPasswordInput] = useState('');
 
-    const loginSubmit = (e) => {
+    const loginSubmit = e => {
         e.preventDefault();
-        dispatch(login(loginEmail, loginPassword));
+        dispatch(login(emailInput, passwordInput));
     };
 
-    const redirect = location.search ? location.search.split("=")[1] : '/account';
+    const handlePasswordChange = e => {
+        setPasswordInput(e.target.value);
+    };
+
+    // const togglePassword = () => {
+    //     if (passwordType === 'password') {
+    //         setPasswordType('text');
+    //         return;
+    //     }
+    //     setPasswordType('password');
+    // };
+
+    const redirect = location.search
+        ? location.search.split('=')[1]
+        : '/account';
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
         if (isAuthenticated) {
             navigate(redirect);
         }
-    }, [dispatch, error, alert, navigate, isAuthenticated, redirect]);
+    }, [dispatch, error, navigate, isAuthenticated, redirect]);
 
     return (
         <Fragment>
@@ -53,38 +67,40 @@ const LoginSignup = () => {
                         <div className='LoginBox'>
                             <div>
                                 <div className='loginToggle'>
-                                    <p className="loginTitle">
-                                        LOGIN
-                                    </p>
+                                    <p className='loginTitle'>LOGIN</p>
                                 </div>
                             </div>
-                            <form
-                                className='loginForm'
-                                onSubmit={loginSubmit}
-                            >
+                            <form className='loginForm' onSubmit={loginSubmit}>
                                 <div className='loginEmail'>
                                     <MailOutlineIcon />
                                     <input
                                         type='email'
                                         placeholder='Email'
                                         required
-                                        value={loginEmail}
+                                        value={emailInput}
                                         onChange={e =>
-                                            setLoginEmail(e.target.value)
+                                            setEmailInput(e.target.value)
                                         }
                                     />
                                 </div>
                                 <div className='loginPassword'>
                                     <LockOpenIcon />
                                     <input
-                                        type='password'
+                                        type={passwordType}
                                         placeholder='Password'
+                                        name='password'
+                                        class='form-control'
                                         required
-                                        value={loginPassword}
-                                        onChange={e =>
-                                            setLoginPassword(e.target.value)
-                                        }
+                                        value={passwordInput}
+                                        onChange={handlePasswordChange}
                                     />
+                                    {/* <div onClick={togglePassword} className='togglePasswordBtn'>
+                                        {passwordType === 'password' ? (
+                                            <VisibilityIcon />
+                                        ) : (
+                                            <VisibilityOffIcon />
+                                        )}
+                                    </div> */}
                                 </div>
                                 <Link to='/password/forgot'>
                                     Forgot Password ?

@@ -1,25 +1,22 @@
-import React, { Fragment, useEffect } from 'react';
-import { DataGrid } from '@material-ui/data-grid';
-import './ProductList.css';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAlert } from 'react-alert';
 import { Button } from '@material-ui/core';
-import MetaData from '../layout/MetaData';
-import EditIcon from '@material-ui/icons/Edit';
+import { DataGrid } from '@material-ui/data-grid';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import React, { Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 // import Sidebar from './Sidebar';
-import {
-    deleteOrder,
-    getAllOrders,
-    clearErrors
-} from '../../actions/orderAction';
+import { clearErrors, deleteOrder, getAllOrders } from '../../actions/orderAction';
 import { DELETE_ORDER_RESET } from '../../constants/orderConstants';
+import MetaData from '../layout/MetaData';
+
+import './ProductList.css';
 
 const OrderList = () => {
 const dispatch = useDispatch();
     const navigate = useNavigate();
-    const alert = useAlert();
 
     const { error, orders } = useSelector(state => state.allOrders);
 
@@ -31,23 +28,23 @@ const dispatch = useDispatch();
 
     useEffect(() => {
         if (error) {
-            alert.error(error);
+            toast.error(error);
             dispatch(clearErrors());
         }
 
         if (deleteError) {
-            alert.error(deleteError);
+            toast.error(deleteError);
             dispatch(clearErrors());
         }
 
         if (isDeleted) {
-            alert.success('Order Deleted Successfully');
+            toast.success('Order Deleted Successfully');
             navigate('/admin/orders');
             dispatch({ type: DELETE_ORDER_RESET });
         }
 
         dispatch(getAllOrders());
-    }, [dispatch, alert, error, deleteError, navigate, isDeleted]);
+    }, [dispatch, error, deleteError, navigate, isDeleted]);
 
     const columns = [
         { field: 'id', headerName: 'Order ID', minWidth: 300, flex: 1 },
