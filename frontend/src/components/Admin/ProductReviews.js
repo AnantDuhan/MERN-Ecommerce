@@ -39,6 +39,7 @@ const ProductReviews = () => {
 
     useEffect(() => {
         if (productId.length === 24) {
+            toast.info("Review Exists for the entered productId")
             dispatch(getAllReviews(productId));
         }
         if (error) {

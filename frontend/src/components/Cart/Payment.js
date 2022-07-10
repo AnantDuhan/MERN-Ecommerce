@@ -83,7 +83,7 @@ const submitHandler = async e => {
         if (result.error) {
             payBtn.current.disabled = false;
 
-            alert.error(result.error.message);
+            toast.error(result.error.message);
         } else {
             if (result.paymentIntent.status === 'succeeded') {
                 order.paymentInfo = {
@@ -95,12 +95,12 @@ const submitHandler = async e => {
 
                 navigate('/success');
             } else {
-                alert.error("There's some issue while processing payment ");
+                toast.error("There's some issue while processing payment ");
             }
         }
     } catch (error) {
         payBtn.current.disabled = false;
-        alert.error(error.response.data.message);
+        toast.error(error.response.data.message);
     }
 };
 
@@ -113,31 +113,28 @@ const submitHandler = async e => {
 
     return (
         <Fragment>
-            <MetaData title="Payment" />
+            <MetaData title='Payment' />
             <CheckoutSteps activeStep={2} />
-            <div className="paymentContainer">
-                <form
-                    className="paymentForm"
-                    onSubmit={(e) => submitHandler(e)}
-                >
+            <div className='paymentContainer'>
+                <form className='paymentForm' onSubmit={e => submitHandler(e)}>
                     <Typography>Card Info</Typography>
                     <div>
                         <CreditCardIcon />
-                        <CardNumberElement className="paymentInput" />
+                        <CardNumberElement className='paymentInput' />
                     </div>
                     <div>
                         <EventIcon />
-                        <CardExpiryElement className="paymentInput" />
+                        <CardExpiryElement className='paymentInput' />
                     </div>
                     <div>
                         <VpnKeyIcon />
-                        <CardCvcElement className="paymentInput" />
+                        <CardCvcElement className='paymentInput' />
                     </div>
                     <input
-                        type="submit"
+                        type='submit'
                         value={`Pay - ₹${orderInfo && orderInfo.totalPrice}`}
                         ref={payBtn}
-                        className="paymentFormBtn"
+                        className='paymentFormBtn'
                     />
                 </form>
             </div>

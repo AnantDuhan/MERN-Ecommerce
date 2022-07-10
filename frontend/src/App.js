@@ -63,7 +63,7 @@ function App() {
 
     const [stripeApiKey, setStripeApiKey] = useState('');
 
-    const stripePromise = loadStripe(process.env.STRIPE_API_KEY);
+    const stripePromise = loadStripe(`${process.env.STRIPE_API_KEY}`);
 
     // const options = {
     //     client_secret: '{{CLIENT_SECRET}}'

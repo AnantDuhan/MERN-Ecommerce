@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node backend/server.js",
-        "dev": "nodemon backend/server.js"
+        "dev": "nodemon backend/server.js --ignore client"
     },
     "author": "Anant Duhan",
     "license": "ISC",
