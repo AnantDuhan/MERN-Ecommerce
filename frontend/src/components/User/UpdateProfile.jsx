@@ -1,5 +1,6 @@
 import FaceIcon from '@material-ui/icons/Face';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import { Avatar, Button, Typography } from '@mui/material';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
@@ -19,40 +20,38 @@ const UpdateProfile = () => {
     const { user } = useSelector((state) => state.user);
     const { error, isUpdated, loading } = useSelector((state) => state.profile);
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [avatar, setAvatar] = useState();
-    const [avatarPreview, setAvatarPreview] = useState('/Profile.png');
+    
+    const [name, setName] = useState(user.name);
+    const [email, setEmail] = useState(user.email);
+    const [avatar, setAvatar] = useState('');
+    const [avatarPreview, setAvatarPreview] = useState(user?.avatar?.url);
 
     const updateProfileSubmit = (e) => {
         e.preventDefault();
-
-        const myForm = new FormData();
-
-        myForm.set('name', name);
-        myForm.set('email', email);
-        myForm.set('avatar', avatar);
-        dispatch(updateProfile(myForm));
+        dispatch(updateProfile(name, email, avatar));
+        dispatch(loadUser());
     };
 
     const updateProfileDataChange = (e) => {
-        const reader = new FileReader();
+        const file = e.target.files[0];
 
-        reader.onload = () => {
-            if (reader.readyState === 2) {
-                setAvatarPreview(reader.result);
-                setAvatar(reader.result);
+        const Reader = new FileReader();
+        Reader.readAsDataURL(file);
+
+        Reader.onload = () => {
+            if (Reader.readyState === 2) {
+                setAvatarPreview(Reader.result);
+
+                setAvatar(Reader.result);
             }
         };
-
-        reader.readAsDataURL(e.target.files[0]);
     };
 
     useEffect(() => {
         if (user) {
             setName(user.name);
             setEmail(user.email);
-            setAvatarPreview(user.avatar.url);
+            setAvatarPreview(user.avatar?.url);
         }
 
         if (error) {
@@ -77,8 +76,8 @@ const UpdateProfile = () => {
                 <Loader />
             ) : (
                 <Fragment>
-                    <MetaData title="Update Profile" />
-                    <div className="updateProfileContainer">
+                    <MetaData title='Update Profile' />
+                    {/* <div className="updateProfileContainer">
                         <div className="updateProfileBox">
                             <h2 className="updateProfileHeading">
                                 Update Profile
@@ -135,6 +134,54 @@ const UpdateProfile = () => {
                                 />
                             </form>
                         </div>
+                    </div> */}
+
+                    <div className='updateProfile'>
+                        <form
+                            className='updateProfileForm'
+                            onSubmit={updateProfileSubmit}
+                        >
+                            <Typography
+                                variant='h3'
+                                style={{ padding: '2vmax' }}
+                            >
+                                Update Profile
+                            </Typography>
+
+                            <Avatar
+                                src={avatarPreview}
+                                alt='User'
+                                sx={{ height: '10vmax', width: '10vmax' }}
+                            />
+
+                            <input
+                                type='file'
+                                accept='image/*'
+                                onChange={updateProfileDataChange}
+                            />
+
+                            <input
+                                type='text'
+                                value={name}
+                                placeholder='Name'
+                                className='updateProfileInputs'
+                                required
+                                onChange={e => setName(e.target.value)}
+                            />
+
+                            <input
+                                type='email'
+                                placeholder='Email'
+                                className='updateProfileInputs'
+                                required
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+
+                            <Button disabled={loading} type='submit'>
+                                Update
+                            </Button>
+                        </form>
                     </div>
                 </Fragment>
             )}

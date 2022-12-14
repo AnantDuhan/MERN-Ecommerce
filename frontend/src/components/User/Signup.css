@@ -1,27 +1,40 @@
-.SignUpContainer {
-  width: 100vw;
-  height: 100vh;
-  max-width: 100%;
+/* .SignUpContainer {
+  min-height: 100vh;
+  background-image: linear-gradient(to right, #fff5bc, #cec1ff);
+
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: rgb(231, 231, 231);
-  position: fixed;
-  top: 0%;
-  left: 0;
+  justify-content: center;
+  padding: 2vmax;
+  box-sizing: border-box;
 }
 
 .SignUpBox {
   background-color: white;
-  width: 25vw;
-  height: 70vh;
+  width: 50%;
+  border-radius: 30px;
   box-sizing: border-box;
-  overflow: hidden;
+  padding: 2vmax;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.signUpForm > input[type="file"]::-webkit-file-upload-button {
+  background-color: tomato;
+  color: white;
+  width: 100%;
+  padding: 1vmax;
+  border-radius: 30px;
+  border: none;
+  font: 100 1.2rem "Roboto", sans-serif;
+}
+
 .signUp_toggle {
   display: flex;
   height: 3vmax;
 }
+
 .signUp_toggle > p {
   color: rgba(0, 0, 0, 0.678);
   font: 300 1vmax "Roboto";
@@ -31,6 +44,7 @@
   place-items: center;
   width: 100%;
 }
+
 .signUp_toggle > p:hover {
   color: tomato;
 }
@@ -177,5 +191,110 @@
   .signUpBtn {
     font: 300 1.9vmax "Roboto";
     padding: 1.8vmax;
+  }
+} */
+
+.register {
+  min-height: 100vh;
+  background-image: linear-gradient(to right, #fff5bc, #cec1ff);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2vmax;
+  box-sizing: border-box;
+}
+
+.registerForm {
+  background-color: white;
+  width: 50%;
+  border-radius: 30px;
+  box-sizing: border-box;
+  padding: 1vmax;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.registerInputs {
+  box-sizing: border-box;
+  padding: 1vmax 2vmax;
+  width: 80%;
+  border-radius: 40px;
+  border: 1px solid #ccc;
+  margin: 1vmax;
+  font: 100 1.2rem "Roboto", sans-serif;
+  outline: none;
+}
+
+.registerForm > input[type="file"] {
+  border-radius: 30px;
+  margin: 1vmax;
+}
+
+.registerForm > input[type="file"]::-webkit-file-upload-button {
+  background-color: tomato;
+  color: white;
+  width: 100%;
+  padding: 1vmax;
+  border-radius: 30px;
+  border: none;
+  font: 100 1.2rem "Roboto", sans-serif;
+}
+
+.registerForm > a {
+  align-self: flex-end;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.342);
+  margin: 2vmax;
+}
+
+.registerForm > input[type="submit"] {
+  border-radius: 30px;
+  margin: 2vmax;
+}
+
+.registerForm > input[type="submit"]::-webkit-file-upload-button {
+  background-color: tomato;
+  color: white;
+  width: 100%;
+  padding: 1vmax;
+  border-radius: 30px;
+  border: none;
+  font: 100 1.2rem "Roboto", sans-serif;
+}
+
+@media screen and (max-width: 600px) {
+  .registerForm {
+    width: 100%;
+  }
+
+  .registerForm > input {
+    padding: 4vw 8vw;
+    margin: 1vmax;
+    font: 100 1.2rem "Roboto", sans-serif;
+    margin: 4vw;
+  }
+
+  .registerForm > input[type="file"] {
+    width: 80%;
+  }
+
+  .registerForm > input[type="file"]::-webkit-file-upload-button {
+    width: 50%;
+  }
+
+  .registerForm > input[type="submit"] {
+    width: 100%;
+  }
+
+  .registerForm > input[type="submit"]::-webkit-file-upload-button {
+    width: 70%;
+  }
+
+  .registerForm > a {
+    align-self: center;
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.342);
   }
 }
