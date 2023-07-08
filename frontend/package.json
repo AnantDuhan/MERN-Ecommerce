@@ -17,7 +17,7 @@
         "@testing-library/user-event": "^13.5.0",
         "axios": "^0.26.0",
         "chart.js": "^3.7.1",
-        "cloudinary": "^1.29.0",
+        "cloudinary": "^1.32.0",
         "cors": "^2.8.5",
         "country-state-city": "^3.0.1",
         "multer": "^1.4.4",
@@ -69,5 +69,5 @@
             "last 1 safari version"
         ]
     },
-    "proxy": "http://127.0.0.1:4000/"
+    "proxy": "http://127.0.0.1:4000"
 }

@@ -65,40 +65,40 @@ const Dashboard = () => {
     };
 
     return (
-        <div>
-            <MetaData title="Dashboard - Admin Panel" />
+        <div className='dashboard'>
             {/* <Sidebar /> */}
+            <MetaData title='Dashboard - Admin Panel' />
 
-            <div className="dashboardContainer">
-                <Typography component="h1">Dashboard</Typography>
+            <div className='dashboardContainer'>
+                <Typography component='h1'>Dashboard</Typography>
 
-                <div className="dashboardSummary">
+                <div className='dashboardSummary'>
                     <div>
                         <p>
                             Total Amount <br /> ₹{totalAmount}
                         </p>
                     </div>
-                    <div className="dashboardSummaryBox2">
-                        <Link to="/admin/products">
+                    <div className='dashboardSummaryBox2'>
+                        <Link to='/admin/products'>
                             <p>Product</p>
                             <p>{products && products?.length}</p>
                         </Link>
-                        <Link to="/admin/orders">
+                        <Link to='/admin/orders'>
                             <p>Orders</p>
                             <p>{orders && orders?.length}</p>
                         </Link>
-                        <Link to="/admin/users">
+                        <Link to='/admin/users'>
                             <p>Users</p>
                             <p>{users && users?.length}</p>
                         </Link>
                     </div>
                 </div>
 
-                <div className="lineChart">
+                <div className='lineChart'>
                     <Line data={lineState} />
                 </div>
 
-                <div className="doughnutChart">
+                <div className='doughnutChart'>
                     <Doughnut data={doughnutState} />
                 </div>
             </div>

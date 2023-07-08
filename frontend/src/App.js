@@ -49,11 +49,9 @@ import { loadStripe } from '@stripe/stripe-js';
 /*
     TODO: #1 Not able to upload image in register page
 
-    TODO: #2 Payment Page Not Found
+    TODO: #2 Payment Page Not Working
 
     TODO: #3 Not able to reset password
-
-    TODO: #4 Coupon Code not working properly
 
     TODO: #5 Sidebar for Admin Dashboard Not Visible
 */
@@ -188,7 +186,7 @@ function App() {
                 {isAuthenticated && (
                     <Route
                         isAdmin={true}
-                        path='/admin/product'
+                        path='/admin/add-product'
                         element={<NewProduct />}
                         exact
                     />
@@ -251,7 +249,7 @@ function App() {
 
                 {/* <Route
                             element={
-                                this.location.pathname ===
+                                this?.location.pathname ===
                                 '/process/payment' ? null : (
                                     <NotFound />
                                 )

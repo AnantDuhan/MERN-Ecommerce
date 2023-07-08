@@ -1,8 +1,8 @@
 const stripe = require('stripe')(`${process.env.STRIPE_SECRET_KEY}`);
 
 exports.processPayment = async (req, res, next) => {
-    const myPayment = await stripe.checkout.sessions.create({
-        payment_method_types: ["card", "paytm", "google-pay"],
+    const myPayment = await stripe.paymentIntents.create({
+        payment_method_types: ["card"],
         amount: req.body.amount,
         currency: "inr",
         metadata: {
@@ -12,7 +12,7 @@ exports.processPayment = async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        client_secret: myPayment.client_secret
+        clientSecret: myPayment.client_secret
     });
 };
 

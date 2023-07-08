@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import CheckoutSteps from '../Cart/CheckoutSteps';
 import { useSelector } from 'react-redux';
 import MetaData from '../layout/MetaData';
@@ -11,8 +11,6 @@ const ConfirmOrder = () => {
     const { user } = useSelector(state => state.user);
     const navigate = useNavigate();
 
-    const [couponCode, setCouponCode] = useState();
-
     const subtotal = cartItems.reduce(
         (acc, item) => acc + item.quantity * item.price,
         0
@@ -22,11 +20,7 @@ const ConfirmOrder = () => {
 
     const tax = subtotal * 0.18;
 
-    let applyCouponCode;
-
     const totalPrice = subtotal + tax + shippingCharges;
-    
-    // let finalPrice = totalPrice * 0.95;
 
     const address = `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state}, ${shippingInfo.pinCode}, ${shippingInfo.country}`;
 
@@ -37,18 +31,12 @@ const ConfirmOrder = () => {
             tax,
             totalPrice,
             // finalPrice,
-            // applyCouponCode
         };
 
         sessionStorage.setItem('orderInfo', JSON.stringify(data));
 
         navigate('/process/payment');
     };
-
-    // const couponCodeApplied = () => {
-        
-    //     finalPrice = couponCode === 'FIRST05' ? totalPrice - (totalPrice * 0.05) : totalPrice;
-    // }
 
     return (
         <Fragment>
@@ -108,15 +96,6 @@ const ConfirmOrder = () => {
                             <div>
                                 <p>GST:</p>
                                 <span>₹{tax}</span>
-                            </div>
-                            <div>
-                                <input
-                                    placeholder="Coupon Code"
-                                    className="couponCode"
-                                    value={couponCode}
-                                    onChange={(e) => setCouponCode(e.target.value)}
-                                />
-                                <button className="couponCodeButton">Apply</button>
                             </div>
                         </div>
 

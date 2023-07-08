@@ -10,6 +10,13 @@ const {
    getProductReviews,
    deleteReview,
 } = require('../controllers/product');
+const multer = require('multer');
+const storage = multer.memoryStorage({
+    destination: function (req, file, callback) {
+        callback(null, '');
+    }
+});
+const upload = multer({ storage }).single('image');
 const { isAuthUser, authRoles } = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,10 +28,10 @@ router
     .get(isAuthUser, authRoles('admin'), getAdminProducts);
 
 router
-   .route('/admin/product/new')
-   .post(isAuthUser, authRoles('admin'), createProduct);
+   .route('/admin/add-product')
+   .post(isAuthUser, authRoles('admin'), upload, createProduct);
 
-router.route('/admin/product/:id').put(isAuthUser, authRoles('admin'), updateProduct);
+router.route('/admin/product/:id').put(isAuthUser, authRoles('admin'), upload, updateProduct);
 
 router
    .route('/admin/product/:id')

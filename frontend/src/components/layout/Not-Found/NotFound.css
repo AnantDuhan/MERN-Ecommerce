@@ -1,4 +1,5 @@
 .PageNotFound {
+  background-image: linear-gradient(to right, #fff5bc, #cec1ff);
   margin: auto;
   text-align: center;
   padding: 10vmax;

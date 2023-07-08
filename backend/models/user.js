@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please Enter Your Name'],
         maxLength: [30, 'Name cannot exceed 30 characters'],
-        minLength: [4, 'Name must be atleast of 4 characters long']
+        minLength: [2, 'Name must be atleast of 2 characters long']
     },
     email: {
         type: String,
@@ -20,21 +20,23 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please Enter Your Password'],
-        minLength: [4, 'Password must be atleast of 8 characters long'],
+        minLength: [6, 'Password must be atleast of 6 characters long'],
         select: false
     },
-    avatar: [
-        {
-            public_id: {
-                type: String
-                // required: true,
-            },
-            url: {
-                type: String
-                // required: true,
-            }
-        }
-    ],
+    // avatar: {
+    //     public_id: {
+    //         type: String,
+    //         required: true
+    //     },
+    //     url: {
+    //         type: String,
+    //         required: true
+    //     }
+    // },
+    avatar: {
+        public_id: String,
+        url: String
+    },
     role: {
         type: String,
         default: 'user'

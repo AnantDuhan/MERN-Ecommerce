@@ -4,17 +4,20 @@
     "description": "MERN Stack E-Commerce webpage",
     "main": "backend/server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node backend/server.js",
-        "dev": "nodemon backend/server.js --ignore client"
+        "dev": "nodemon backend/server.js --ignore frontend"
     },
     "author": "Anant Duhan",
     "license": "ISC",
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.231.0",
+        "@aws-sdk/s3-request-presigner": "^3.231.0",
         "@redux-devtools/extension": "^3.2.2",
+        "aws-sdk": "^2.1277.0",
         "bcryptjs": "^2.4.3",
         "body-parser": "^1.19.2",
-        "cloudinary": "^1.29.0",
+        "cloudinary": "^1.32.0",
+        "connect-multiparty": "^2.2.0",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "dotenv": "^16.0.0",
@@ -31,7 +34,7 @@
         "react-google-login": "^5.2.2",
         "react-icons": "^4.3.1",
         "react-router": "^6.2.2",
-        "react-router-dom": "^6.3.0",
+        "react-router-dom": "^6.4.5",
         "react-scripts": "^5.0.0",
         "react-stars": "^2.2.5",
         "stripe": "^8.222.0",

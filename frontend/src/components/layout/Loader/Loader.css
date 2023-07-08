@@ -1,26 +1,25 @@
-.loading {
-  width: 100vw;
-  height: 100vh;
-  background-color: white;
-  align-items: center;
-  max-width: 100%;
-  display: flex;
-  justify-content: center;
-
+.loadingPage {
+  height: 90vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
 }
 
-.loading > div {
-  width: 10vmax;
-  height: 10vmax;
-  border-bottom: 5px solid rgba(0, 0, 0, 0.719);
-
+.loadingCircle {
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
-
-  animation: loadingRotate 800ms linear infinite;
+  border: 10px solid #ffffff;
+  border-top: 10px solid rgb(34, 34, 34);
+  border-bottom: 10px solid rgb(32, 23, 23);
+  animation: loading 1s linear infinite;
 }
 
-@keyframes loadingRotate {
-  to {
-    transform: rotateZ(-360deg);
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

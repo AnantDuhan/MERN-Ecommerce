@@ -28,7 +28,7 @@ const ProductDetails = () => {
 
     const options = {
         size: 'large',
-        value: product.ratings,
+        value: product?.ratings,
         readOnly: false,
         precision: 0.2
     };

@@ -37,7 +37,7 @@ const About = () => {
                           <a href='https://www.linkedin.com/in/anantduhan/'>
                               @anantduhan
                           </a>
-                          . I'm a MERN Stack Developer and CSE 3rd Year Student
+                          . I'm a MERN Stack Developer and CSE 4<sup>th</sup> Year Student
                           at SRM University
                       </span>
                   </div>

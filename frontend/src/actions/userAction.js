@@ -58,13 +58,17 @@ export const login = (email, password) => async (dispatch) => {
 };
 
 // Register
-export const register = (userData) => async (dispatch) => {
+export const register = (name, email, password, avatar) => async (dispatch) => {
     try {
         dispatch({ type: REGISTER_USER_REQUEST });
 
         const config = { headers: { 'Content-Type': 'application/json' } };
 
-        const { data } = await axios.post(`/api/v1/register`, userData, {config});
+        const { data } = await axios.post(
+            `/api/v1/register`,
+            { name, email, password, avatar },
+            { config }
+        );
 
         dispatch({ type: REGISTER_USER_SUCCESS, payload: data.user });
     } catch (error) {
@@ -103,13 +107,13 @@ export const logout = () => async (dispatch) => {
 };
 
 // Update Profile
-export const updateProfile = (userData) => async (dispatch) => {
+export const updateProfile = (name, email, avatar) => async (dispatch) => {
     try {
         dispatch({ type: UPDATE_PROFILE_REQUEST });
 
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
-        const { data } = await axios.put(`/api/v1/me/update`, userData, {config});
+        const { data } = await axios.put(`/api/v1/me/update`, {name, email}, {config});
 
         dispatch({ type: UPDATE_PROFILE_SUCCESS, payload: data.success });
     } catch (error) {

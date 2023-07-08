@@ -62,6 +62,7 @@ const Cart = () => {
                             cartItems.map((item) => (
                                 <div className="cartContainer">
                                     <CartItemCard
+                                        key={item}
                                         item={item}
                                         deleteCartItems={deleteCartItems}
                                     />

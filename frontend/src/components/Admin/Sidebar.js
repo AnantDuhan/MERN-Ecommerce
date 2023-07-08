@@ -14,11 +14,11 @@ import RateReviewIcon from '@material-ui/icons/RateReview';
 
 const Sidebar = () => {
     return (
-        <div className="sidebar">
-            <Link to="/">
-                <img src={logo} alt="Ecommerce" />
+        <div className='sidebar'>
+            <Link to='/'>
+                <img src={logo} alt='Ecommerce' />
             </Link>
-            <Link to="/admin/dashboard">
+            <Link to='/admin/dashboard'>
                 <p>
                     <DashboardIcon /> Dashboard
                 </p>
@@ -28,36 +28,36 @@ const Sidebar = () => {
                     defaultCollapseIcon={<ExpandMoreIcon />}
                     defaultExpandIcon={<ImportExportIcon />}
                 >
-                    <TreeItem nodeId="1" label="Products">
-                        <Link to="/admin/products">
+                    <TreeItem nodeId='1' label='Products'>
+                        <Link to='/admin/products'>
                             <TreeItem
-                                nodeId="2"
-                                label="All"
+                                nodeId='2'
+                                label='All'
                                 icon={<PostAddIcon />}
                             />
                         </Link>
 
-                        <Link to="/admin/product">
+                        <Link to='/admin/add-product'>
                             <TreeItem
-                                nodeId="3"
-                                label="Create"
+                                nodeId='3'
+                                label='Create'
                                 icon={<AddIcon />}
                             />
                         </Link>
                     </TreeItem>
                 </TreeView>
             </Link>
-            <Link to="/admin/orders">
+            <Link to='/admin/orders'>
                 <p>
                     <ListAltIcon /> Orders
                 </p>
             </Link>
-            <Link to="/admin/users">
+            <Link to='/admin/users'>
                 <p>
                     <PeopleIcon /> Users
                 </p>
             </Link>
-            <Link to="/admin/reviews">
+            <Link to='/admin/reviews'>
                 <p>
                     <RateReviewIcon /> Reviews
                 </p>
