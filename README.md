@@ -1,8 +1,11 @@
-# ECOMMERCE - MERN
+# -ECOMMERCE - MERN
+
 ![ecommerce](/frontend/src/images/logo.png)
+
 ## Demo
-This application will be deployed on Heroku soon. You can check it out :smile: [here]().<br>
-<br>
+
+This application will be deployed on Heroku soon. You can check it out 😄 [here]().`<br>`
+`<br>`
 This is a FULL Stack Ecommerce website which includes all the features that a Ecommerce website will usually have. It comes with a Admin Dashboard and Enabled Payment using Stripe.
 
 1. Buyers browse the store categories, products and brands.
@@ -18,36 +21,35 @@ This is a FULL Stack Ecommerce website which includes all the features that a Ec
   * Redux Thunk middleware to handle asynchronous redux actions
 
 ## Install
+
 Some basic git commands are:
+
 ```git
 $ git clone https://github.com/AnantDuhan/MERN-Ecommerce.git
 $ cd MERN-Ecommerce
 $ npm install
 ```
+
 **For Backend** - `npm install`
 **For Frontend** - `cd frontend` `npm install`
-
 
 ## Env Variables
 
 Make Sure to Create a config.env file in backend/config directory that include:
 
 * DB_URI & JWT_SECRET_KEY & JWT_EXPIRES_IN
-* PORT, FRONTEND_URL & RESULT_PER_PAGE 
+* PORT, FRONTEND_URL & RESULT_PER_PAGE
 * STRIPE_API_KEY & STRIPE_SECRET_KEY
 * COOKIE_EXPIRES
 * SMTP_HOST, SMTP_PORT & SMTP_SERVICE
 * SMTP_MAIL & SMTP_PASSWORD
-* CLOUDINARY_NAME
-* CLOUDINARY_API_KEY & CLOUDINARY_API_SECRET
-
+* AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME & AWS_BUCKET_REGION
 
 ## Heroku Deployment
 
 ```
 > Create a Procfile in the root directory of your application with the following command **web: npm run start:production**
 ```
-
 
 ## Simple build for production
 
@@ -58,11 +60,13 @@ $ npm run production
 ## Run the application for development
 
 **for frontend**
+
 ```
 $ npm start
 ```
 
 **for backend**
+
 ```
 $ npm run dev
 ```
@@ -76,23 +80,17 @@ $ npm run start:production
 ## Languages & tools
 
 - [Mongoose](https://mongoosejs.com/)
-
 - [Express](https://expressjs.com/)
-
 - [React](https://reactjs.org/)
-
 - [Node](https://nodejs.org/en/)
-
-- [Webpack](https://webpack.js.org/)
-
-- [Cloudinary](https://cloudinary.com/)
+- [Amazon Web Services]()
 
 ### Code Formatter
 
 - Add a `.vscode` directory
 - Create a file `settings.json` inside `.vscode`
 - Install Prettier - Code formatter in VSCode
-- Add the following snippet:  
+- Add the following snippet:
 
 ```json
     {
@@ -104,4 +102,3 @@ $ npm run start:production
       "javascript.preferences.quoteStyle": "single",
     }
 ```
-

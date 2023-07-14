@@ -12,25 +12,21 @@ const {
    getSingleUser,
    updateUserRole,
    deleteUser,
-   postImage,
-   getUrl
 } = require('../controllers/user');
-const multer = require('multer');
-const storage = multer.memoryStorage({
-    destination: function (req, file, callback) {
-        callback(null, '');
-    }
-});
-const upload = multer({ storage });
+// const multer = require('multer');
+
 const { isAuthUser, authRoles } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.route('/post-image').post(upload.single('image'), postImage);
+// const storage = multer.memoryStorage({
+//     destination: function (req, file, callback) {
+//         callback(null, '');
+//     }
+// });
+// const upload = multer({ storage });
 
-router.route('/getUrl').get(getUrl);
-
-router.route('/register').post(upload.single('image'), registerUser);
+// router.route('/register').post(upload.single('image'), registerUser);
 
 router.route('/login').post(loginUser);
 
@@ -44,16 +40,12 @@ router.route('/me').get(isAuthUser, getUserDetails);
 
 router.route('/password/update').put(isAuthUser, updatePassword);
 
-router
-    .route('/me/update')
-    .put(isAuthUser, upload.single('image'), updateProfile);
-
 router.route('/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 
 router
     .route('/admin/user/:id')
     .get(isAuthUser, authRoles('admin'), getSingleUser)
     .put(isAuthUser, authRoles('admin'), updateUserRole)
-    .delete(isAuthUser, authRoles('admin'), deleteUser);
+    // .delete(isAuthUser, authRoles('admin'), deleteUser);
 
 module.exports = router;
