@@ -2,71 +2,7 @@ const User = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const AWS = require('aws-sdk');
 require('dotenv').config({ path: 'backend/config/config.env' });
-
-const s3 = new AWS.S3({
-    region: process.env.AWS_BUCKET_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-});
-
-// Register our user
-exports.registerUser = async (req, res, next) => {
-    try {
-        const file = req.file;
-        console.log('FILE____', file);
-
-        if (!file) {
-            res.status(400).send('No file uploaded.');
-            return;
-        }
-
-        // Define the upload parameters
-        const uploadParams = {
-            Bucket: 'ecommerce-bucket-sdk',
-            Key: file.originalname, // The name under which the file will be stored in S3
-            Body: file.buffer, // The file data to be uploaded
-        };
-
-        // Upload the file to S3
-        const avatarUrl = await s3.upload(uploadParams).promise();
-
-        const { name, email, password } = req.body;
-
-        const user = User.create({
-            name,
-            email,
-            password,
-            avatar: avatarUrl.Location,
-        });
-
-        let token = jwt.sign(
-            {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar,
-            },
-            process.env.JWT_SECRET_KEY
-        );
-
-        const options = {
-            expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-        };
-
-        res.status(201).cookie('token', token, options).json({
-            success: true,
-            user,
-        });
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: err.message,
-        });
-    }
-};
 
 // Login User
 exports.loginUser = async (req, res, next) => {

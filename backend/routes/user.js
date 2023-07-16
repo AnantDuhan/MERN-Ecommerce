@@ -1,32 +1,19 @@
 const express = require('express');
 const {
-   registerUser,
    loginUser,
    logout,
    forgotPassword,
    resetPassword,
    getUserDetails,
    updatePassword,
-   updateProfile,
    getAllUsers,
    getSingleUser,
    updateUserRole,
-   deleteUser,
 } = require('../controllers/user');
-// const multer = require('multer');
 
 const { isAuthUser, authRoles } = require('../middleware/auth');
 
 const router = express.Router();
-
-// const storage = multer.memoryStorage({
-//     destination: function (req, file, callback) {
-//         callback(null, '');
-//     }
-// });
-// const upload = multer({ storage });
-
-// router.route('/register').post(upload.single('image'), registerUser);
 
 router.route('/login').post(loginUser);
 
@@ -45,7 +32,6 @@ router.route('/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 router
     .route('/admin/user/:id')
     .get(isAuthUser, authRoles('admin'), getSingleUser)
-    .put(isAuthUser, authRoles('admin'), updateUserRole)
-    // .delete(isAuthUser, authRoles('admin'), deleteUser);
+    .put(isAuthUser, authRoles('admin'), updateUserRole);
 
 module.exports = router;
