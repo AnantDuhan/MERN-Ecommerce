@@ -62,6 +62,7 @@ const UserOptions = ({ user }) => {
 
     function logoutUser() {
         dispatch(logout());
+        navigate('/');
         toast.success('Logout Successfully');
     }
 

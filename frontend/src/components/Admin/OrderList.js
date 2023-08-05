@@ -47,7 +47,9 @@ const dispatch = useDispatch();
     }, [dispatch, error, deleteError, navigate, isDeleted]);
 
     const columns = [
-        { field: 'id', headerName: 'Order ID', minWidth: 300, flex: 1 },
+        { field: 'id', headerName: 'Order ID', minWidth: 160, flex: 0.6 },
+        {
+            field: 'name', headerName: 'Product Name', minWidth: 200, flex: 0.6 },
 
         {
             field: 'status',
@@ -92,7 +94,7 @@ const dispatch = useDispatch();
                                 'id'
                             )}`}
                         >
-                            <EditIcon className="editIcon" />
+                            <EditIcon className='editIcon' />
                         </Link>
 
                         <Button
@@ -102,7 +104,7 @@ const dispatch = useDispatch();
                                 )
                             }
                         >
-                            <DeleteIcon className="deleteIcon"/>
+                            <DeleteIcon className='deleteIcon' />
                         </Button>
                     </Fragment>
                 );
@@ -116,6 +118,7 @@ const dispatch = useDispatch();
         orders.forEach(item => {
             rows.push({
                 id: item._id,
+                name: item.orderItems[0].name,
                 itemsQty: item.orderItems.length,
                 amount: item.totalPrice,
                 status: item.orderStatus

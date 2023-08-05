@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 // import Sidebar from './Sidebar.js';
 import './Dashboard.css';
 import { Typography } from '@material-ui/core';
@@ -65,8 +65,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className='dashboard'>
-            {/* <Sidebar /> */}
+        <Fragment>
             <MetaData title='Dashboard - Admin Panel' />
 
             <div className='dashboardContainer'>
@@ -102,7 +101,7 @@ const Dashboard = () => {
                     <Doughnut data={doughnutState} />
                 </div>
             </div>
-        </div>
+        </Fragment>
     );
 };
 

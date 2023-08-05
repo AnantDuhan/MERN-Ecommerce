@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+   registerUser,
    loginUser,
    logout,
    forgotPassword,
@@ -12,8 +13,28 @@ const {
 } = require('../controllers/user');
 
 const { isAuthUser, authRoles } = require('../middleware/auth');
+// const upload = require('../app');
+const multer = require('multer');
+
+// Configure Multer for file uploads
+const upload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+        if (
+            file.mimetype === 'image/png' ||
+            file.mimetype === 'image/jpg' ||
+            file.mimetype === 'image/jpeg'
+        ) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type.'));
+        }
+    }
+});
 
 const router = express.Router();
+
+router.route('/register').post(upload.single('image'), registerUser);
 
 router.route('/login').post(loginUser);
 

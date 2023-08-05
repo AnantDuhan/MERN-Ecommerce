@@ -1,3 +1,5 @@
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -32,26 +34,22 @@ import ProductDetails from './components/Product/ProductDetails';
 import Products from './components/Product/Products';
 import Search from './components/Product/Search';
 import ForgotPassword from './components/User/ForgotPassword';
-import Login from './components/User/Login';
+import LoginAndRegister from './components/User/LoginAndRegister';
 // import LoginSignup from './components/User/LoginSignup';
 import Profile from './components/User/Profile';
 import ResetPassword from './components/User/ResetPassword';
-import Signup from './components/User/Signup';
+// import Signup from './components/User/Signup';
 import UpdatePassword from './components/User/UpdatePassword';
 import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
 
 import './App.css';
-
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import LoginButton from './components/Home/LoginButton';
 
 /*
     TODO: #1 Not able to upload image in register page
 
     TODO: #2 Payment Page Not Working
-
-    TODO: #3 Not able to reset password
 
     TODO: #5 Sidebar for Admin Dashboard Not Visible
 */
@@ -61,7 +59,9 @@ function App() {
 
     const [stripeApiKey, setStripeApiKey] = useState('');
 
-    const stripePromise = loadStripe(`${process.env.STRIPE_API_KEY}`);
+    const stripePromise = loadStripe(
+        'pk_test_51K9RkSSDvITsgzEyN1XtfELWFWiUetYQEU3NWsuHgEmnn07jtXs0HJKJ1x2cXldIX2hOc9qrm81fS6Fi1Z0pHsvu000MvtXP6h'
+    );
 
     // const options = {
     //     client_secret: '{{CLIENT_SECRET}}'
@@ -89,12 +89,15 @@ function App() {
         <Fragment>
             <Header />
             {isAuthenticated && <UserOptions user={user} />}
+            <div className='login-button'>
+                {!isAuthenticated && <LoginButton />}
+            </div>
             {stripeApiKey && (
                 <Elements stripe={stripePromise}>
                     <Routes>
                         {isAuthenticated && (
                             <Route
-                                path='/process/payment'
+                                path='/payment'
                                 element={<Payment />}
                                 exact
                             />
@@ -137,8 +140,8 @@ function App() {
                     element={<ResetPassword />}
                     exact
                 />
-                <Route path='/login' element={<Login />} exact />
-                <Route path='/register' element={<Signup />} exact />
+                <Route path='/login' element={<LoginAndRegister />} exact />
+                {/* <Route path='/register' element={<Signup />} exact /> */}
 
                 <Route path='/cart' element={<Cart />} exact />
                 {isAuthenticated && (
@@ -247,14 +250,13 @@ function App() {
                 )}
                 {/*  */}
 
-                {/* <Route
-                            element={
-                                this?.location.pathname ===
-                                '/process/payment' ? null : (
-                                    <NotFound />
-                                )
-                            }
-                        /> */}
+                <Route
+                    element={
+                        this?.location.pathname === '/payment' ? null : (
+                            <NotFound />
+                        )
+                    }
+                />
 
                 {/* Page Not Found Route */}
                 <Route path='*' element={<NotFound />} />

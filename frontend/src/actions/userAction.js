@@ -62,10 +62,10 @@ export const register = (name, email, password, avatar) => async (dispatch) => {
     try {
         dispatch({ type: REGISTER_USER_REQUEST });
 
-        const config = { headers: { 'Content-Type': 'application/json' } };
+        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
         const { data } = await axios.post(
-            `/api/v1/register`,
+            `/register`,
             { name, email, password, avatar },
             { config }
         );
@@ -113,7 +113,7 @@ export const updateProfile = (name, email, avatar) => async (dispatch) => {
 
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
-        const { data } = await axios.put(`/api/v1/me/update`, {name, email}, {config});
+        const { data } = await axios.put(`/api//me/update`, {name, email, avatar}, {config});
 
         dispatch({ type: UPDATE_PROFILE_SUCCESS, payload: data.success });
     } catch (error) {
@@ -228,7 +228,7 @@ export const updateUser = (id, userData) => async (dispatch) => {
         const config = { headers: { 'Content-Type': 'application/json' } };
 
         const { data } = await axios.put(
-            `/api/v1/admin/user/${id}`,
+            `/admin/user/${id}`,
             userData,
             {config}
         );

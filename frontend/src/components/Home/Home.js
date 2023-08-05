@@ -6,13 +6,17 @@ import { toast } from 'react-toastify';
 import { clearErrors, getProduct } from '../../actions/productAction';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
+// import LoginButton from './LoginButton';
 import ProductCard from './ProductCard';
 
 import './Home.css';
 
 const Home = () => {
     const dispatch = useDispatch();
+
     const { loading, error, products } = useSelector((state) => state.products);
+    // const { isAuthenticated } = useSelector(state => state.user);
+
 
     useEffect(() => {
         if (error) {
@@ -28,24 +32,28 @@ const Home = () => {
                 <Loader />
             ) : (
                 <Fragment>
-                    <MetaData title="ECOMMERCE" />
+                    <MetaData title='ECOMMERCE' />
 
-                    <div className="banner">
+                    <div className='banner'>
                         <p>Welcome to Ecommerce</p>
                         <h1>FIND AMAZING PRODUCTS BELOW</h1>
 
-                        <a href="#container">
+                        <a href='#container'>
                             <button>
                                 Scroll <CgMouse />
                             </button>
                         </a>
                     </div>
 
-                    <h2 className="homeHeading">Featured Products</h2>
+                    {/* <div className='login-button'>
+                        {isAuthenticated ? null : <LoginButton />}
+                    </div> */}
 
-                    <div className="container" id="container">
+                    <h2 className='homeHeading'>Featured Products</h2>
+
+                    <div className='container' id='container'>
                         {products &&
-                            products.map((product) => (
+                            products.map(product => (
                                 <ProductCard
                                     key={product._id}
                                     product={product}

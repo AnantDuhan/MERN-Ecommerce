@@ -1,55 +1,57 @@
-.search {
+.searchBox {
+  width: 100vw;
   height: 100vh;
-  background-image: linear-gradient(to right, #fff5bc, #cec1ff);
-
+  max-width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 2vmax;
-  box-sizing: border-box;
-}
-
-.searchForm {
-  background-color: white;
-  width: 50%;
-  border-radius: 30px;
-  box-sizing: border-box;
-  padding: 2vmax;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  box-shadow: -1px -2px 18px rgb(16, 16, 16);
+  background-color: rgb(231, 231, 231);
+  position: fixed;
+  top: 0%;
+  left: 0;
 }
 
-.searchForm > input {
-  box-sizing: border-box;
+.searchBox>input[type="text"] {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.274);
+  background-color: white;
+  border: none;
+  color: rgba(0, 0, 0, 0.637);
   padding: 1vmax 2vmax;
-  width: 80%;
-  border-radius: 40px;
-  border: 1px solid #ccc;
-  margin: 2vmax;
-  font: 100 1.2rem "Roboto", sans-serif;
+  width: 50%;
   outline: none;
+  border-radius: 0%;
+  font: 300 1.1vmax cursive;
+  box-sizing: border-box;
+  height: 8%;
 }
 
-.searchResults {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 2vmax;
-  box-sizing: border-box;
-  margin: 2vmax;
+.searchBox>input[type="submit"] {
+  height: 8%;
+  border-radius: 0%;
+  background-color: tomato;
+  border: none;
+  padding: 1vmax;
+  width: 10%;
+  font: 300 1.1vmax "Roboto";
+  cursor: pointer;
+  color: white;
+  transition: all 0.5s;
+}
+
+.searchBox>input[type="submit"]:hover {
+  background-color: rgb(55, 97, 214);
 }
 
 @media screen and (max-width: 600px) {
-  .searchForm {
+  .searchBox>input[type="text"] {
     width: 100%;
+    font: 300 4vw cursive;
+    height: 10%;
   }
 
-  .searchForm > input {
-    padding: 4vw 8vw;
-    margin: 2vmax;
-    font: 100 1.2rem "Roboto", sans-serif;
-    margin: 4vw;
+  .searchBox>input[type="submit"] {
+    height: 10%;
+    width: 30%;
+    font: 300 4vw "Roboto";
   }
 }

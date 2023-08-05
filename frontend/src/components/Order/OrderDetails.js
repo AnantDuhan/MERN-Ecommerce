@@ -49,7 +49,7 @@ const OrderDetails = () => {
                                     <p>Phone:</p>
                                     <span>
                                         {order.shippingInfo &&
-                                            order.shippingInfo.phoneNo}
+                                            order.shippingInfo.phoneNumber}
                                     </span>
                                 </div>
                                 <div>

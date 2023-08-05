@@ -27,16 +27,16 @@ const Shipping = () => {
   const [state, setState] = useState(shippingInfo.state);
   const [country, setCountry] = useState(shippingInfo.country);
   const [pinCode, setPinCode] = useState(shippingInfo.pinCode);
-  const [phoneNo, setPhoneNo] = useState(shippingInfo.phoneNo);
+  const [phoneNumber, setPhoneNumber] = useState(shippingInfo.phoneNumber);
 
     const shippingSubmit = (e) => {
         e.preventDefault();
 
-        if (phoneNo.length < 10 || phoneNo.length > 10) {
+        if (phoneNumber.length < 10 || phoneNumber.length > 10) {
             toast.success("Phone Number should be 10 digits long");
             return;
         }
-        dispatch(saveShippingInfo({ address, city, state, country, pinCode, phoneNo }));
+        dispatch(saveShippingInfo({ address, city, state, country, pinCode, phoneNumber }));
         navigate('/order/confirm');
     }
 
@@ -91,8 +91,8 @@ const Shipping = () => {
                                 type="text"
                                 placeholder="Phone Number"
                                 required
-                                value={phoneNo}
-                                onChange={(e) => setPhoneNo(e.target.value)}
+                                value={phoneNumber}
+                                onChange={(e) =>setPhoneNumber(e.target.value)}
                             />
                         </div>
                         <div>

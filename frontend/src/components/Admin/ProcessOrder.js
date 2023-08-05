@@ -1,20 +1,22 @@
-import { Typography } from '@material-ui/core';
-import { Button } from '@material-ui/core';
-import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import React, { Fragment, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-
-// import SideBar from './Sidebar';
-import { clearErrors, getOrderDetails, updateOrder } from '../../actions/orderAction';
-import { UPDATE_ORDER_RESET } from '../../constants/orderConstants';
-import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
-
+import { Link, useParams } from 'react-router-dom';
+import { Typography } from '@material-ui/core';
+// import SideBar from './Sidebar';
+import {
+    getOrderDetails,
+    clearErrors,
+    updateOrder
+} from '../../actions/orderAction';
+import { useSelector, useDispatch } from 'react-redux';
+import Loader from '../layout/Loader/Loader';
+import { toast } from 'react-toastify';
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
+import { Button } from '@material-ui/core';
+import { UPDATE_ORDER_RESET } from '../../constants/orderConstants';
 import './ProcessOrder.css';
 
-const ProcessOrder = () => {
+const ProcessOrder = ({ history, match }) => {
     const { order, error, loading } = useSelector(state => state.orderDetails);
     const { error: updateError, isUpdated } = useSelector(state => state.order);
 
@@ -68,10 +70,7 @@ const ProcessOrder = () => {
                                         ? 'block'
                                         : 'grid'
                             }}
-                            
                         >
-                            
-                            
                             <div>
                                 <div className='confirmshippingArea'>
                                     <Typography>Shipping Info</Typography>

@@ -9,7 +9,7 @@ footer {
 
 .leftFooter {
   width: 20%;
-  display: flex; 
+  display: flex;
 
   flex-direction: column;
   align-items: center;

@@ -66,7 +66,7 @@ const LoginSignup = () => {
             ) : (
                 <Fragment>
                     <MetaData title='SIGNUP -- ECOMMERCE' />
-                        
+
                     <div className='register'>
                         <form
                             className='registerForm'
@@ -79,11 +79,11 @@ const LoginSignup = () => {
                                 SIGNUP NOW
                             </Typography>
 
-                            <Avatar
+                            {avatar && <Avatar
                                 src={avatar}
-                                alt='User'
+                                alt='avatar preview'
                                 sx={{ height: '7vmax', width: '7vmax' }}
-                            />
+                            />}
 
                             <input
                                 type='file'

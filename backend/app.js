@@ -4,13 +4,8 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const errorMiddleware = require('./middleware/error');
-const User = require('./models/user');
-const Product = require('./models/product');
 const multer = require('multer');
-const jwt = require('jsonwebtoken');
 const AWS = require('aws-sdk');
-const url = require('url');
-const { isAuthUser, authRoles } = require('./middleware/auth');
 require('dotenv').config({ path: 'backend/config/config.env' });
 
 app.use(cors());
@@ -23,6 +18,33 @@ app.use(
         parameterLimit: 50000
     })
 );
+
+AWS.config.update({
+    region: process.env.AWS_BUCKET_REGION,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
+const s3 = new AWS.S3();
+
+// Configure Multer for file uploads
+const upload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+        if (
+            file.mimetype === 'image/png' ||
+            file.mimetype === 'image/jpg' ||
+            file.mimetype === 'image/jpeg'
+        ) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type.'));
+        }
+    }
+});
+
+app.use(upload.single('image'));
+app.use(upload.array('product', 10));
 
 // Route Imports
 const productRoute = require('./routes/product');
@@ -50,434 +72,415 @@ app.use(async (req, res, next) => {
 // middleware for error
 app.use(errorMiddleware);
 
-const s3 = new AWS.S3({
-    region: process.env.AWS_BUCKET_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
+// app.post('/register', upload.single('image'), async (req, res) => {
+//     try {
+//         const { name, email, password } = req.body;
+//         const file = req.file;
 
-// Configure Multer for file uploads
-const upload = multer({
-    storage: multer.memoryStorage(),
-    fileFilter: (req, file, cb) => {
-        if (
-            file.mimetype === 'image/png' ||
-            file.mimetype === 'image/jpg' ||
-            file.mimetype === 'image/jpeg'
-        ) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file type.'));
-        }
-    }
-});
+//         if (!file) {
+//             res.status(400).send('No file uploaded.');
+//             return;
+//         }
 
-app.post('/register', upload.single('image'), async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const file = req.file;
+//         // Define the upload parameters
+//         const uploadParams = {
+//             Bucket: process.env.AWS_BUCKET_NAME,
+//             Key: file.originalname, // The name under which the file will be stored in S3
+//             Body: file.buffer // The file data to be uploaded
+//         };
 
-        if (!file) {
-            res.status(400).send('No file uploaded.');
-            return;
-        }
+//         // Upload the file to S3
+//         const avatarUrl = await s3
+//             .upload(uploadParams, (err, data) => {
+//                 if (err) {
+//                     console.error('⚠️ Error uploading image:', err);
+//                     res.status(500).json({
+//                         success: false,
+//                         message: '⚠️ Error uploading image.' + err.message
+//                     });
+//                     return;
+//                 }
+//                 console.log('✅ Image uploaded successfully:', data.Location);
+//                 res.status(200).json({
+//                     success: true,
+//                     message: '✅ Image uploaded successfully.' + data.Location
+//                 });
+//             })
+//             .promise();
 
-        // Define the upload parameters
-        const uploadParams = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: file.originalname, // The name under which the file will be stored in S3
-            Body: file.buffer // The file data to be uploaded
-        };
+//         const user = await User.create({
+//             name,
+//             email,
+//             password,
+//             avatar: avatarUrl.Location
+//         });
 
-        // Upload the file to S3
-        const avatarUrl = await s3
-            .upload(uploadParams, (err, data) => {
-                if (err) {
-                    console.error('⚠️ Error uploading image:', err);
-                    res.status(500).json({
-                        success: false,
-                        message: '⚠️ Error uploading image.' + err.message
-                    });
-                    return;
-                }
-                console.log('✅ Image uploaded successfully:', data.Location);
-                res.status(200).json({
-                    success: true,
-                    message: '✅ Image uploaded successfully.' + data.Location
-                });
-            })
-            .promise();
+//         let token = jwt.sign(
+//             {
+//                 id: user._id,
+//                 name: user.name,
+//                 email: user.email
+//             },
+//             process.env.JWT_SECRET_KEY
+//         );
 
-        const user = await User.create({
-            name,
-            email,
-            password,
-            avatar: avatarUrl.Location
-        });
+//         const options = {
+//             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+//             httpOnly: true
+//         };
 
-        let token = jwt.sign(
-            {
-                id: user._id,
-                name: user.name,
-                email: user.email
-            },
-            process.env.JWT_SECRET_KEY
-        );
+//         res.status(201).cookie('token', token, options).json({
+//             success: true,
+//             user
+//         });
+//     } catch (err) {
+//         res.status(500).json({
+//             success: false,
+//             message: err.message
+//         });
+//     }
+// });
 
-        const options = {
-            expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true
-        };
+// app.put('/me/update', isAuthUser, upload.single('image'), async (req, res) => {
+//     try {
+//         const userId = req.user.id;
+//         const { name, email } = req.body;
+//         const file = req.file;
 
-        res.status(201).cookie('token', token, options).json({
-            success: true,
-            user
-        });
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
-});
+//         // Upload the avatar image to AWS S3
+//         const params = {
+//             Bucket: process.env.AWS_BUCKET_NAME,
+//             Key: `${userId}-${file.originalname}`,
+//             Body: file.buffer,
+//             ContentType: file.mimetype
+//         };
 
-app.put('/me/update', isAuthUser, upload.single('image'), async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { name, email } = req.body;
-        const file = req.file;
+//         s3.upload(params, (err, data) => {
+//             if (err) {
+//                 console.error('⚠️ Error uploading avatar:', err);
+//                 res.status(500).json({ error: '⚠️ Internal server error.' });
+//             } else {
+//                 const avatarUrl = data.Location;
 
-        // Upload the avatar image to AWS S3
-        const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `${userId}-${file.originalname}`,
-            Body: file.buffer,
-            ContentType: file.mimetype
-        };
+//                 // Update the user profile in the database
+//                 User.findByIdAndUpdate(
+//                     userId,
+//                     { name: name, email: email, avatar: avatarUrl },
+//                     { new: true },
+//                     (err, updatedUser) => {
+//                         if (err) {
+//                             console.error('⚠️ Error updating profile:', err);
+//                             res.status(500).json({
+//                                 error: '⚠️ Internal server error.'
+//                             });
+//                         } else {
+//                             res.status(200).json({
+//                                 message: '✅ Profile updated successfully.',
+//                                 user: updatedUser
+//                             });
+//                         }
+//                     }
+//                 );
+//             }
+//         });
+//     } catch (error) {
+//         console.error('⚠️ Error processing request:', error);
+//         res.status(500).json({ error: '⚠️ Internal server error.' });
+//     }
+// });
 
-        s3.upload(params, (err, data) => {
-            if (err) {
-                console.error('⚠️ Error uploading avatar:', err);
-                res.status(500).json({ error: '⚠️ Internal server error.' });
-            } else {
-                const avatarUrl = data.Location;
+// // Extract image key from URL
+// const getImageKeyFromUrl = imageUrl => {
+//     const parsedUrl = url.parse(imageUrl);
+//     const pathName = parsedUrl.pathname;
+//     const key = pathName.substring(1); // Remove the leading slash (/)
 
-                // Update the user profile in the database
-                User.findByIdAndUpdate(
-                    userId,
-                    { name: name, email: email, avatar: avatarUrl },
-                    { new: true },
-                    (err, updatedUser) => {
-                        if (err) {
-                            console.error('⚠️ Error updating profile:', err);
-                            res.status(500).json({
-                                error: '⚠️ Internal server error.'
-                            });
-                        } else {
-                            res.status(200).json({
-                                message: '✅ Profile updated successfully.',
-                                user: updatedUser
-                            });
-                        }
-                    }
-                );
-            }
-        });
-    } catch (error) {
-        console.error('⚠️ Error processing request:', error);
-        res.status(500).json({ error: '⚠️ Internal server error.' });
-    }
-});
+//     return key;
+// };
 
-// Extract image key from URL
-const getImageKeyFromUrl = imageUrl => {
-    const parsedUrl = url.parse(imageUrl);
-    const pathName = parsedUrl.pathname;
-    const key = pathName.substring(1); // Remove the leading slash (/)
+// app.delete(
+//     '/admin/user/:id',
+//     isAuthUser,
+//     authRoles('admin'),
+//     async (req, res) => {
+//         try {
+//             const userId = req.params.id;
+//             const user = await User.findById(userId);
+//             if (!user) {
+//                 return res.status(404).json({ error: '⚠️ User not found' });
+//             }
 
-    return key;
-};
+//             // Delete image from AWS S3
+//             const imageKey = getImageKeyFromUrl(user.avatar);
+//             const deleteParams = {
+//                 Bucket: process.env.AWS_BUCKET_NAME,
+//                 Key: imageKey
+//             };
+//             await s3.deleteObject(deleteParams).promise();
+//             console.log('✅ Image deleted from AWS S3');
 
-app.delete(
-    '/admin/user/:id',
-    isAuthUser,
-    authRoles('admin'),
-    async (req, res) => {
-        try {
-            const userId = req.params.id;
-            const user = await User.findById(userId);
-            if (!user) {
-                return res.status(404).json({ error: '⚠️ User not found' });
-            }
+//             // Delete user from MongoDB
+//             await User.findByIdAndDelete(userId);
+//             console.log('✅ User deleted from MongoDB:', user);
 
-            // Delete image from AWS S3
-            const imageKey = getImageKeyFromUrl(user.avatar);
-            const deleteParams = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: imageKey
-            };
-            await s3.deleteObject(deleteParams).promise();
-            console.log('✅ Image deleted from AWS S3');
+//             return res.status(200).json({
+//                 success: true,
+//                 message: '✅ Profile deleted successfully.'
+//             });
+//         } catch (error) {
+//             console.error('⚠️ Error processing request:', error);
+//             return res.status(500).json({ error: '⚠️ Internal server error.' });
+//         }
+//     }
+// );
 
-            // Delete user from MongoDB
-            await User.findByIdAndDelete(userId);
-            console.log('✅ User deleted from MongoDB:', user);
+// app.post(
+//     '/admin/add-product',
+//     isAuthUser,
+//     authRoles('admin'),
+//     upload.array('product', 10),
+//     async (req, res) => {
+//         try {
+//             const { name, description, price, category, Stock } = req.body;
+//             const files = req.files;
 
-            return res.status(200).json({
-                success: true,
-                message: '✅ Profile deleted successfully.'
-            });
-        } catch (error) {
-            console.error('⚠️ Error processing request:', error);
-            return res.status(500).json({ error: '⚠️ Internal server error.' });
-        }
-    }
-);
+//             const imageUrls = [];
 
-app.post(
-    '/admin/add-product',
-    isAuthUser,
-    authRoles('admin'),
-    upload.array('product', 10),
-    async (req, res) => {
-        try {
-            const { name, description, price, category, Stock } = req.body;
-            const files = req.files;
+//             if (files && files.length > 0) {
+//                 for (const file of files) {
+//                     // Upload the product image to AWS S3
+//                     const uploadParams = {
+//                         Bucket: process.env.AWS_BUCKET_NAME,
+//                         Key: file.originalname,
+//                         Body: file.buffer,
+//                         ContentType: file.mimetype
+//                     };
 
-            const imageUrls = [];
+//                     const uploadResult = await s3
+//                         .upload(uploadParams, (err, data) => {
+//                             if (err) {
+//                                 console.error('⚠️ Error uploading image:', err);
+//                                 res.status(500).json({
+//                                     success: false,
+//                                     message:
+//                                         '⚠️ Error uploading image.' +
+//                                         err.message
+//                                 });
+//                                 return;
+//                             }
+//                             console.log(
+//                                 '✅ Image uploaded successfully:',
+//                                 data.Location
+//                             );
+//                             res.status(200).json({
+//                                 success: true,
+//                                 message:
+//                                     '✅ Image uploaded successfully.' +
+//                                     data.Location
+//                             });
+//                         })
+//                         .promise();
 
-            if (files && files.length > 0) {
-                for (const file of files) {
-                    // Upload the product image to AWS S3
-                    const uploadParams = {
-                        Bucket: process.env.AWS_BUCKET_NAME,
-                        Key: file.originalname,
-                        Body: file.buffer,
-                        ContentType: file.mimetype
-                    };
+//                     imageUrls.push(uploadResult.Location);
+//                 }
+//             }
 
-                    const uploadResult = await s3
-                        .upload(uploadParams, (err, data) => {
-                            if (err) {
-                                console.error('⚠️ Error uploading image:', err);
-                                res.status(500).json({
-                                    success: false,
-                                    message:
-                                        '⚠️ Error uploading image.' +
-                                        err.message
-                                });
-                                return;
-                            }
-                            console.log(
-                                '✅ Image uploaded successfully:',
-                                data.Location
-                            );
-                            res.status(200).json({
-                                success: true,
-                                message:
-                                    '✅ Image uploaded successfully.' +
-                                    data.Location
-                            });
-                        })
-                        .promise();
+//             // Create a new product in the database
+//             const product = await Product.create({
+//                 name,
+//                 description,
+//                 price,
+//                 category,
+//                 Stock,
+//                 images: imageUrls.map(url => ({ url })),
+//                 user: req.user.id
+//             });
 
-                    imageUrls.push(uploadResult.Location);
-                }
-            }
+//             const newProduct = await product.save();
 
-            // Create a new product in the database
-            const product = await Product.create({
-                name,
-                description,
-                price,
-                category,
-                Stock,
-                images: imageUrls.map(url => ({ url })),
-                user: req.user.id
-            });
+//             res.status(201).json({
+//                 message: '✅ Product created successfully.',
+//                 product: newProduct
+//             });
+//         } catch (error) {
+//             console.error('⚠️ Error creating product:', error);
+//             res.status(500).json({
+//                 success: false,
+//                 error: '⚠️ Internal server error.' + error
+//             });
+//         }
+//     }
+// );
 
-            const newProduct = await product.save();
+// app.put(
+//     '/admin/product/:id',
+//     isAuthUser,
+//     authRoles('admin'),
+//     upload.array('product', 10),
+//     async (req, res) => {
+//         try {
+//             const productId = req.params.id;
+//             const { name, description, price, category, stock } = req.body;
+//             const files = req.files;
 
-            res.status(201).json({
-                message: '✅ Product created successfully.',
-                product: newProduct
-            });
-        } catch (error) {
-            console.error('⚠️ Error creating product:', error);
-            res.status(500).json({
-                success: false,
-                error: '⚠️ Internal server error.' + error
-            });
-        }
-    }
-);
+//             let imageUrls = [];
 
-app.put(
-    '/admin/product/:id',
-    isAuthUser,
-    authRoles('admin'),
-    upload.array('product', 10),
-    async (req, res) => {
-        try {
-            const productId = req.params.id;
-            const { name, description, price, category, stock } = req.body;
-            const files = req.files;
+//             const product = await Product.findById(productId);
 
-            let imageUrls = [];
+//             if (!product) {
+//                 return res.status(404).json({ error: '⚠️ Product not found' });
+//             }
 
-            const product = await Product.findById(productId);
+//             // Delete images from AWS S3
+//             const deleteObjects = product.images.map(image => ({
+//                 Key: getImageKeyFromUrl(image.url)
+//             }));
+//             const deleteParams = {
+//                 Bucket: process.env.AWS_BUCKET_NAME,
+//                 Delete: {
+//                     Objects: deleteObjects,
+//                     Quiet: false
+//                 }
+//             };
+//             await s3.deleteObjects(deleteParams).promise();
+//             console.log('✅ Images deleted from AWS S3');
 
-            if (!product) {
-                return res.status(404).json({ error: '⚠️ Product not found' });
-            }
+//             // Upload new images
+//             for (const file of files) {
+//                 const params = {
+//                     Bucket: process.env.AWS_BUCKET_NAME,
+//                     Key: file.originalname,
+//                     Body: file.buffer,
+//                     ContentType: file.mimetype
+//                 };
 
-            // Delete images from AWS S3
-            const deleteObjects = product.images.map(image => ({
-                Key: getImageKeyFromUrl(image.url)
-            }));
-            const deleteParams = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Delete: {
-                    Objects: deleteObjects,
-                    Quiet: false
-                }
-            };
-            await s3.deleteObjects(deleteParams).promise();
-            console.log('✅ Images deleted from AWS S3');
+//                 const s3UploadResult = await s3.upload(params).promise();
+//                 imageUrls.push({
+//                     key: file.originalname,
+//                     url: s3UploadResult.Location
+//                 });
+//             }
 
-            // Upload new images
-            for (const file of files) {
-                const params = {
-                    Bucket: process.env.AWS_BUCKET_NAME,
-                    Key: file.originalname,
-                    Body: file.buffer,
-                    ContentType: file.mimetype
-                };
+//             // Update the product in the database
+//             const updatedProduct = await Product.findByIdAndUpdate(
+//                 productId,
+//                 {
+//                     name,
+//                     description,
+//                     price,
+//                     category,
+//                     stock,
+//                     images: imageUrls
+//                 },
+//                 { new: true }
+//             );
 
-                const s3UploadResult = await s3.upload(params).promise();
-                imageUrls.push({
-                    key: file.originalname,
-                    url: s3UploadResult.Location
-                });
-            }
+//             if (!updatedProduct) {
+//                 return res
+//                     .status(404)
+//                     .json({ error: '⚠️⚠️ Product not found.' });
+//             }
 
-            // Update the product in the database
-            const updatedProduct = await Product.findByIdAndUpdate(
-                productId,
-                {
-                    name,
-                    description,
-                    price,
-                    category,
-                    stock,
-                    images: imageUrls
-                },
-                { new: true }
-            );
+//             res.status(200).json({
+//                 message: '✅ Product updated successfully.',
+//                 product: updatedProduct
+//             });
+//         } catch (error) {
+//             console.error('⚠️ Error processing request:', error);
+//             res.status(500).json({
+//                 success: false,
+//                 error: '⚠️ Internal server error.'
+//             });
+//         }
+//     }
+// );
 
-            if (!updatedProduct) {
-                return res
-                    .status(404)
-                    .json({ error: '⚠️⚠️ Product not found.' });
-            }
+// app.put(
+//     '/admin/product/:id',
+//     isAuthUser,
+//     authRoles('admin'),
+//     upload.array('product', 10),
+//     async (req, res) => {
+//         try {
+//             const productId = req.params.id;
+//             const product = await Product.findById(productId);
+//             if (!product) {
+//                 return res.status(404).json({ error: '⚠️ Product not found' });
+//             }
 
-            res.status(200).json({
-                message: '✅ Product updated successfully.',
-                product: updatedProduct
-            });
-        } catch (error) {
-            console.error('⚠️ Error processing request:', error);
-            res.status(500).json({
-                success: false,
-                error: '⚠️ Internal server error.'
-            });
-        }
-    }
-);
+//             // Delete images from AWS S3
+//             const deleteObjects = product.images.map(image => ({
+//                 Key: getImageKeyFromUrl(image.url)
+//             }));
+//             const deleteParams = {
+//                 Bucket: process.env.AWS_BUCKET_NAME,
+//                 Delete: {
+//                     Objects: deleteObjects,
+//                     Quiet: false
+//                 }
+//             };
+//             await s3.deleteObjects(deleteParams).promise();
+//             console.log('✅ Images deleted from AWS S3');
 
-app.put(
-    '/admin/product/:id',
-    isAuthUser,
-    authRoles('admin'),
-    upload.array('product', 10),
-    async (req, res) => {
-        try {
-            const productId = req.params.id;
-            const product = await Product.findById(productId);
-            if (!product) {
-                return res.status(404).json({ error: '⚠️ Product not found' });
-            }
+//             // Delete product from MongoDB
+//             await Product.findByIdAndDelete(productId);
+//             console.log('✅ Product deleted from MongoDB:', product);
 
-            // Delete images from AWS S3
-            const deleteObjects = product.images.map(image => ({
-                Key: getImageKeyFromUrl(image.url)
-            }));
-            const deleteParams = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Delete: {
-                    Objects: deleteObjects,
-                    Quiet: false
-                }
-            };
-            await s3.deleteObjects(deleteParams).promise();
-            console.log('✅ Images deleted from AWS S3');
+//             return res.status(200).json({
+//                 success: true,
+//                 message: '✅ Product deleted successfully.',
+//                 product
+//             });
+//         } catch (error) {
+//             console.error('⚠️ Error processing request:', error);
+//             return res.status(500).json({ error: '⚠️ Internal server error.' });
+//         }
+//     }
+// );
 
-            // Delete product from MongoDB
-            await Product.findByIdAndDelete(productId);
-            console.log('✅ Product deleted from MongoDB:', product);
+// app.delete(
+//     '/admin/product/:id',
+//     isAuthUser,
+//     authRoles('admin'),
+//     async (req, res) => {
+//         try {
+//             const productId = req.params.id;
+//             const product = await Product.findById(productId);
+//             if (!product) {
+//                 return res.status(404).json({ error: '⚠️ Product not found' });
+//             }
 
-            return res.status(200).json({
-                success: true,
-                message: '✅ Product deleted successfully.',
-                product
-            });
-        } catch (error) {
-            console.error('⚠️ Error processing request:', error);
-            return res.status(500).json({ error: '⚠️ Internal server error.' });
-        }
-    }
-);
+//             // Delete images from AWS S3
+//             const deleteObjects = product.images.map(image => ({
+//                 Key: getImageKeyFromUrl(image.url)
+//             }));
+//             const deleteParams = {
+//                 Bucket: process.env.AWS_BUCKET_NAME,
+//                 Delete: {
+//                     Objects: deleteObjects,
+//                     Quiet: false
+//                 }
+//             };
+//             await s3.deleteObjects(deleteParams).promise();
+//             console.log('✅ Images deleted from AWS S3');
 
-app.delete(
-    '/admin/product/:id',
-    isAuthUser,
-    authRoles('admin'),
-    async (req, res) => {
-        try {
-            const productId = req.params.id;
-            const product = await Product.findById(productId);
-            if (!product) {
-                return res.status(404).json({ error: '⚠️ Product not found' });
-            }
+//             // Delete product from MongoDB
+//             await Product.findByIdAndDelete(productId);
+//             console.log('✅ Product deleted from MongoDB:', product);
 
-            // Delete images from AWS S3
-            const deleteObjects = product.images.map(image => ({
-                Key: getImageKeyFromUrl(image.url)
-            }));
-            const deleteParams = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Delete: {
-                    Objects: deleteObjects,
-                    Quiet: false
-                }
-            };
-            await s3.deleteObjects(deleteParams).promise();
-            console.log('✅ Images deleted from AWS S3');
-
-            // Delete product from MongoDB
-            await Product.findByIdAndDelete(productId);
-            console.log('✅ Product deleted from MongoDB:', product);
-
-            return res.status(200).json({
-                success: true,
-                message: '✅ Product deleted successfully.',
-                product
-            });
-        } catch (error) {
-            console.error('⚠️ Error processing request:', error);
-            return res.status(500).json({ error: '⚠️ Internal server error.' });
-        }
-    }
-);
+//             return res.status(200).json({
+//                 success: true,
+//                 message: '✅ Product deleted successfully.',
+//                 product
+//             });
+//         } catch (error) {
+//             console.error('⚠️ Error processing request:', error);
+//             return res.status(500).json({ error: '⚠️ Internal server error.' });
+//         }
+//     }
+// );
 
 module.exports = app;
+// module.exports = s3;
+// module.exports = upload;
+

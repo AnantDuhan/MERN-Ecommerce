@@ -117,6 +117,13 @@
   transform: translateY(-1vmax);
 }
 
+.login-button {
+  position: fixed;
+  top: 40px;
+  right: 20px;
+  z-index: 9999;
+}
+
 @media screen and (max-width: 600px) {
   .productCard > p {
     font-size: 1.7vmax;
