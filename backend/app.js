@@ -19,32 +19,32 @@ app.use(
     })
 );
 
-AWS.config.update({
-    region: process.env.AWS_BUCKET_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
+// AWS.config.update({
+//     region: process.env.AWS_BUCKET_REGION,
+//     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+// });
 
-const s3 = new AWS.S3();
+// const s3 = new AWS.S3();
 
 // Configure Multer for file uploads
-const upload = multer({
-    storage: multer.memoryStorage(),
-    fileFilter: (req, file, cb) => {
-        if (
-            file.mimetype === 'image/png' ||
-            file.mimetype === 'image/jpg' ||
-            file.mimetype === 'image/jpeg'
-        ) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file type.'));
-        }
-    }
-});
+// const upload = multer({
+//     storage: multer.memoryStorage(),
+//     fileFilter: (req, file, cb) => {
+//         if (
+//             file.mimetype === 'image/png' ||
+//             file.mimetype === 'image/jpg' ||
+//             file.mimetype === 'image/jpeg'
+//         ) {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('Invalid file type.'));
+//         }
+//     }
+// });
 
-app.use(upload.single('image'));
-app.use(upload.array('product', 10));
+// app.use(upload.single('image'));
+// app.use(upload.array('product', 10));
 
 // Route Imports
 const productRoute = require('./routes/product');
