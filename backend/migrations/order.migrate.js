@@ -28,6 +28,9 @@ async function migrate() {
                 status: null,
                 createdAt: null
             };
+            order.couponUsed = false;
+            order.couponCode = null;
+            order.discountedAmount = 0;
             await order.save();
         }
 

@@ -31,14 +31,12 @@ router
 
 router.route('/order/:id/return').post(isAuthUser, requestReturn);
 
-router.route('/admin/refund/:id/status').patch(isAuthUser, authRoles('admin'),updateRefundStatus);
-
 router.route('/order/:id/refund').post(isAuthUser, initiateRefund);
 
-// Get all return requests
-router.get('/admin/returns', isAuthUser, authRoles('admin'), getAllReturns);
+router.route('/admin/refund/:id/status').patch(isAuthUser, authRoles('admin'), updateRefundStatus);
 
-// Get all refund requests
-router.get('/admin/refunds', isAuthUser, authRoles('admin'), getAllRefunds);
+router.route('/admin/returns').get(isAuthUser, authRoles('admin'), getAllReturns);
+
+router.route('/admin/refunds').get(isAuthUser, authRoles('admin'), getAllRefunds);
 
 module.exports = router;

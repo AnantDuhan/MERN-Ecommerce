@@ -8,8 +8,6 @@ exports.contactUs = async (req, res) => {
     try {
         const { name, email, subject, message } = req.body;
 
-        const user = req.user._id;
-
         const contact = await Contact.create({
             name,
             email,
@@ -17,9 +15,9 @@ exports.contactUs = async (req, res) => {
             message
         });
 
-        // await contact.save();
+        await contact.save();
 
-        const whatsappMessage = `New contact form submission:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`;
+        const whatsappMessage = `New contact form submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`;
 
         await client.messages.create({
             body: whatsappMessage,
@@ -28,7 +26,7 @@ exports.contactUs = async (req, res) => {
         });
 
         await sendEmail({
-            email: user.email,
+            email: 'duhananant@gmail.com',
             subject: `New Contact Form Submission: ${subject}`,
             html: `
       <p>You have received a new contact form submission:</p>

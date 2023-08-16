@@ -5,6 +5,7 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 const User = require('../models/user');
+const Coupon = require('../models/Coupon');
 const stripe = require('stripe')(
     'sk_test_51K9RkSSDvITsgzEymgWGmrPCCP0Iu8b8j2AtRaZbnuXqwSLkQMSnTc6a6gQmRRzT60nP0KMhApPEpASMOPP3GgGh00rlK3KQm2'
 );
@@ -21,8 +22,23 @@ exports.newOrder = async (req, res, next) => {
             itemsPrice,
             taxPrice,
             shippingPrice,
-            totalPrice
+            totalPrice,
+            couponCode
         } = req.body;
+
+        const coupon = await Coupon.findOne({ code: couponCode });
+
+        let discountedTotalPrice = totalPrice;
+        if (coupon) {
+
+            if (
+                totalPrice >= coupon.minOrderAmount &&
+                totalPrice <= coupon.maxOrderAmount
+            ) {
+                discountedTotalPrice =
+                    totalPrice - (totalPrice * coupon.discountPercent) / 100;
+            }
+        }
 
         const order = await Order.create({
             shippingInfo,
@@ -31,9 +47,11 @@ exports.newOrder = async (req, res, next) => {
             itemsPrice,
             taxPrice,
             shippingPrice,
-            totalPrice,
+            totalPrice: discountedTotalPrice,
             paidAt: Date.now(),
-            user: req.user._id
+            user: req.user._id,
+            couponUsed: coupon ? true : false,
+            couponCode: couponCode
         });
 
         const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
@@ -70,7 +88,6 @@ exports.newOrder = async (req, res, next) => {
           )
           .join('\n')}
    Total Price: ₹${order.totalPrice}
-   Invoice: ${invoice.hosted_invoice_url}
 
    Thank you for ordering. For more please visit our website http://www.orderplanning.com.\n
    Happy Shopping.😊`;
@@ -279,13 +296,18 @@ exports.requestReturn = async (req, res) => {
             });
         }
 
+        if (order.orderStatus !== 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: 'Order has not been delivered yet'
+            });
+        }
+
         if (order.isReturned) {
-            return res
-                .status(400)
-                .json({
-                    success: true,
-                    message: 'Order has already been returned'
-                });
+            return res.status(400).json({
+                success: true,
+                message: 'Order has already been returned'
+            });
         }
 
         order.isReturned = true;
@@ -293,9 +315,9 @@ exports.requestReturn = async (req, res) => {
         order.returnRequestedAt = new Date();
         await order.save();
 
-        res.json({
-            success: false,
-            message: 'Return requested successfully',
+        res.status(200).json({
+            success: true,
+            message: 'Return requested',
             order
         });
     } catch (error) {
@@ -309,71 +331,59 @@ exports.requestReturn = async (req, res) => {
 
 // Initiate refund for a returned order
 exports.initiateRefund = async (req, res) => {
-  try {
-    const { orderId } = req.params;
+    try {
+            const order = await Order.findById(req.params.id);
 
-    const order = await Order.findById(orderId);
+            if (!order) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Order not found'
+                });
+            }
 
-    if (!order) {
-      return res
-          .status(404)
-          .json({
-              success: false,
-              message: 'Order not found'
-          });
+            if (order.orderStatus !== 'Delivered') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Order has not been delivered yet'
+                });
+            }
+
+            if (!order.isReturned) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Order has not been returned'
+                });
+            }
+
+            if (order.isRefunded) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Order has already been refunded'
+                });
+            }
+
+            // Update the order refund status to 'initiated' and save
+            order.refundStatus = 'initiated';
+            await order.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Refund initiation request sent',
+                order
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'Refund initiated',
+                order
+            });
+        } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
     }
-
-    if (!order.isReturned) {
-      return res
-          .status(400)
-          .json({
-              success: false,
-              message: 'Order has not been returned'
-          });
-    }
-
-    if (order.isRefunded) {
-      return res
-          .status(400)
-          .json({
-              success: false,
-              message: 'Order has already been refunded'
-          });
-    }
-
-      // Perform the refund process here using the payment gateway (e.g., Stripe)
-      const refund = await stripe.refunds.create({
-          payment_intent: order.paymentInfo.id,
-          amount: order.totalPrice
-      });
-
-      order.refundStatus = 'refunded';
-      order.refundInfo = {
-          id: refund.id,
-          amount: refund.amount,
-          status: refund.status,
-          createdAt: new Date(refund.createdAt * 1000)
-      };
-      await order.save();
-
-    order.isRefunded = true;
-    order.refundAmount = req.body.refundAmount;
-    order.refundRequestedAt = new Date();
-    order.refundedAt = new Date();
-    await order.save();
-
-    res.status(200).json({
-        success: true,
-        message: 'Refund initiated successfully',
-        order
-    });
-  } catch (error) {
-    console.error(error);
-      res.status(500).json({
-          success: false,
-          message: 'Server error'
-      });
-  }
 };
 
 exports.updateRefundStatus = async (req, res) => {
@@ -383,21 +393,17 @@ exports.updateRefundStatus = async (req, res) => {
         const order = await Order.findById(req.params.id);
 
         if (!order) {
-            return res
-                .status(404)
-                .json({
-                    success: false,
-                    message: 'Order not found'
-                });
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
         }
 
         if (!refundStatus) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    message: 'Refund status is required'
-                });
+            return res.status(400).json({
+                success: false,
+                message: 'Refund status is required'
+            });
         }
 
         if (
@@ -411,6 +417,27 @@ exports.updateRefundStatus = async (req, res) => {
             });
         }
 
+        // If the refund status is 'approved', perform the actual refund process
+        if (refundStatus === 'approved') {
+            const refund = await stripe.refunds.create({
+                payment_intent: order.paymentInfo.id,
+                amount: order.totalPrice
+            });
+
+            order.refundInfo = {
+                id: refund.id,
+                amount: refund.amount,
+                status: refund.status,
+                createdAt: refund.created
+                    ? new Date(refund.created * 1000)
+                    : null
+            };
+            await order.save();
+
+            order.refundedAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days later
+        }
+
+        // Update the refund status and save the order
         order.refundStatus = refundStatus;
         await order.save();
 
@@ -430,28 +457,28 @@ exports.updateRefundStatus = async (req, res) => {
 
 // Get all return requests
 exports.getAllReturns = async (req, res) => {
-  try {
-    const returns = await Order.find({ isReturned: true })
-      .select('-orderItems')
-      .populate('user', 'name email')
-      .sort('-returnRequestedAt');
+    try {
+        const returns = await Order.find({ isReturned: true })
+            .select('-orderItems')
+            .populate('user', 'name email')
+            .sort('-returnRequestedAt');
 
-    res.status(200).json({ success: true, returns });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+        res.status(200).json({ success: true, returns });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 };
 
 // Get all refund requests
 exports.getAllRefunds = async (req, res) => {
-  try {
-    const refunds = await Order.find({ isRefunded: true })
-      .select('-orderItems')
-      .populate('user', 'name email')
-      .sort('-refundRequestedAt');
+    try {
+        const refunds = await Order.find({ isRefunded: true })
+            .select('-orderItems')
+            .populate('user', 'name email')
+            .sort('-refundRequestedAt');
 
-    res.status(200).json({ success: true, refunds });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+        res.status(200).json({ success: true, refunds });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 };

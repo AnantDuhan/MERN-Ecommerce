@@ -101,6 +101,7 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    // refund details
     isReturned: {
         type: Boolean,
         default: false
@@ -129,10 +130,22 @@ const orderSchema = new mongoose.Schema({
         type: String
     },
     refundInfo: {
-        id: mongoose.Schema.ObjectId,
+        id: String,
         amount: Number,
         status: String,
         createdAt: Date
+    },
+    // Coupon details
+    couponUsed: {
+        type: Boolean,
+        default: false
+    },
+    couponCode: {
+        type: String
+    },
+    discountedAmount: {
+        type: Number,
+        default: 0
     }
 });
 
