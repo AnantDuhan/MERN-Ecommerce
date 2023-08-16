@@ -1,6 +1,7 @@
 const stripe = require('stripe')(
     'sk_test_51K9RkSSDvITsgzEymgWGmrPCCP0Iu8b8j2AtRaZbnuXqwSLkQMSnTc6a6gQmRRzT60nP0KMhApPEpASMOPP3GgGh00rlK3KQm2'
 );
+const Order = require('../models/order');
 
 exports.processPayment = async (req, res, next) => {
     const myPayment = await stripe.paymentIntents.create({

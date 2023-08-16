@@ -5,44 +5,48 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 const User = require('../models/user');
+const stripe = require('stripe')(
+    'sk_test_51K9RkSSDvITsgzEymgWGmrPCCP0Iu8b8j2AtRaZbnuXqwSLkQMSnTc6a6gQmRRzT60nP0KMhApPEpASMOPP3GgGh00rlK3KQm2'
+);
 
 // create new order
 exports.newOrder = async (req, res, next) => {
-    const user = await User.findById(req.user._id);
+    try {
+        const user = await User.findById(req.user._id);
 
-    const {
-        shippingInfo,
-        orderItems,
-        paymentInfo,
-        itemsPrice,
-        taxPrice,
-        shippingPrice,
-        totalPrice
-    } = req.body;
+        const {
+            shippingInfo,
+            orderItems,
+            paymentInfo,
+            itemsPrice,
+            taxPrice,
+            shippingPrice,
+            totalPrice
+        } = req.body;
 
-    const order = await Order.create({
-        shippingInfo,
-        orderItems,
-        paymentInfo,
-        itemsPrice,
-        taxPrice,
-        shippingPrice,
-        totalPrice,
-        paidAt: Date.now(),
-        user: req.user._id
-    });
+        const order = await Order.create({
+            shippingInfo,
+            orderItems,
+            paymentInfo,
+            itemsPrice,
+            taxPrice,
+            shippingPrice,
+            totalPrice,
+            paidAt: Date.now(),
+            user: req.user._id
+        });
 
-    const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
-    const currentDate = new Date();
-    const estimatedDeliveryDate = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() + randomDays
-   ); // Add random days
+        const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
+        const currentDate = new Date();
+        const estimatedDeliveryDate = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate() + randomDays
+        ); // Add random days
 
-   const imageUrl = order.orderItems.image;
+        const imageUrl = order.orderItems.image;
 
-   const emailMessage = `<html>
+        const emailMessage = `<html>
     <body>
         <p>Hello ${user.name}!</p>
         <p>Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
@@ -53,29 +57,47 @@ exports.newOrder = async (req, res, next) => {
     </body>
     </html>`;
 
-    // For WhatsApp, use the same message without HTML tags
-    const whatsappMessage = `Hello ${user.name}!\n
-Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.\n
-Thank you for ordering. For more please visit our website http://www.orderplanning.com.\n
-Happy Shopping.😊`;
+        // For WhatsApp, use the same message without HTML tags
+        const whatsappMessage = `Hello ${user.name}!\n
+   Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.\n
+   Your Order Details:
+   Order ID: ${order._id}
+   Items:
+      ${order.orderItems
+          .map(
+              item =>
+                  `${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price}`
+          )
+          .join('\n')}
+   Total Price: ₹${order.totalPrice}
+   Invoice: ${invoice.hosted_invoice_url}
 
-    await client.messages.create({
-        body: whatsappMessage,
-        from: 'whatsapp:+14155238886',
-        to: `whatsapp:+91${order.shippingInfo.phoneNumber}`,
-        mediaUrl: [imageUrl]
-    });
+   Thank you for ordering. For more please visit our website http://www.orderplanning.com.\n
+   Happy Shopping.😊`;
 
-    await sendEmail({
-        email: user.email,
-        subject: `Your Order📦 has been placed successfully`,
-        html: emailMessage
-    });
+        await client.messages.create({
+            body: whatsappMessage,
+            from: 'whatsapp:+14155238886',
+            to: `whatsapp:+91${order.shippingInfo.phoneNumber}`,
+            mediaUrl: [imageUrl]
+        });
 
-    res.status(200).json({
-        success: true,
-        order
-    });
+        await sendEmail({
+            email: user.email,
+            subject: `Your Order📦 has been placed successfully`,
+            html: emailMessage
+        });
+
+        res.status(200).json({
+            success: true,
+            order
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
 
 // get single order
@@ -173,7 +195,9 @@ exports.updateOrder = async (req, res, next) => {
     const emailMessage = `<html>
     <body>
         <p>Hello ${user.name}!</p>
-        <p>Your order📦 ${order._id} has been ${order.orderStatus}. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
+        <p>Your order📦 ${order._id} has been ${
+        order.orderStatus
+    }. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
         <img src="${imageUrl}" alt="Ordered Items">
         <p>Thank you for ordering. For more please visit our website <a href="http://www.orderplanning.com">www.orderplanning.com</a>.</p>
         <p>Here's the image of your ordered items:</p>
@@ -186,6 +210,16 @@ exports.updateOrder = async (req, res, next) => {
 Your order📦 ${order._id} has been ${
         order.orderStatus
     }. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.\n
+Your Order Details:
+Order ID: ${order._id}
+Items:
+${order.orderItems
+    .map(
+        item =>
+            `${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price}`
+    )
+    .join('\n')}
+Total Price: ₹${order.totalPrice}
 Thank you for ordering. For more please visit our website http://www.orderplanning.com.\n
 Happy Shopping.😊`;
 
@@ -193,19 +227,13 @@ Happy Shopping.😊`;
         mediaUrl: [imageUrl],
         body: whatsappMessage,
         from: 'whatsapp:+14155238886',
-        to: `whatsapp:+91${order.shippingInfo.phoneNumber}`,
+        to: `whatsapp:+91${order.shippingInfo.phoneNumber}`
     });
 
     await sendEmail({
         email: user.email,
         subject: `Your Order📦 Status Update: ${order.orderStatus}`,
         html: emailMessage
-    });
-
-    await sendEmail({
-        email: user.email,
-        subject: `Your Order📦 Status Update: ${order.orderStatus}`,
-        html: message
     });
 
     res.status(200).json({
@@ -238,4 +266,192 @@ exports.deleteOrder = async (req, res, next) => {
         success: true,
         message: 'Order📦 deleted successfully'
     });
+};
+
+exports.requestReturn = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        if (order.isReturned) {
+            return res
+                .status(400)
+                .json({
+                    success: true,
+                    message: 'Order has already been returned'
+                });
+        }
+
+        order.isReturned = true;
+        order.returnReason = req.body.returnReason;
+        order.returnRequestedAt = new Date();
+        await order.save();
+
+        res.json({
+            success: false,
+            message: 'Return requested successfully',
+            order
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+// Initiate refund for a returned order
+exports.initiateRefund = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res
+          .status(404)
+          .json({
+              success: false,
+              message: 'Order not found'
+          });
+    }
+
+    if (!order.isReturned) {
+      return res
+          .status(400)
+          .json({
+              success: false,
+              message: 'Order has not been returned'
+          });
+    }
+
+    if (order.isRefunded) {
+      return res
+          .status(400)
+          .json({
+              success: false,
+              message: 'Order has already been refunded'
+          });
+    }
+
+      // Perform the refund process here using the payment gateway (e.g., Stripe)
+      const refund = await stripe.refunds.create({
+          payment_intent: order.paymentInfo.id,
+          amount: order.totalPrice
+      });
+
+      order.refundStatus = 'refunded';
+      order.refundInfo = {
+          id: refund.id,
+          amount: refund.amount,
+          status: refund.status,
+          createdAt: new Date(refund.createdAt * 1000)
+      };
+      await order.save();
+
+    order.isRefunded = true;
+    order.refundAmount = req.body.refundAmount;
+    order.refundRequestedAt = new Date();
+    order.refundedAt = new Date();
+    await order.save();
+
+    res.status(200).json({
+        success: true,
+        message: 'Refund initiated successfully',
+        order
+    });
+  } catch (error) {
+    console.error(error);
+      res.status(500).json({
+          success: false,
+          message: 'Server error'
+      });
+  }
+};
+
+exports.updateRefundStatus = async (req, res) => {
+    try {
+        const { refundStatus } = req.body;
+
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res
+                .status(404)
+                .json({
+                    success: false,
+                    message: 'Order not found'
+                });
+        }
+
+        if (!refundStatus) {
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    message: 'Refund status is required'
+                });
+        }
+
+        if (
+            refundStatus !== 'pending' &&
+            refundStatus !== 'approved' &&
+            refundStatus !== 'rejected'
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid refund status'
+            });
+        }
+
+        order.refundStatus = refundStatus;
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Refund status updated successfully',
+            order
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
+    }
+};
+
+// Get all return requests
+exports.getAllReturns = async (req, res) => {
+  try {
+    const returns = await Order.find({ isReturned: true })
+      .select('-orderItems')
+      .populate('user', 'name email')
+      .sort('-returnRequestedAt');
+
+    res.status(200).json({ success: true, returns });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Get all refund requests
+exports.getAllRefunds = async (req, res) => {
+  try {
+    const refunds = await Order.find({ isRefunded: true })
+      .select('-orderItems')
+      .populate('user', 'name email')
+      .sort('-refundRequestedAt');
+
+    res.status(200).json({ success: true, refunds });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };

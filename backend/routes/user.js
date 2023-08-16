@@ -15,6 +15,7 @@ const {
 const { isAuthUser, authRoles } = require('../middleware/auth');
 // const upload = require('../app');
 const multer = require('multer');
+const { contactUs } = require('../controllers/contact');
 
 // Configure Multer for file uploads
 const upload = multer({
@@ -54,5 +55,7 @@ router
     .route('/admin/user/:id')
     .get(isAuthUser, authRoles('admin'), getSingleUser)
     .put(isAuthUser, authRoles('admin'), updateUserRole);
+
+router.route('/contact-us').post(contactUs);
 
 module.exports = router;

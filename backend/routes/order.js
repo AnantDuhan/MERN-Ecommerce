@@ -6,6 +6,11 @@ const {
    getAllOrders,
    updateOrder,
    deleteOrder,
+   requestReturn,
+   updateRefundStatus,
+   initiateRefund,
+   getAllReturns,
+   getAllRefunds,
 } = require('../controllers/order');
 const router = express.Router();
 
@@ -23,5 +28,17 @@ router
     .route('/admin/order/:id')
     .put(isAuthUser, authRoles('admin'), updateOrder)
     .delete(isAuthUser, authRoles('admin'), deleteOrder);
+
+router.route('/order/:id/return').post(isAuthUser, requestReturn);
+
+router.route('/admin/refund/:id/status').patch(isAuthUser, authRoles('admin'),updateRefundStatus);
+
+router.route('/order/:id/refund').post(isAuthUser, initiateRefund);
+
+// Get all return requests
+router.get('/admin/returns', isAuthUser, authRoles('admin'), getAllReturns);
+
+// Get all refund requests
+router.get('/admin/refunds', isAuthUser, authRoles('admin'), getAllRefunds);
 
 module.exports = router;

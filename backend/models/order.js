@@ -100,6 +100,39 @@ const orderSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    isReturned: {
+        type: Boolean,
+        default: false
+    },
+    returnReason: {
+        type: String
+    },
+    returnRequestedAt: {
+        type: Date
+    },
+    isRefunded: {
+        type: Boolean,
+        default: false
+    },
+    refundAmount: {
+        type: Number,
+        default: 0
+    },
+    refundRequestedAt: {
+        type: Date
+    },
+    refundedAt: {
+        type: Date
+    },
+    refundStatus: {
+        type: String
+    },
+    refundInfo: {
+        id: mongoose.Schema.ObjectId,
+        amount: Number,
+        status: String,
+        createdAt: Date
     }
 });
 
