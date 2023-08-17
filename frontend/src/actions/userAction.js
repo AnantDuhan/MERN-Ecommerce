@@ -65,7 +65,7 @@ export const register = (name, email, password, avatar) => async (dispatch) => {
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
         const { data } = await axios.post(
-            `/register`,
+            `/api/v1/register`,
             { name, email, password, avatar },
             { config }
         );
@@ -113,7 +113,7 @@ export const updateProfile = (name, email, avatar) => async (dispatch) => {
 
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
-        const { data } = await axios.put(`/api//me/update`, {name, email, avatar}, {config});
+        const { data } = await axios.put(`/api/me/update`, {name, email, avatar}, {config});
 
         dispatch({ type: UPDATE_PROFILE_SUCCESS, payload: data.success });
     } catch (error) {

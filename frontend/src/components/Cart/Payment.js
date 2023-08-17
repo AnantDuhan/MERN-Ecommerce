@@ -84,13 +84,10 @@ const Payment = () => {
                 }
             });
 
-            // console.log("RESULT____", result);
-
             if (result.error) {
                 payBtn.current.disabled = false;
                 toast.error(result.error.message);
             } else {
-                console.log('ERROR');
                 if (result.paymentIntent.status === 'succeeded') {
                     order.paymentInfo = {
                         id: result.paymentIntent.id,
@@ -99,16 +96,13 @@ const Payment = () => {
 
                     dispatch(createOrder(order));
                     toast.success('payment successfull');
-                    // console.log("SUCCESSS____");
                     navigate('/success');
                 } else {
-                    // console.log('ERROR__');
                     toast.error("There's some issue while processing payment ");
                 }
             }
         } catch (error) {
             payBtn.current.disabled = false;
-            // console.log("ERROR______", error);
             toast.error(error);
         }
     };

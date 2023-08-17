@@ -37,8 +37,13 @@ const About = () => {
                           <a href='https://www.linkedin.com/in/anantduhan/'>
                               @anantduhan
                           </a>
-                          . I'm a MERN Stack Developer and CSE 4<sup>th</sup> Year Student
-                          at SRM University
+                          . I'm a <b>Full Stack Developer</b> and{' '}
+                          <b>B.tech Graduate</b> from{' '}
+                          <b>
+                              SRM Institute Of Science and Technology (2023
+                              Batch)
+                          </b>
+                          .
                       </span>
                   </div>
                   <div className='aboutSectionContainer2'>

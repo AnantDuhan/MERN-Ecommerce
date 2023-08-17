@@ -90,6 +90,10 @@ const Dashboard = () => {
                             <p>Users</p>
                             <p>{users && users?.length}</p>
                         </Link>
+                        <Link to='/admin/order/return'>
+                            <p>Returns</p>
+                            <p>252</p>
+                        </Link>
                     </div>
                 </div>
 

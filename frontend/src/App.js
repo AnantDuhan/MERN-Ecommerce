@@ -22,6 +22,7 @@ import OrderSuccess from './components/Cart/OrderSuccess';
 import Payment from './components/Cart/Payment';
 import Shipping from './components/Cart/Shipping';
 import Home from './components/Home/Home';
+import LoginButton from './components/Home/LoginButton';
 import About from './components/layout/About/About';
 import Contact from './components/layout/Contact/Contact';
 import Footer from './components/layout/Footer/Footer';
@@ -44,7 +45,6 @@ import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
 
 import './App.css';
-import LoginButton from './components/Home/LoginButton';
 
 /*
     TODO: #1 Not able to upload image in register page

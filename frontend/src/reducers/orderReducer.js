@@ -19,7 +19,22 @@ import {
     ORDER_DETAILS_REQUEST,
     ORDER_DETAILS_SUCCESS,
     ORDER_DETAILS_FAIL,
-    CLEAR_ERRORS,
+    REQUEST_RETURN_REQUEST,
+    REQUEST_RETURN_SUCCESS,
+    REQUEST_RETURN_FAIL,
+    INITIATE_REFUND_REQUEST,
+    INITIATE_REFUND_SUCCESS,
+    INITIATE_REFUND_FAIL,
+    REFUND_STATUS_UPDATE_REQUEST,
+    REFUND_STATUS_UPDATE_SUCCESS,
+    REFUND_STATUS_UPDATE_FAIL,
+    ALL_RETURNS_REQUEST,
+    ALL_RETURNS_SUCCESS,
+    ALL_RETURNS_FAIL,
+    ALL_REFUNDS_REQUEST,
+    ALL_REFUNDS_SUCCESS,
+    ALL_REFUNDS_FAIL,
+    CLEAR_ERRORS
 } from '../constants/orderConstants';
 
 export const newOrderReducer = (state = {}, action) => {
@@ -190,3 +205,152 @@ export const orderDetailsReducer = (state = { order: {} }, action) => {
             return state;
     }
 };
+
+export const returnRequestReducer = (state = {}, action) => {
+    switch (action.type) {
+        case REQUEST_RETURN_REQUEST:
+            return {
+                loading: true
+            };
+
+        case REQUEST_RETURN_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+                order: action.payload
+            };
+
+        case REQUEST_RETURN_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            };
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null
+            };
+
+        default:
+            return state;
+    }
+};
+
+export const initiateRefundReducer = (state = {}, action) => {
+    switch (action.type) {
+        case INITIATE_REFUND_REQUEST:
+            return {
+                loading: true
+            };
+
+        case INITIATE_REFUND_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+                order: action.payload
+            };
+
+        case INITIATE_REFUND_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            };
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null
+            };
+
+        default:
+            return state;
+    }
+};
+
+export const refundStatusUpdateReducer = (state = {}, action) => {
+    switch (action.type) {
+        case REFUND_STATUS_UPDATE_REQUEST:
+            return {
+                loading: true
+            };
+
+        case REFUND_STATUS_UPDATE_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+                order: action.payload
+            };
+
+        case REFUND_STATUS_UPDATE_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            };
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null
+            };
+
+        default:
+            return state;
+    }
+};
+
+export const allRefundsReducer = (state = { refunds: [] }, action) => {
+    switch (action.type) {
+        case ALL_REFUNDS_REQUEST:
+            return {
+                loading: true
+            };
+
+        case ALL_REFUNDS_SUCCESS:
+            return {
+                loading: false,
+                refunds: action.payload
+            };
+
+        case ALL_REFUNDS_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            };
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null
+            };
+
+        default:
+            return state;
+    }
+};
+
+export const allReturnsReducer = (state = { returns: [] }, action) => {
+    switch (action.type) {
+        case ALL_RETURNS_REQUEST:
+            return {
+                loading: true
+            };
+
+        case ALL_RETURNS_SUCCESS:
+            return {
+                loading: false,
+                returns: action.payload
+            };
+
+        case ALL_RETURNS_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            };
+        case CLEAR_ERRORS:
+            return {
+                ...state,
+                error: null
+            };
+
+        default:
+            return state;
+    }
+};
+

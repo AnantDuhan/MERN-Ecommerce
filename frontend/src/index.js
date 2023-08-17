@@ -10,8 +10,8 @@ import store from './store';
 import 'react-toastify/dist/ReactToastify.css';
 
 const options = {
-    autoClose:  6000,
-    position: toast.POSITION.TOP_RIGHT,
+    autoClose:  3000,
+    position: toast.POSITION.TOP_CENTER,
     transition: Bounce,
 };
 

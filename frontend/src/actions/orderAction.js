@@ -17,6 +17,21 @@ import {
     ORDER_DETAILS_REQUEST,
     ORDER_DETAILS_SUCCESS,
     ORDER_DETAILS_FAIL,
+    REQUEST_RETURN_REQUEST,
+    REQUEST_RETURN_SUCCESS,
+    REQUEST_RETURN_FAIL,
+    INITIATE_REFUND_REQUEST,
+    INITIATE_REFUND_SUCCESS,
+    INITIATE_REFUND_FAIL,
+    REFUND_STATUS_UPDATE_REQUEST,
+    REFUND_STATUS_UPDATE_SUCCESS,
+    REFUND_STATUS_UPDATE_FAIL,
+    ALL_RETURNS_REQUEST,
+    ALL_RETURNS_SUCCESS,
+    ALL_RETURNS_FAIL,
+    ALL_REFUNDS_REQUEST,
+    ALL_REFUNDS_SUCCESS,
+    ALL_REFUNDS_FAIL,
     CLEAR_ERRORS,
 } from '../constants/orderConstants';
 
@@ -76,7 +91,7 @@ export const getAllOrders = () => async (dispatch) => {
 };
 
 // Update Order
-export const updateOrder = (id, order) => async (dispatch) => {
+export const updateOrder = (id, status) => async (dispatch) => {
     try {
         dispatch({ type: UPDATE_ORDER_REQUEST });
 
@@ -87,7 +102,7 @@ export const updateOrder = (id, order) => async (dispatch) => {
         };
         const { data } = await axios.put(
             `/api/v1/admin/order/${id}`,
-            order,
+            {status},
             {config}
         );
 
@@ -128,6 +143,97 @@ export const getOrderDetails = (id) => async (dispatch) => {
         dispatch({
             type: ORDER_DETAILS_FAIL,
             payload: error.response.data.message,
+        });
+    }
+};
+
+export const returnRequest = (id, returnReason) => async (dispatch) => {
+    try {
+        dispatch({ type: REQUEST_RETURN_REQUEST });
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+
+        const { data } = await axios.post(`/api/v1/order/${id}/return`, { returnReason }, { config });
+
+        dispatch({
+            type: REQUEST_RETURN_SUCCESS,
+            payload: data.order
+        });
+
+    } catch (error) {
+        dispatch({
+            type: REQUEST_RETURN_FAIL,
+            payload: error.response.data.message
+        })
+    }
+};
+
+export const initiateRefund = (id) => async (dispatch) => {
+    try {
+        dispatch({ type: INITIATE_REFUND_REQUEST });
+
+        const { data } = axios.post(`/api/v1/order/${id}/refund`);
+
+        dispatch({ type: INITIATE_REFUND_SUCCESS, payload: data.order });
+    } catch (error) {
+        dispatch({
+            type: INITIATE_REFUND_FAIL,
+            payload: error.response.data.message
+        });
+    }
+};
+
+export const updateRefundStatus  = (id, refundStatus) => async dispatch => {
+    try {
+        dispatch({ type: REFUND_STATUS_UPDATE_REQUEST });
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        const { data } = axios.get(`/api/v1/admin/refund/${id}/status`, {refundStatus}, {config});
+
+        dispatch({ type: REFUND_STATUS_UPDATE_SUCCESS, payload: data.order });
+    } catch (error) {
+        dispatch({
+            type: REFUND_STATUS_UPDATE_FAIL,
+            payload: error.response.data.message
+        });
+    }
+};
+
+export const allRefunds = () => async (dispatch) => {
+    try {
+        dispatch({ type: ALL_REFUNDS_REQUEST });
+
+        const { data } = axios.get(`/api/v1/admin/refunds`);
+
+        dispatch({ type: ALL_REFUNDS_SUCCESS, payload: data.order });
+    } catch (error) {
+        dispatch({
+            type: ALL_REFUNDS_FAIL,
+            payload: error.response.data.message
+        });
+    }
+};
+
+export const allReturns = () => async dispatch => {
+    try {
+        dispatch({ type: ALL_RETURNS_REQUEST });
+
+        const { data } = axios.get(`/api/v1/admin/Returns`);
+
+        dispatch({ type: ALL_RETURNS_SUCCESS, payload: data.order });
+    } catch (error) {
+        dispatch({
+            type: ALL_RETURNS_FAIL,
+            payload: error.response.data.message
         });
     }
 };

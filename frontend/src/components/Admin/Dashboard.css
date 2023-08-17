@@ -42,10 +42,8 @@
 }
 
 .dashboardSummaryBox2 > a {
-  color: rgb(0, 0, 0);
   font: 300 2rem "Roboto";
   text-align: center;
-  background-color: rgb(255, 233, 174);
   text-decoration: none;
   padding: 1.5rem;
   width: 10vmax;
@@ -56,16 +54,31 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  color: white;
 }
 
-.dashboardSummaryBox2 > a:first-child {
-  background-color: rgb(255, 110, 110);
+.dashboardSummaryBox2>a:nth-child(1) {
+  background-color: #ff6b6b;
   color: rgb(255, 255, 255);
+  /* Bright Red */
 }
 
-.dashboardSummaryBox2 > a:last-child {
-  background-color: rgb(51, 51, 51);
+.dashboardSummaryBox2>a:nth-child(2) {
+  background-color: #4eb3d3;
   color: rgb(255, 255, 255);
+  /* Bright Blue */
+}
+
+.dashboardSummaryBox2>a:nth-child(3) {
+  background-color: #ffc35e;
+  color: rgb(255, 255, 255);
+  /* Bright Orange */
+}
+
+.dashboardSummaryBox2>a:nth-child(4) {
+  background-color: #81c784;
+  color: rgb(255, 255, 255);
+  /* Bright Green */
 }
 
 .lineChart {
