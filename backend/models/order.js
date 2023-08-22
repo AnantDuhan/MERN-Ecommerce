@@ -76,11 +76,6 @@ const orderSchema = new mongoose.Schema({
         default: 0,
         required: true
     },
-    taxPrice: {
-        type: Number,
-        default: 0,
-        required: true
-    },
     shippingPrice: {
         type: Number,
         default: 0,
@@ -101,13 +96,17 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    // refund details
+    returns: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Return'
+        }
+    ],
+
+    // Refund details
     isReturned: {
         type: Boolean,
         default: false
-    },
-    returnReason: {
-        type: String
     },
     returnRequestedAt: {
         type: Date
@@ -116,24 +115,21 @@ const orderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    refundAmount: {
-        type: Number,
-        default: 0
-    },
     refundRequestedAt: {
         type: Date
     },
-    refundedAt: {
-        type: Date
-    },
     refundStatus: {
-        type: String
+        type: String,
+        default: 'Not Requested'
     },
     refundInfo: {
         id: String,
         amount: Number,
         status: String,
         createdAt: Date
+    },
+    refundedAt: {
+        type: Date
     },
     // Coupon details
     couponUsed: {

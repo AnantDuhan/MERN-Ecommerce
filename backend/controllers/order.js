@@ -284,7 +284,7 @@ exports.deleteOrder = async (req, res, next) => {
         message: 'Order📦 deleted successfully'
     });
 };
-
+/*
 exports.requestReturn = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
@@ -327,8 +327,9 @@ exports.requestReturn = async (req, res) => {
             message: 'Server error'
         });
     }
-};
+}; */
 
+/*
 // Initiate refund for a returned order
 exports.initiateRefund = async (req, res) => {
     try {
@@ -368,12 +369,6 @@ exports.initiateRefund = async (req, res) => {
 
             res.status(200).json({
                 success: true,
-                message: 'Refund initiation request sent',
-                order
-            });
-
-            res.status(200).json({
-                success: true,
                 message: 'Refund initiated',
                 order
             });
@@ -384,8 +379,8 @@ exports.initiateRefund = async (req, res) => {
             message: 'Server error'
         });
     }
-};
-
+}; */
+/*
 exports.updateRefundStatus = async (req, res) => {
     try {
         const { refundStatus } = req.body;
@@ -407,9 +402,9 @@ exports.updateRefundStatus = async (req, res) => {
         }
 
         if (
-            refundStatus !== 'pending' &&
-            refundStatus !== 'approved' &&
-            refundStatus !== 'rejected'
+            refundStatus !== 'Pending' &&
+            refundStatus !== 'Approved' &&
+            refundStatus !== 'Rejected'
         ) {
             return res.status(400).json({
                 success: false,
@@ -418,10 +413,10 @@ exports.updateRefundStatus = async (req, res) => {
         }
 
         // If the refund status is 'approved', perform the actual refund process
-        if (refundStatus === 'approved') {
+        if (refundStatus === 'Approved') {
             const refund = await stripe.refunds.create({
                 payment_intent: order.paymentInfo.id,
-                amount: order.totalPrice
+                amount: Math.round(order.totalPrice),
             });
 
             order.refundInfo = {
@@ -453,8 +448,8 @@ exports.updateRefundStatus = async (req, res) => {
             message: 'Server error'
         });
     }
-};
-
+}; */
+/*
 // Get all return requests
 exports.getAllReturns = async (req, res) => {
     try {
@@ -481,4 +476,4 @@ exports.getAllRefunds = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
-};
+}; */

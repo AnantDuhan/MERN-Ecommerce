@@ -27,7 +27,7 @@ exports.contactUs = async (req, res) => {
 
         await sendEmail({
             email: 'duhananant@gmail.com',
-            subject: `New Contact Form Submission: ${subject}`,
+            subject: `New Contact Form Submission`,
             html: `
       <p>You have received a new contact form submission:</p>
       <ul>
@@ -46,6 +46,7 @@ exports.contactUs = async (req, res) => {
             contact
         })
     } catch (error) {
+        console.log("ERROR", error);
         res.status(500).json({
             success: false,
             message: 'Error Sending Message'

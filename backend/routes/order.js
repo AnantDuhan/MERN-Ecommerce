@@ -6,21 +6,20 @@ const {
    getAllOrders,
    updateOrder,
    deleteOrder,
-   requestReturn,
-   updateRefundStatus,
-   initiateRefund,
-   getAllReturns,
-   getAllRefunds,
 } = require('../controllers/order');
 const router = express.Router();
 
 const { isAuthUser, authRoles } = require('../middleware/auth');
+const { requestReturn, getAllReturns } = require('../controllers/return');
+const { initiateRefund, updateRefundStatus, getAllRefunds } = require('../controllers/refund');
 
 router.route('/order/new').post(isAuthUser, newOrder);
 
 router.route('/order/:id').get(isAuthUser, getSingleOrder);
 
 router.route('/orders/me').get(isAuthUser, myOrders);
+
+router.route('/order/:id/return').post(isAuthUser, requestReturn);
 
 router.route('/admin/orders').get(isAuthUser, authRoles('admin'), getAllOrders);
 
@@ -29,11 +28,11 @@ router
     .put(isAuthUser, authRoles('admin'), updateOrder)
     .delete(isAuthUser, authRoles('admin'), deleteOrder);
 
-router.route('/order/:id/return').post(isAuthUser, requestReturn);
+router
+    .route('/admin/order/:id/refund')
+    .post(isAuthUser, authRoles('admin'), initiateRefund);
 
-router.route('/order/:id/refund').post(isAuthUser, initiateRefund);
-
-router.route('/admin/refund/:id/status').patch(isAuthUser, authRoles('admin'), updateRefundStatus);
+router.route('/admin/order/:orderId/refund/:refundId/status').patch(isAuthUser, authRoles('admin'), updateRefundStatus);
 
 router.route('/admin/returns').get(isAuthUser, authRoles('admin'), getAllReturns);
 
