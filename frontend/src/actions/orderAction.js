@@ -176,7 +176,7 @@ export const initiateRefund = (id) => async (dispatch) => {
     try {
         dispatch({ type: INITIATE_REFUND_REQUEST });
 
-        const { data } = axios.post(`/api/v1/order/${id}/refund`);
+        const { data } = await axios.post(`/api/v1/admin/order/${id}/refund`);
 
         dispatch({ type: INITIATE_REFUND_SUCCESS, payload: data.order });
     } catch (error) {
@@ -187,7 +187,7 @@ export const initiateRefund = (id) => async (dispatch) => {
     }
 };
 
-export const updateRefundStatus  = (id, refundStatus) => async dispatch => {
+export const updateRefundStatus  = (orderId, refundId, refundStatus) => async dispatch => {
     try {
         dispatch({ type: REFUND_STATUS_UPDATE_REQUEST });
 
@@ -197,9 +197,19 @@ export const updateRefundStatus  = (id, refundStatus) => async dispatch => {
             }
         };
 
-        const { data } = axios.get(`/api/v1/admin/refund/${id}/status`, {refundStatus}, {config});
+        const body = JSON.stringify({ refundStatus });
 
-        dispatch({ type: REFUND_STATUS_UPDATE_SUCCESS, payload: data.order });
+        await axios.patch(
+            `/api/v1/admin/order/${orderId}/refund/${refundId}/status`,
+            { body },
+            { config }
+        );
+
+        dispatch({
+            type: REFUND_STATUS_UPDATE_SUCCESS,
+            payload: { orderId, refundId, refundStatus }
+            // payload: data.order
+        });
     } catch (error) {
         dispatch({
             type: REFUND_STATUS_UPDATE_FAIL,
@@ -212,9 +222,9 @@ export const allRefunds = () => async (dispatch) => {
     try {
         dispatch({ type: ALL_REFUNDS_REQUEST });
 
-        const { data } = axios.get(`/api/v1/admin/refunds`);
+        const { data } = await axios.get(`/api/v1/admin/refunds`);
 
-        dispatch({ type: ALL_REFUNDS_SUCCESS, payload: data.order });
+        dispatch({ type: ALL_REFUNDS_SUCCESS, payload: data.refunds });
     } catch (error) {
         dispatch({
             type: ALL_REFUNDS_FAIL,
@@ -227,9 +237,9 @@ export const allReturns = () => async dispatch => {
     try {
         dispatch({ type: ALL_RETURNS_REQUEST });
 
-        const { data } = axios.get(`/api/v1/admin/Returns`);
+        const { data } = await axios.get(`/api/v1/admin/returns`);
 
-        dispatch({ type: ALL_RETURNS_SUCCESS, payload: data.order });
+        dispatch({ type: ALL_RETURNS_SUCCESS, payload: data.returns });
     } catch (error) {
         dispatch({
             type: ALL_RETURNS_FAIL,

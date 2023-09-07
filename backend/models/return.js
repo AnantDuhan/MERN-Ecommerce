@@ -1,16 +1,24 @@
 const mongoose = require('mongoose');
 
+const returnProductSchema = new mongoose.Schema({
+    product: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Product',
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true
+    }
+});
+
 const returnSchema = new mongoose.Schema({
     order: {
         type: mongoose.Schema.ObjectId,
         ref: 'Order',
         required: true
     },
-    product: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Product',
-        required: true
-    },
+    products: [returnProductSchema], // An array of returned products
     reason: {
         type: String,
         required: true

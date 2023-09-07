@@ -1,68 +1,84 @@
-import Typography from "@material-ui/core/Typography";
-import { DataGrid } from "@material-ui/data-grid";
-import LaunchIcon from "@material-ui/icons/Launch";
-import React, { Fragment, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from 'react-router-dom';
+import { DataGrid } from '@material-ui/data-grid';
+import LaunchIcon from '@material-ui/icons/Launch';
+import React, { Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Typography } from '@material-ui/core';
+import { clearErrors, myOrders } from '../../actions/orderAction';
+import Loader from '../layout/Loader/Loader';
+import MetaData from '../layout/MetaData';
 
-import { clearErrors, myOrders } from "../../actions/orderAction";
-import Loader from "../layout/Loader/Loader";
-import MetaData from "../layout/MetaData";
-
-import "./MyOrders.css";
+import './MyOrders.css';
 
 const MyOrders = () => {
-
     const dispatch = useDispatch();
-    const { id } = useParams();
 
-    const { loading, error, orders } = useSelector((state) => state.myOrders);
-    const { user } = useSelector((state) => state.user);
+    const { loading, error, orders } = useSelector(state => state.myOrders);
+    const { user } = useSelector(state => state.user);
 
     const columns = [
-        { field: 'id', headerName: 'Order ID', minWidth: 180, flex: 0.8 },
+        { field: 'id', headerName: 'Order ID', minWidth: 150, flex: 0.4 }, // Extra minWidth and flex for ID
         {
-            field: 'status',
-            headerName: 'Status',
-            minWidth: 150,
-            flex: 0.5,
-            cellClassName: (params) => {
-                return params.getValue(params.id, 'status') === 'Delivered'
+            field: 'orderStatus',
+            headerName: 'Order Status',
+            minWidth: 120,
+            flex: 0.3, // Equal minWidth and flex
+            cellClassName: params => {
+                const status = params.row.orderStatus;
+                return status === 'Delivered' ? 'greenColor' : 'redColor';
+            }
+        },
+        {
+            field: 'refundStatus',
+            headerName: 'Refund Status',
+            minWidth: 120,
+            flex: 0.3, // Equal minWidth and flex
+            cellClassName: params => {
+                const status = params.row.refundStatus;
+                return status === 'Approved' || status === 'Refunded'
                     ? 'greenColor'
-                    : 'redColor';
-            },
+                    : status === 'Initiated' ||
+                      status === 'Pending' ||
+                      status === 'Rejected'
+                    ? 'redColor'
+                    : '';
+            }
         },
         {
             field: 'itemsQty',
             headerName: 'Items Qty',
             type: 'number',
-            minWidth: 150,
-            flex: 0.3,
+            minWidth: 120,
+            flex: 0.3 // Equal minWidth and flex
         },
         {
             field: 'amount',
             headerName: 'Amount',
             type: 'number',
-            minWidth: 270,
-            flex: 0.5,
+            minWidth: 120, // Equal minWidth and flex
+            flex: 0.2 // Equal minWidth and flex
         },
         {
             field: 'actions',
-            flex: 0.3,
+            flex: 0.2,
             headerName: 'Actions',
-            minWidth: 150,
+            minWidth: 120,
             type: 'number',
             sortable: false,
-            renderCell: (params) => {
+            renderCell: params => {
                 return (
-                    <Link to={`/order/${params.getValue(params.id, 'id')}`}>
-                        <LaunchIcon />
-                    </Link>
+                    <div className='actions-container'>
+                        <Link to={`/order/${params.getValue(params.id, 'id')}`}>
+                            <LaunchIcon />
+                        </Link>
+                    </div>
                 );
-            },
-        },
+            }
+        }
     ];
+
+
 
     const rows = [];
 
@@ -71,7 +87,8 @@ const MyOrders = () => {
             rows.push({
                 itemsQty: item.orderItems.length,
                 id: item._id,
-                status: item.orderStatus,
+                orderStatus: item.orderStatus,
+                refundStatus: item.refundStatus,
                 amount: item.totalPrice,
             });
         });
@@ -91,17 +108,22 @@ const MyOrders = () => {
             {loading ? (
                 <Loader />
             ) : (
-                <div className="myOrdersPage">
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        pageSize={10}
-                        disableSelectionOnClick
-                        className="myOrdersTable"
-                        autoHeight
-                    />
-
-                    <Typography id="myOrdersHeading">{user.name}'s Orders</Typography>
+                <div className='myOrdersPage'>
+                    <h1 id='orderListHeading'>MY ORDERS</h1>
+                    <div className='table-container'>
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            pageSize={10}
+                            rowsPerPageOptions={[10, 20, 30]}
+                            // disableSelectionOnClick
+                            className='myOrdersTable'
+                            autoHeight
+                        />
+                    </div>
+                    <Typography id='myOrdersHeading'>
+                        {user.name}'s Orders
+                    </Typography>
                 </div>
             )}
         </Fragment>

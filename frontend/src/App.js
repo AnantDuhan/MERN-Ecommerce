@@ -3,7 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import WebFont from 'webfontloader';
 
 import { loadUser } from './actions/userAction';
@@ -45,11 +45,12 @@ import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
 
 import './App.css';
+import ReturnRequest from './components/Order/ReturnRequest';
+import ReturnList from './components/Admin/ReturnList';
+import RefundList from './components/Admin/RefundList';
 
 /*
     TODO: #1 Not able to upload image in register page
-
-    TODO: #2 Payment Page Not Working
 
     TODO: #5 Sidebar for Admin Dashboard Not Visible
 */
@@ -63,9 +64,8 @@ function App() {
         'pk_test_51K9RkSSDvITsgzEyN1XtfELWFWiUetYQEU3NWsuHgEmnn07jtXs0HJKJ1x2cXldIX2hOc9qrm81fS6Fi1Z0pHsvu000MvtXP6h'
     );
 
-    // const options = {
-    //     client_secret: '{{CLIENT_SECRET}}'
-    // }
+    const location = useLocation();
+    const isAdminRoute = location.pathname.startsWith('/admin');
 
     async function getStripeApiKey() {
         const { data } = await axios.get('/api/v1/stripeapikey');
@@ -112,7 +112,7 @@ function App() {
                 <Route path='/products/:keyword' element={<Products />} exact />
                 <Route path='/search' element={<Search />} exact />
                 <Route path='/about' element={<About />} exact />
-                <Route path='/contact' element={<Contact />} exact />
+                <Route path='/contact-us' element={<Contact />} exact />
                 {isAuthenticated && (
                     <Route path='/account' element={<Profile />} exact />
                 )}
@@ -163,10 +163,21 @@ function App() {
                         exact
                     />
                 )}
+
                 {isAuthenticated && (
                     <Route path='/order/:id' element={<OrderDetails />} exact />
                 )}
 
+                {isAuthenticated && (
+                    <Route
+                        path='/order/:id/return'
+                        element={<ReturnRequest />}
+                        exact
+                    />
+                )}
+            </Routes>
+            {/* {isAdminRoute && <Sidebar />} */}
+            <Routes>
                 {/* Admin Routes */}
                 {isAuthenticated && (
                     <Route
@@ -248,20 +259,36 @@ function App() {
                         exact
                     />
                 )}
+
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/returns'
+                        element={<ReturnList />}
+                        exact
+                    />
+                )}
+
+                {isAuthenticated && (
+                    <Route
+                        isAdmin={true}
+                        path='/admin/refunds'
+                        element={<RefundList />}
+                        exact
+                    />
+                )}
                 {/*  */}
 
                 <Route
                     element={
-                        this?.location.pathname === '/payment' ? null : (
-                            <NotFound />
-                        )
+                        location.pathname === '/payment' ? null : <NotFound />
                     }
                 />
 
                 {/* Page Not Found Route */}
-                <Route path='*' element={<NotFound />} />
+                {/* <Route path='*' element={<NotFound />} /> */}
             </Routes>
-            <Footer />
+            {!isAdminRoute && <Footer />}
         </Fragment>
     );
 }

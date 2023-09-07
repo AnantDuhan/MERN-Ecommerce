@@ -5,6 +5,7 @@ import ListAltIcon from '@material-ui/icons/ListAlt';
 import PersonIcon from '@material-ui/icons/Person';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { SpeedDial, SpeedDialAction } from '@material-ui/lab';
+import CategoryIcon from '@mui/icons-material/Category';
 import React, { Fragment, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +23,7 @@ const UserOptions = ({ user }) => {
     const { cartItems } = useSelector((state) => state.cart);
 
     const options = [
+        {icon: <CategoryIcon />, name: 'Products', func: products },
         { icon: <ListAltIcon />, name: 'Orders', func: orders },
         { icon: <PersonIcon />, name: 'Profile', func: account },
         {
@@ -46,6 +48,10 @@ const UserOptions = ({ user }) => {
 
     function dashboard() {
         navigate('/admin/dashboard');
+    }
+
+    function products() {
+        navigate('/products');
     }
 
     function orders() {
@@ -80,7 +86,7 @@ const UserOptions = ({ user }) => {
                 icon={
                     <img
                         className='speedDialIcon'
-                        src={user.avatar?.url ? user.avatar?.url : '/Profile.png'}
+                        src={user.avatar ? user.avatar : '/Profile.png'}
                         alt='Profile'
                     />
                 }

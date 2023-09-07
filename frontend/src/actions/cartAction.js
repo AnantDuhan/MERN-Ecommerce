@@ -2,6 +2,7 @@ import {
     ADD_TO_CART,
     REMOVE_CART_ITEM,
     SAVE_SHIPPING_INFO,
+    CLEAR_CART_ITEMS
 } from '../constants/cartConstants';
 import axios from 'axios';
 
@@ -48,4 +49,12 @@ export const saveShippingInfo = (data) => async (dispatch) => {
     });
 
     localStorage.setItem('shippingInfo', JSON.stringify(data));
+};
+
+export const clearCart = () => dispatch => {
+    dispatch({
+        type: CLEAR_CART_ITEMS
+    });
+
+    localStorage.removeItem('cartItems');
 };

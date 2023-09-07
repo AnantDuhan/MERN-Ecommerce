@@ -3,49 +3,54 @@ const Order = require('../models/order');
 
 exports.requestReturn = async (req, res) => {
     try {
-            const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.id);
 
-            if (!order) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Order not found'
-                });
-            }
-
-            if (order.orderStatus !== 'Delivered') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Order has not been delivered yet'
-                });
-            }
-
-            const productsInOrder = order.orderItems.map(item => item.product._id);
-
-            // Create a new Return document for each product in the order
-            for (const productId of productsInOrder) {
-                const newReturn = new Return({
-                    order: order._id,
-                    product: productId,
-                    reason: req.body.returnReason,
-                    requestedAt: new Date(),
-                    status: 'Pending'
-                });
-
-                await newReturn.save();
-                order.returns.push(newReturn._id); // Push the return _id into the array
-            }
-
-            order.isReturned = true;
-            order.returnReason = req.body.returnReason;
-            order.returnRequestedAt = new Date();
-            await order.save();
-
-            res.status(200).json({
-                success: true,
-                message: 'Return requested',
-                order
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
             });
-        } catch (error) {
+        }
+
+        if (order.orderStatus !== 'Delivered') {
+            return res.status(400).json({
+                success: false,
+                message: 'Order has not been delivered yet'
+            });
+        }
+
+        const productsInOrder = order.orderItems.map(item => ({
+            product: item.product._id,
+            quantity: item.quantity
+        }));
+
+
+
+        // Create a new Return document for the entire order
+        const newReturn = new Return({
+            order: order._id,
+            products: productsInOrder,
+            reason: req.body.returnReason,
+            requestedAt: new Date(),
+            status: 'Completed'
+        });
+
+        await newReturn.save();
+
+        // Update the order to reference the single return request
+        order.return.push(newReturn);
+        order.isReturned = true;
+        order.returnReason = req.body.returnReason;
+        order.returnRequestedAt = new Date();
+        order.refundStatus = 'Initiated';
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Return requested',
+            order
+        });
+    } catch (error) {
         console.error(error);
         res.status(500).json({
             success: false,
@@ -54,13 +59,15 @@ exports.requestReturn = async (req, res) => {
     }
 };
 
+
+
 // Get all return requests
 exports.getAllReturns = async (req, res) => {
     try {
         const returns = await Return.find()
             .populate({
                 path: 'order',
-                select: 'user returnRequestedAt',
+                select: 'user returnRequestedAt totalPrice',
                 populate: {
                     path: 'user',
                     select: 'name email'

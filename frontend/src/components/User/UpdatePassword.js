@@ -1,27 +1,27 @@
-import { Button, Typography } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
-import { toast } from 'react-toastify';
-
-import { clearErrors, updatePassword } from '../../actions/userAction';
-import { UPDATE_PASSWORD_RESET } from '../../constants/userConstants';
-import Loader from '../layout/Loader/Loader';
-import MetaData from '../layout/MetaData';
-
+import React, { Fragment, useState, useEffect } from 'react';
 import './UpdatePassword.css';
+import Loader from '../layout/Loader/Loader';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearErrors, updatePassword } from '../../actions/userAction';
+import { toast } from 'react-toastify';
+import { UPDATE_PASSWORD_RESET } from '../../constants/userConstants';
+import MetaData from '../layout/MetaData';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@material-ui/icons/Lock';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { useNavigate } from 'react-router';
 
 const UpdatePassword = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { error, isUpdated, loading } = useSelector((state) => state.profile);
+    const { error, isUpdated, loading } = useSelector(state => state.profile);
 
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const updatePasswordSubmit = (e) => {
+    const updatePasswordSubmit = e => {
         e.preventDefault();
 
         const myForm = new FormData();
@@ -45,7 +45,7 @@ const UpdatePassword = () => {
             navigate('/account');
 
             dispatch({
-                type: UPDATE_PASSWORD_RESET,
+                type: UPDATE_PASSWORD_RESET
             });
         }
     }, [dispatch, error, navigate, isUpdated]);
@@ -57,50 +57,60 @@ const UpdatePassword = () => {
             ) : (
                 <Fragment>
                     <MetaData title='Change Password' />
+                    <div className='updatePasswordContainer'>
+                        <div className='updatePasswordBox'>
+                            <h2 className='updatePasswordHeading'>
+                                Update Profile
+                            </h2>
 
-                    <div className='updatePassword'>
-                        <form
-                            className='updatePasswordForm'
-                            onSubmit={updatePasswordSubmit}
-                        >
-                            <Typography
-                                variant='h4'
-                                style={{ padding: '2vmax' }}
+                            <form
+                                className='updatePasswordForm'
+                                onSubmit={updatePasswordSubmit}
                             >
-                                UPDATE PASSWORD
-                            </Typography>
+                                <div className='loginPassword'>
+                                    <VpnKeyIcon />
+                                    <input
+                                        type='password'
+                                        placeholder='Old Password'
+                                        required
+                                        value={oldPassword}
+                                        onChange={e =>
+                                            setOldPassword(e.target.value)
+                                        }
+                                    />
+                                </div>
 
-                            <input
-                                type='password'
-                                placeholder='Old Password'
-                                className='updatePasswordInputs'
-                                required
-                                value={oldPassword}
-                                onChange={e => setOldPassword(e.target.value)}
-                            />
-
-                            <input
-                                type='password'
-                                placeholder='New Password'
-                                className='updatePasswordInputs'
-                                required
-                                value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}
-                            />
-
-                            <input
-                                type='password'
-                                className='updatePasswordInputs'
-                                placeholder='Confirm Password'
-                                required
-                                value={confirmPassword}
-                                onChange={e =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                            />
-
-                            <Button type='submit'>UPDATE PASSWORD</Button>
-                        </form>
+                                <div className='loginPassword'>
+                                    <LockOpenIcon />
+                                    <input
+                                        type='password'
+                                        placeholder='New Password'
+                                        required
+                                        value={newPassword}
+                                        onChange={e =>
+                                            setNewPassword(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <div className='loginPassword'>
+                                    <LockIcon />
+                                    <input
+                                        type='password'
+                                        placeholder='Confirm Password'
+                                        required
+                                        value={confirmPassword}
+                                        onChange={e =>
+                                            setConfirmPassword(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <input
+                                    type='submit'
+                                    value='Change'
+                                    className='updatePasswordBtn'
+                                />
+                            </form>
+                        </div>
                     </div>
                 </Fragment>
             )}

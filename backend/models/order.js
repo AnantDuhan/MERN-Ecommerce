@@ -96,10 +96,17 @@ const orderSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    returns: [
+    return: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.ObjectId,
             ref: 'Return'
+        }
+    ],
+    refund: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Refund',
+            required: true
         }
     ],
 

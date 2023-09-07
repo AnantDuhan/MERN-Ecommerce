@@ -30,11 +30,12 @@ const UpdateUser = () => {
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('');
 
-    const userId = id;
+    console.log("ID", id);
+    console.log('userId', user);
 
     useEffect(() => {
-        if (user && user._id !== userId) {
-            dispatch(getUserDetails(userId));
+        if (user && user._id !== id) {
+            dispatch(getUserDetails(id));
         } else {
             setName(user.name);
             setEmail(user.email);
@@ -55,7 +56,7 @@ const UpdateUser = () => {
             navigate('/admin/users');
             dispatch({ type: UPDATE_USER_RESET });
         }
-    }, [dispatch, error, navigate, isUpdated, updateError, user, userId]);
+    }, [dispatch, error, navigate, isUpdated, updateError, user, id]);
 
     const updateUserSubmitHandler = e => {
         e.preventDefault();
@@ -66,7 +67,7 @@ const UpdateUser = () => {
         myForm.set('email', email);
         myForm.set('role', role);
 
-        dispatch(updateUser(userId, myForm));
+        dispatch(updateUser(id, myForm));
     };
 
     return (
@@ -128,7 +129,7 @@ const UpdateUser = () => {
                                         : false
                                 }
                             >
-                                Update
+                                Update User
                             </Button>
                         </form>
                     )}

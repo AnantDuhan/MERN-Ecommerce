@@ -30,7 +30,7 @@ const ProductDetails = () => {
         size: 'large',
         value: product?.ratings,
         readOnly: false,
-        precision: 0.2
+        precision: 0.5
     };
 
     const [quantity, setQuantity] = useState(1);
@@ -62,14 +62,13 @@ const ProductDetails = () => {
     };
 
     const reviewSubmitHandler = () => {
-        const myForm = new FormData();
+        const reviewData = new FormData();
 
-        myForm.set('rating', rating);
-        myForm.set('comment', comment);
-        myForm.set('productId', id);
+        reviewData.set('productId', id);
+        reviewData.set('comment', comment);
+        reviewData.set('rating', rating);
 
-        dispatch(newReview(myForm));
-
+        dispatch(newReview(reviewData));
         setOpen(false);
     };
 
@@ -108,8 +107,7 @@ const ProductDetails = () => {
                                         src={item.url}
                                         alt={`${i} Slide`}
                                     />
-                                ))
-                            }
+                                ))}
                         </div>
 
                         <div>
@@ -118,7 +116,10 @@ const ProductDetails = () => {
                                 <p>Product # {product._id}</p>
                             </div>
                             <div className='detailsBlock-2'>
-                                <Rating {...options} />
+                                <Rating
+                                    name={`rating`}
+                                    {...options}
+                                />
                                 <span className='detailsBlock-2-span'>
                                     {' '}
                                     ({product.numOfReviews} Reviews)
@@ -152,7 +153,7 @@ const ProductDetails = () => {
                                 </div>
 
                                 <p>
-                                    Status: {' '}
+                                    Status:{' '}
                                     <b
                                         className={
                                             product.Stock < 1
@@ -193,7 +194,7 @@ const ProductDetails = () => {
                                 onChange={e => setRating(e.target.value)}
                                 value={rating}
                                 size='large'
-                                precision='0.2'
+                                precision='0.5'
                             />
 
                             <textarea
@@ -220,16 +221,11 @@ const ProductDetails = () => {
                         </DialogActions>
                     </Dialog>
 
-                    {product.reviews && product.reviews[0] ? (
+                    {product.reviews && product.reviews.length > 0 ? (
                         <div className='reviews'>
-                            {product.reviews &&
-                                product.reviews.map(review => (
-                                    <ReviewCard
-                                        key={review._id}
-                                        review={review}
-                                    />
-                                ))
-                            }
+                            {product.reviews.map(review => (
+                                <ReviewCard key={review._id} review={review} />
+                            ))}
                         </div>
                     ) : (
                         <p className='noReviews'>No Reviews Yet</p>

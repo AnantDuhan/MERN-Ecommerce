@@ -2,6 +2,7 @@ import {
     ADD_TO_CART,
     REMOVE_CART_ITEM,
     SAVE_SHIPPING_INFO,
+    CLEAR_CART_ITEMS
 } from '../constants/cartConstants';
 
 export const cartReducer = (
@@ -13,20 +14,20 @@ export const cartReducer = (
             const item = action.payload;
 
             const isItemExist = state.cartItems.find(
-                (i) => i.product === item.product
+                i => i.product === item.product
             );
 
             if (isItemExist) {
                 return {
                     ...state,
-                    cartItems: state.cartItems.map((i) =>
+                    cartItems: state.cartItems.map(i =>
                         i.product === isItemExist.product ? item : i
-                    ),
+                    )
                 };
             } else {
                 return {
                     ...state,
-                    cartItems: [...state.cartItems, item],
+                    cartItems: [...state.cartItems, item]
                 };
             }
 
@@ -34,14 +35,19 @@ export const cartReducer = (
             return {
                 ...state,
                 cartItems: state.cartItems.filter(
-                    (i) => i.product !== action.payload
-                ),
+                    i => i.product !== action.payload
+                )
             };
 
         case SAVE_SHIPPING_INFO:
             return {
                 ...state,
-                shippingInfo: action.payload,
+                shippingInfo: action.payload
+            };
+        case CLEAR_CART_ITEMS: // Handle the new action type
+            return {
+                ...state,
+                cartItems: [] // Clear cart items when an order is successfully placed
             };
 
         default:

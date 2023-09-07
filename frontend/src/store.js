@@ -9,6 +9,11 @@ import {
     newOrderReducer,
     orderDetailsReducer,
     orderReducer,
+    returnRequestReducer,
+    initiateRefundReducer,
+    refundStatusUpdateReducer,
+    allRefundsReducer,
+    allReturnsReducer
 } from './reducers/orderReducer';
 import {
     newProductReducer,
@@ -26,6 +31,9 @@ import {
     userDetailsReducer,
     userReducer,
 } from './reducers/userReducer';
+import { couponReducer } from './reducers/couponReducer';
+import { contactReducer } from './reducers/contactReducer';
+import { subscribeReducer } from './reducers/subscribeReducer';
 
 const reducer = combineReducers({
     // product reducer
@@ -52,7 +60,21 @@ const reducer = combineReducers({
     myOrders: myOrdersReducer,
     allOrders: allOrdersReducer,
     order: orderReducer,
-    orderDetails: orderDetailsReducer
+    orderDetails: orderDetailsReducer,
+    returnRequest: returnRequestReducer,
+    initiateRefund: initiateRefundReducer,
+    refundStatusUpdate: refundStatusUpdateReducer,
+    allRefunds: allRefundsReducer,
+    allReturns: allReturnsReducer,
+
+    // coupon reducer
+    coupon: couponReducer,
+
+    // contact reducer
+    contact: contactReducer,
+
+    // subscribe reducer
+    subscribe: subscribeReducer
 });
 
 let initialState = {

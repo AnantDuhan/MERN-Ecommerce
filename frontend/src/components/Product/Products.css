@@ -93,6 +93,37 @@
   border: 1px solid rgba(0, 0, 0, 0.329);
 }
 
+.price-range-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.price-range-button {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  flex-grow: 1;
+  text-align: center;
+  transition: all 0.3s;
+  margin-right: 5px;
+}
+
+/* Style the first range in each line to display in a single line */
+.price-range-line button:first-child {
+  white-space: nowrap;
+}
+
+/* .price-range-button:last-child {
+  margin-right: 0;
+  /* Remove right margin for the last button */
+/* } */
+.price-range-button.active {
+  background-color: tomato;
+  color: #fff;
+}
+
 @media screen and (max-width: 600px) {
 
   .filterBox {
@@ -104,7 +135,22 @@
   .page-link {
     font: 300 1.7vmax "Roboto";
   }
+
   .category-link {
     font: 400 1.8vmax "Roboto";
   }
+
+    .price-ranges {
+      flex-direction: column;
+      align-items: flex-start;
+      width: auto;
+      /* Allow buttons to take their natural width */
+    }
+
+    .price-range-button {
+      width: auto;
+      /* Allow buttons to take their natural width */
+      margin: 5px 0;
+      /* Add vertical spacing between buttons */
+    }
 }

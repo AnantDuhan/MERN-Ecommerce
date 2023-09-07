@@ -20,7 +20,7 @@ router
 
 router.route('/product/:id').get(getProductDetails);
 
-router.route('/review').put(isAuthUser, createProductReview);
+router.route('/review').post(isAuthUser, createProductReview);
 
 router
     .route('/reviews')

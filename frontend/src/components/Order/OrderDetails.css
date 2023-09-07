@@ -1,24 +1,14 @@
-.orderDetailsPage {
-  background-color: white;
-}
-
 .orderDetailsContainer > h1 {
   font: 300 3vmax "Roboto";
   margin: 4vmax 0;
   color: tomato;
 }
 
-.orderDetailsContainer {
-  padding: 5vmax;
-  padding-bottom: 0%;
-}
-
 .orderDetailsContainer > p {
   font: 400 1.8vmax "Roboto";
 }
 
-.orderDetailsContainerBox,
-.orderDetailsCartItemsContainer {
+.orderDetailsContainerBox {
   margin: 2vmax;
 }
 
@@ -69,7 +59,79 @@
   color: #5e5e5e;
 }
 
-@media screen and (max-width: 600px) {
+.orderDetailsPage {
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+}
+
+.orderDetailsContainer {
+  flex: 60%;
+  padding: 20px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.scrollable-content {
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+.orderDetailsItems {
+  flex: 40%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  max-height: calc(100vh - 60px);
+}
+
+.orderDetailsCartItemsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 20px;
+}
+
+.orderItemImg {
+  height: 400px;
+  width: 400px;
+  flex: 40%;
+  margin-right: 1rem;
+}
+
+.orderItemImg img {
+  max-width: 100%;
+  height: auto;
+  width: auto;
+  align-items: flex-start;
+}
+
+.orderItemDetails {
+  flex: 0 0;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.returnButtonContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+@media screen and (max-width: 768px) {
   .orderDetailsContainer > p {
     font: 400 6vw "Roboto";
   }
@@ -106,4 +168,34 @@
   .orderDetailsCartItemsContainer > div > span {
     font: 100 4vw "Roboto";
   }
+
+    .orderDetailsPage {
+      flex-direction: column;
+    }
+
+    .orderDetailsContainer,
+    .orderDetailsItems {
+      padding: 10px;
+      border: none;
+    }
+
+    .orderDetailsContainer {
+      margin-bottom: 20px;
+    }
+
+    .orderItem {
+      flex-direction: column;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border: none;
+    }
+
+    .orderItemImg,
+    .orderItemDetails {
+      text-align: center;
+    }
+
+    .orderItemImg img {
+      max-height: 12vmax;
+    }
 }

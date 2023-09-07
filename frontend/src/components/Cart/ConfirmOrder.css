@@ -76,6 +76,23 @@
   color: #5e5e5e;
 }
 
+.couponSelection {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.couponSelection label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.couponSelection select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
 .orderSummary {
   padding: 7vmax;
 }

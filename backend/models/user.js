@@ -9,34 +9,39 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please Enter Your Name'],
         maxLength: [30, 'Name cannot exceed 30 characters'],
-        minLength: [2, 'Name must be atleast of 2 characters long'],
+        minLength: [2, 'Name must be atleast of 2 characters long']
     },
     email: {
         type: String,
         required: [true, 'Please Enter Your Email'],
         unique: true,
-        validate: [validator.isEmail, 'Please Enter a valid Email'],
+        validate: [validator.isEmail, 'Please Enter a valid Email']
     },
     password: {
         type: String,
         required: [true, 'Please Enter Your Password'],
         minLength: [6, 'Password must be atleast of 6 characters long'],
-        select: false,
+        select: false
     },
     avatar: {
         type: String,
+        required: true
+    },
+    whatsappNumber: {
+        type: Number,
         required: true,
+        unique :[true,'This number is already in use by another account!']
     },
     role: {
         type: String,
-        default: 'user',
+        default: 'user'
     },
     createdAt: {
         type: Date,
-        default: Date.now,
+        default: Date.now
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date,
+    resetPasswordExpire: Date
 });
 
 userSchema.pre('save', async function (next) {

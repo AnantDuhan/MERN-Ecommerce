@@ -153,14 +153,18 @@ export const newReview = (reviewData) => async (dispatch) => {
         dispatch({ type: NEW_REVIEW_REQUEST });
 
         const config = {
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            }
         };
 
-        const { data } = await axios.put(`/api/v1/review`, reviewData, {config});
+        const { data } = await axios.post(`/api/v1/review`, {reviewData}, {config});
+
+        console.log("DATA", data);
 
         dispatch({
             type: NEW_REVIEW_SUCCESS,
-            payload: data.success,
+            payload: data.review,
         });
     } catch (error) {
         dispatch({

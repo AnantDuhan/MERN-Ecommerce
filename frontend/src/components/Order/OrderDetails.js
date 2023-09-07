@@ -1,22 +1,74 @@
-import { Typography } from '@material-ui/core';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { clearErrors, getOrderDetails } from '../../actions/orderAction';
+import {
+    clearErrors,
+    getOrderDetails,
+    returnRequest
+} from '../../actions/orderAction';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    MenuItem,
+    Select,
+    Typography
+} from '@material-ui/core';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
 
 import './OrderDetails.css';
 
 const OrderDetails = () => {
-    const { order, error, loading } = useSelector(
-        (state) => state.orderDetails
-    );
+    const { order, error, loading } = useSelector(state => state.orderDetails);
 
     const dispatch = useDispatch();
     const { id } = useParams();
+
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [selectedReturnReason, setSelectedReturnReason] = useState('');
+
+    const returnReasons = [
+        'Defective Product',
+        'Wrong Product Shipped',
+        'Received Incomplete Order',
+        "Product Doesn't Match Description",
+        'Size Does Not Fit',
+        "Color Doesn't Match",
+        'Changed My Mind',
+        'Item Arrived Late',
+        'Ordered by Mistake',
+        'Unsatisfactory Quality',
+        'Received Damaged Product',
+        'Ordered Duplicate Product',
+        'Product Expired/Short Expiry Date',
+        'Not Satisfied with Performance',
+        "Item Doesn't Meet Expectations"
+    ];
+
+    const submitReturnRequest = (orders, selectedReturnReason) => {
+        if (orders && selectedReturnReason) {
+            dispatch(returnRequest(order._id, selectedReturnReason));
+            toast.success('Return request submitted successfully');
+            handleCloseDialog();
+        }
+    };
+
+    const handleOpenDialog = order => {
+        setOpenDialog(true);
+        setSelectedOrder(order);
+        setSelectedReturnReason(order.returnReason || returnReasons[0]);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+    };
 
     useEffect(() => {
         if (error) {
@@ -33,14 +85,14 @@ const OrderDetails = () => {
                 <Loader />
             ) : (
                 <Fragment>
-                    <MetaData title="Order Details" />
-                    <div className="orderDetailsPage">
-                        <div className="orderDetailsContainer">
-                            <Typography component="h1">
+                    <MetaData title='Order Details' />
+                    <div className='orderDetailsPage'>
+                        <div className='orderDetailsContainer'>
+                            <Typography component='h1'>
                                 Order #{order && order._id}
                             </Typography>
                             <Typography>Shipping Info</Typography>
-                            <div className="orderDetailsContainerBox">
+                            <div className='orderDetailsContainerBox'>
                                 <div>
                                     <p>Name:</p>
                                     <span>{order.user && order.user.name}</span>
@@ -61,7 +113,7 @@ const OrderDetails = () => {
                                 </div>
                             </div>
                             <Typography>Payment</Typography>
-                            <div className="orderDetailsContainerBox">
+                            <div className='orderDetailsContainerBox'>
                                 <div>
                                     <p
                                         className={
@@ -88,7 +140,7 @@ const OrderDetails = () => {
                             </div>
 
                             <Typography>Order Status</Typography>
-                            <div className="orderDetailsContainerBox">
+                            <div className='orderDetailsContainerBox'>
                                 <div>
                                     <p
                                         className={
@@ -102,33 +154,188 @@ const OrderDetails = () => {
                                     </p>
                                 </div>
                             </div>
+                            <div className='returnButtonContainer'>
+                                <button
+                                    className='refundButton'
+                                    onClick={handleOpenDialog}
+                                    disabled={order.isReturned === true || order.orderStatus === 'Processing' || order.orderStatus === 'Shipped'}
+                                    style={{
+                                        backgroundColor: 'tomato',
+                                        color: 'white',
+                                        padding: '10px 20px',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Return
+                                </button>
+                                <Dialog
+                                    open={openDialog}
+                                    onClose={handleCloseDialog}
+                                    maxWidth='sm'
+                                    fullWidth
+                                >
+                                    <DialogTitle>
+                                        Confirm Order Details
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <Typography variant='h5'>
+                                            Order Details:
+                                        </Typography>
+                                        {order && order.orderItems ? (
+                                            <div>
+                                                <Typography>
+                                                    Order ID: {order._id}
+                                                </Typography>
+                                                {/* Display product images and details */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    {order.orderItems.map(
+                                                        item => (
+                                                            <div
+                                                                key={item._id}
+                                                                style={{
+                                                                    marginRight:
+                                                                        '20px'
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        item.image
+                                                                    }
+                                                                    alt={
+                                                                        item.name
+                                                                    }
+                                                                    style={{
+                                                                        width:
+                                                                            '300px',
+                                                                        height:
+                                                                            '300px',
+                                                                        objectFit:
+                                                                            'contain'
+                                                                    }}
+                                                                />
+                                                                <Typography>
+                                                                    Product
+                                                                    Name:{' '}
+                                                                    {item.name}
+                                                                </Typography>
+                                                                <Typography>
+                                                                    Quantity:{' '}
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                                <Typography>
+                                                    Amount: {order.totalPrice}
+                                                </Typography>
+                                            </div>
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center'
+                                                }}
+                                            >
+                                                <div className='loader'></div>{' '}
+                                            </div>
+                                        )}
+
+                                        <Typography variant='h5'>
+                                            Select reason for return:
+                                        </Typography>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                value={selectedReturnReason}
+                                                onChange={event =>
+                                                    setSelectedReturnReason(
+                                                        event.target.value
+                                                    )
+                                                }
+                                            >
+                                                {returnReasons.map(reason => (
+                                                    <MenuItem
+                                                        key={reason}
+                                                        value={reason}
+                                                    >
+                                                        {reason}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button
+                                            onClick={handleCloseDialog}
+                                            color='secondary'
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            onClick={() =>
+                                                submitReturnRequest(
+                                                    selectedOrder,
+                                                    selectedReturnReason
+                                                )
+                                            }
+                                            color='secondary'
+                                        >
+                                            Return
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </div>
                         </div>
 
-                        <div className="orderDetailsCartItems">
+                        <div className='orderDetailsItems'>
                             <Typography>Order Items:</Typography>
-                            <div className="orderDetailsCartItemsContainer">
-                                {order.orderItems &&
-                                    order.orderItems.map((item) => (
-                                        <div key={item.product}>
-                                            <img
-                                                src={item.image}
-                                                alt="Product"
-                                            />
-                                            <Link
-                                                to={`/product/${item.product}`}
+                            <div className='scrollable-content'>
+                                <div className='orderDetailsCartItemsContainer'>
+                                    {order.orderItems &&
+                                        order.orderItems.map(item => (
+                                            <div
+                                                className='orderItem'
+                                                key={item.product}
                                             >
-                                                {item.name}
-                                            </Link>{' '}
-                                            <span>
-                                                {item.quantity} X ₹{item.price}{' '}
-                                                ={' '}
-                                                <b>
-                                                    ₹
-                                                    {item.price * item.quantity}
-                                                </b>
-                                            </span>
-                                        </div>
-                                    ))}
+                                                <div className='orderItemImg'>
+                                                    <img
+                                                        src={item.image}
+                                                        alt='Product'
+                                                    />
+                                                </div>
+                                                <div className='orderItemDetails'>
+                                                    <Link
+                                                        to={`/product/${item.product}`}
+                                                    >
+                                                        <Typography variant='h6'>
+                                                            {item.name}
+                                                        </Typography>
+                                                    </Link>
+                                                    <Typography>
+                                                        Quantity:{' '}
+                                                        {item.quantity}
+                                                    </Typography>
+                                                    <Typography>
+                                                        Price: ₹{item.price}
+                                                    </Typography>
+                                                    <Typography>
+                                                        Total: ₹
+                                                        {item.price *
+                                                            item.quantity}
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -165,6 +165,29 @@
     transform: translateX(100%);
 }
 
+.loginPassword,
+.signUpPassword {
+    position: relative;
+}
+
+.loginPassword input[type="password"],
+.signUpPassword input[type="password"] {
+    padding-right: 30px;
+}
+
+.password-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: gray;
+}
+
+.password-icon:hover {
+    color: tomato;
+}
+
 @media screen and (max-width: 600px) {
     .LoginSignUpContainer {
         background-color: white;

@@ -91,7 +91,8 @@ exports.createProductReview = async (req, res, next) => {
     await product.save({ validateBeforeSave: false });
 
     res.status(200).json({
-        success: true
+        success: true,
+        review
     });
 };
 

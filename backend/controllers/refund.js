@@ -7,7 +7,7 @@ const stripe = require('stripe')(
 
 exports.initiateRefund = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id).populate('returns');
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({
@@ -24,7 +24,7 @@ exports.initiateRefund = async (req, res) => {
         }
 
         // Check if there are any returns associated with this order
-        if (order.returns.length === 0) {
+        if (order.return.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: 'No returns found for this order'
@@ -43,7 +43,7 @@ exports.initiateRefund = async (req, res) => {
         const updatedReturns = [];
 
         // Create new Refund documents and update Return documents
-        for (const returnDoc of order.returns) {
+        for (const returnDoc of order.return) {
             if (returnDoc.status === 'Pending') {
                 // Set the refund amount to the order's total price
                 const refundAmount = order.totalPrice;
@@ -54,6 +54,9 @@ exports.initiateRefund = async (req, res) => {
                     amount: refundAmount
                 });
                 refunds.push(newRefund);
+
+                // Push the new refund object's _id into the refund array in order model
+                order.refund.push(newRefund._id);
 
                 // Update the Return document
                 returnDoc.status = 'Initiated';
@@ -78,9 +81,19 @@ exports.initiateRefund = async (req, res) => {
             }))
         );
 
+        const newRefund = new Refund({
+            order: order._id,
+            amount: order.totalPrice,
+            initiatedAt: new Date(),
+            status: 'Initiated'
+        });
+
+        await newRefund.save();
+        order.refund.push(newRefund._id);
+
         // Update the order refund status and refund requested timestamp
         order.isRefunded = true;
-        order.refundStatus = 'Initiated';
+        order.refundStatus = 'Processing';
         order.refundRequestedAt = new Date();
         await order.save();
 
@@ -98,85 +111,67 @@ exports.initiateRefund = async (req, res) => {
     }
 };
 
+
 exports.updateRefundStatus = async (req, res) => {
     try {
-        const { refundStatus } = req.body;
+            const { refundStatus } = req.body;
 
-        const refundId = req.params.refundId;
-        const orderId = req.params.orderId;
+            const refundId = req.params.refundId;
+            const orderId = req.params.orderId;
 
-        const refund = await Refund.findById(refundId);
-        const order = await Order.findById(orderId);
+            const refund = await Refund.findById(refundId);
+            const order = await Order.findById(orderId);
 
-        if (!refund) {
-            return res.status(404).json({
-                success: false,
-                message: 'Refund not found'
-            });
-        }
-
-        if (!refundStatus) {
-            return res.status(400).json({
-                success: false,
-                message: 'Refund status is required'
-            });
-        }
-
-        if (
-            refundStatus !== 'Pending' &&
-            refundStatus !== 'Approved' &&
-            refundStatus !== 'Rejected'
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid refund status'
-            });
-        }
-
-        if (refundStatus === 'Approved') {
-            if (
-                !order ||
-                !order.paymentInfo ||
-                !order.paymentInfo.id
-            ) {
-                return res.status(400).json({
+            if (!refund) {
+                return res.status(404).json({
                     success: false,
-                    message: 'Order payment information is not available'
+                    message: 'Refund not found'
                 });
             }
 
-            // Assuming 'stripe' is your Stripe instance
-            const createRefund = await stripe.refunds.create({
-                payment_intent: order.paymentInfo.id,
-                amount: Math.round(order.totalPrice)
-            });
+            if (!refundStatus) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Refund status is required'
+                });
+            }
 
-            createRefund.refundInfo = {
-                id: createRefund.id,
-                amount: createRefund.amount,
-                status: createRefund.status,
-                createdAt: createRefund.created
-                    ? new Date(createRefund.created * 1000)
-                    : null
-            };
+            if (
+                refundStatus !== 'Pending' &&
+                refundStatus !== 'Approved' &&
+                refundStatus !== 'Rejected' &&
+                refundStatus !== 'Refunded'
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid refund status'
+                });
+            }
 
+            if (refundStatus === 'Refunded') {
+                await stripe.refunds.create({
+                    payment_intent: order.paymentInfo.id,
+                    amount: Math.round(order.totalPrice)
+                });
+            }
+
+            // Update order with refund info
             order.isRefunded = true;
             order.refundStatus = 'Refunded';
-            order.refundedAt = new Date(
-                Date.now() + 7 * 24 * 60 * 60 * 1000
-            ); // 7 days later
+            order.refund.push(refund._id); // Push the refund _id to the refunds array
+            order.refundedAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days later
             await order.save();
-        }
 
-        refund.status = refundStatus;
-        await refund.save();
+            refund.status = 'Refunded';
+            await refund.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Refund status updated successfully',
-            refund
-        });
-    } catch (error) {
+            res.status(200).json({
+                success: true,
+                message: 'Refund status updated successfully',
+                refund,
+                order
+            });
+        } catch (error) {
         console.error(error);
         res.status(500).json({
             success: false,
@@ -185,13 +180,12 @@ exports.updateRefundStatus = async (req, res) => {
     }
 };
 
-
 exports.getAllRefunds = async (req, res) => {
     try {
         const refunds = await Refund.find()
             .populate({
                 path: 'order',
-                select: 'user refundRequestedAt',
+                select: 'user refundRequestedAt totalPrice',
                 populate: {
                     path: 'user',
                     select: 'name email'

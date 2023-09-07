@@ -124,6 +124,75 @@
   z-index: 9999;
 }
 
+/* Default styles for all screen sizes */
+.new-drop-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  /* Adjust the gap between products */
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.shop-all-container {
+  display: grid;
+  grid-template-columns: repeat(2, 400px);
+  /* Create a 3x2 grid */
+  grid-gap: 20px;
+  /* Adjust the gap between products */
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.product-grid-item img {
+  max-width: 50%;
+  height: auto;
+  display: block;
+}
+
+.newsletter-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newsletter-input {
+  flex: 0.5;
+  padding: 10px 50px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Style for the Subscribe button */
+.subscribe-button {
+  background-color: tomato;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.subscribe-button:hover {
+  background-color: #ff6347;
+  /* Change the button color on hover to a lighter shade of tomato */
+}
+
+/* Media queries for responsiveness */
+@media screen and (max-width: 768px) {
+
+  /* Adjust styles for screens up to 768px wide */
+  .new-drop-container {
+    justify-content: flex-start;
+    /* Align items to the left */
+  }
+
+  .shop-all-container {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2x2 grid for smaller screens */
+  }
+}
+
 @media screen and (max-width: 600px) {
   .productCard > p {
     font-size: 1.7vmax;
@@ -142,4 +211,9 @@
     margin: 0 0.5vmax;
     font: 300 1vmax "Roboto";
   }
+
+    .shop-all-container {
+      grid-template-columns: 1fr;
+      /* 1x1 grid for mobile */
+    }
 }

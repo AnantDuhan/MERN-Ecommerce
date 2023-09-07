@@ -1,26 +1,34 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import CheckoutSteps from '../Cart/CheckoutSteps';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import MetaData from '../layout/MetaData';
 import './ConfirmOrder.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
+import { getAllCoupons } from '../../actions/couponAction';
 
 const ConfirmOrder = () => {
     const { shippingInfo, cartItems } = useSelector(state => state.cart);
     const { user } = useSelector(state => state.user);
+    const { coupons } = useSelector(state => state.coupon);
+
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [selectedCoupon, setSelectedCoupon] = useState(null);
 
     const subtotal = cartItems.reduce(
         (acc, item) => acc + item.quantity * item.price,
         0
     );
 
-    const shippingCharges = subtotal > 1000 ? 0 : 200;
+    const shippingCharges = subtotal > 1000 ? 0 : 150;
 
-    const tax = subtotal * 0.18;
+    const selectedCouponValue = selectedCoupon ? selectedCoupon.discount : 0;
 
-    const totalPrice = subtotal + tax + shippingCharges;
+    const couponDiscountAmount = (subtotal * selectedCouponValue) / 100;
+
+    const totalPrice = subtotal + shippingCharges - couponDiscountAmount;
 
     const address = `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state}, ${shippingInfo.pinCode}, ${shippingInfo.country}`;
 
@@ -28,15 +36,18 @@ const ConfirmOrder = () => {
         const data = {
             subtotal,
             shippingCharges,
-            tax,
             totalPrice,
-            // finalPrice,
+            selectedCoupon
         };
 
         sessionStorage.setItem('orderInfo', JSON.stringify(data));
 
         navigate('/payment');
     };
+
+    useEffect(() => {
+        dispatch(getAllCoupons());
+    }, [dispatch]);
 
     return (
         <Fragment>
@@ -93,9 +104,28 @@ const ConfirmOrder = () => {
                                 <p>Shipping Charges:</p>
                                 <span>₹{shippingCharges}</span>
                             </div>
-                            <div>
-                                <p>GST:</p>
-                                <span>₹{tax}</span>
+                            <div className='couponSelection'>
+                                <label>Select Coupon:</label>
+                                <select
+                                    onChange={e => {
+                                        const selectedCouponId = e.target.value;
+                                        const selectedCouponObj = coupons.find(
+                                            coupon =>
+                                                coupon._id === selectedCouponId
+                                        );
+                                        setSelectedCoupon(selectedCouponObj);
+                                    }}
+                                >
+                                    <option value={null}>No Coupon</option>
+                                    {coupons.map(coupon => (
+                                        <option
+                                            key={coupon._id}
+                                            value={coupon._id}
+                                        >
+                                            {`${coupon.code} - ${coupon.discount}%`}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 

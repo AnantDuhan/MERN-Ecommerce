@@ -9,7 +9,7 @@
 .dashboardContainer {
   border-left: 1px solid rgba(0, 0, 0, 0.13);
   background-color: rgb(255, 255, 255);
-  padding: 3rem 0;
+  padding: 0 6rem;
 }
 
 .dashboardContainer > h1 {
@@ -36,9 +36,9 @@
   color: white;
   font: 300 1.3rem "Roboto";
   text-align: center;
-  padding: 1.5rem;
+  padding: 2rem;
   width: 100%;
-  margin: 0 2rem;
+  margin: auto;
 }
 
 .dashboardSummaryBox2 > a {
@@ -81,12 +81,27 @@
   /* Bright Green */
 }
 
+.dashboardSummaryBox2>a:nth-child(5) {
+  background-color: #da9ce6;
+  color: rgb(255, 255, 255);
+  /* Different Bright Purple */
+}
+
 .lineChart {
   width: 80%;
   margin: auto;
 }
 
-.doughnutChart {
+.doughnutChartsContainer {
+  display: flex;
+  justify-content: space-between; /* Adjust as needed */
+  align-items: center;  /* Adjust as needed */
+  width: 100%;
+  margin-top: 20px;  /* Add margin as needed */
+}
+
+.doughnutChart1,
+.doughnutChart2 {
   width: 30vmax;
   margin: auto;
 }

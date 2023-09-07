@@ -1,6 +1,8 @@
-import FaceIcon from '@material-ui/icons/Face';
+import BadgeIcon from '@mui/icons-material/Badge';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -25,6 +27,7 @@ const LoginAndRegister = ({ history, location }) => {
 
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
 
     const [user, setUser] = useState({
         name: '',
@@ -33,6 +36,7 @@ const LoginAndRegister = ({ history, location }) => {
     });
 
     const { name, email, password } = user;
+    const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
     const [avatar, setAvatar] = useState('/Profile.png');
     const [avatarPreview, setAvatarPreview] = useState('/Profile.png');
@@ -70,10 +74,6 @@ const LoginAndRegister = ({ history, location }) => {
             setUser({ ...user, [e.target.name]: e.target.value });
         }
     };
-
-    // const redirect = location.search
-    //     ? location.search.split('=')[1]
-    //     : '/account';
 
     useEffect(() => {
         if (error) {
@@ -142,7 +142,11 @@ const LoginAndRegister = ({ history, location }) => {
                                 <div className='loginPassword'>
                                     <LockOpenIcon />
                                     <input
-                                        type='password'
+                                        type={
+                                            showLoginPassword
+                                                ? 'text'
+                                                : 'password'
+                                        }
                                         placeholder='Password'
                                         required
                                         value={loginPassword}
@@ -150,6 +154,20 @@ const LoginAndRegister = ({ history, location }) => {
                                             setLoginPassword(e.target.value)
                                         }
                                     />
+                                    <span
+                                        className='password-icon'
+                                        onClick={() =>
+                                            setShowLoginPassword(
+                                                !showLoginPassword
+                                            )
+                                        }
+                                    >
+                                        {showLoginPassword ? (
+                                            <VisibilityIcon />
+                                        ) : (
+                                            <VisibilityOffIcon />
+                                        )}
+                                    </span>
                                 </div>
                                 <Link to='/password/forgot'>
                                     Forget Password ?
@@ -167,7 +185,7 @@ const LoginAndRegister = ({ history, location }) => {
                                 onSubmit={registerSubmit}
                             >
                                 <div className='signUpName'>
-                                    <FaceIcon />
+                                    <BadgeIcon />
                                     <input
                                         type='text'
                                         placeholder='Name'
@@ -191,13 +209,31 @@ const LoginAndRegister = ({ history, location }) => {
                                 <div className='signUpPassword'>
                                     <LockOpenIcon />
                                     <input
-                                        type='password'
+                                        type={
+                                            showRegisterPassword
+                                                ? 'text'
+                                                : 'password'
+                                        }
                                         placeholder='Password'
                                         required
                                         name='password'
                                         value={password}
                                         onChange={registerDataChange}
                                     />
+                                    <span
+                                        className='password-icon'
+                                        onClick={() =>
+                                            setShowRegisterPassword(
+                                                !showRegisterPassword
+                                            )
+                                        }
+                                    >
+                                        {showRegisterPassword ? (
+                                            <VisibilityIcon />
+                                        ) : (
+                                            <VisibilityOffIcon />
+                                        )}
+                                    </span>
                                 </div>
 
                                 <div id='registerImage'>
