@@ -3,10 +3,10 @@ import {
     SUBSCRIBE_REQUEST,
     SUBSCRIBE_SUCCESS,
     SUBSCRIBE_FAIL,
-    CLEAR_SUBSCRIBE,
+    CLEAR_SUBSCRIBE
 } from '../constants/subscribeConstants';
 
-export const newsletter = (email) => async dispatch => {
+export const newsletter = email => async dispatch => {
     try {
         dispatch({ type: SUBSCRIBE_REQUEST });
 
@@ -16,11 +16,15 @@ export const newsletter = (email) => async dispatch => {
             }
         };
 
-        const { data } = await axios.post('/api/v1/subscribe', {email}, {
-            config
-        });
+        const { data } = await axios.post(
+            '/api/v1/subscribe',
+            { email },
+            {
+                config
+            }
+        );
 
-        console.log("data", data);
+        console.log('data', data);
 
         dispatch({ type: SUBSCRIBE_SUCCESS, payload: data });
     } catch (error) {

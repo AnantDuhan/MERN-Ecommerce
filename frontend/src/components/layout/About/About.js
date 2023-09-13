@@ -28,7 +28,8 @@ const About = () => {
                           src='https://res.cloudinary.com/anantduhan/image/upload/v1651066064/avatars/WhatsApp_Image_2022-04-27_at_6.19.23_PM_zislxv.jpg'
                           alt='Founder'
                       />
-                      <Typography>Anant Duhan</Typography>
+                      <Typography variant='h4'>Anant Duhan</Typography>
+                      <Typography variant='h7'>Founder & CEO of Order Planning</Typography>
                       <Button onClick={visitInstagram} color='primary'>
                           Visit Instagram
                       </Button>
@@ -37,7 +38,7 @@ const About = () => {
                           <a href='https://www.linkedin.com/in/anantduhan/'>
                               @anantduhan
                           </a>
-                          . I'm a <b>Full Stack Developer</b> and{' '}
+                          . I'm a <b>Full Stack Developer</b> and a{' '}
                           <b>B.tech Graduate</b> from{' '}
                           <b>
                               SRM Institute Of Science and Technology (2023

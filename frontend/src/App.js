@@ -1,3 +1,4 @@
+// import Search from './components/Product/Search';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
@@ -13,6 +14,8 @@ import OrderList from './components/Admin/OrderList';
 import ProcessOrder from './components/Admin/ProcessOrder';
 import ProductList from './components/Admin/ProductList';
 import ProductReviews from './components/Admin/ProductReviews';
+import RefundList from './components/Admin/RefundList';
+import ReturnList from './components/Admin/ReturnList';
 import UpdateProduct from './components/Admin/UpdateProduct';
 import UpdateUser from './components/Admin/UpdateUser';
 import UsersList from './components/Admin/UsersList';
@@ -22,18 +25,17 @@ import OrderSuccess from './components/Cart/OrderSuccess';
 import Payment from './components/Cart/Payment';
 import Shipping from './components/Cart/Shipping';
 import Home from './components/Home/Home';
-import LoginButton from './components/Home/LoginButton';
 import About from './components/layout/About/About';
 import Contact from './components/layout/Contact/Contact';
 import Footer from './components/layout/Footer/Footer';
-import Header from './components/layout/Header/Header';
-import UserOptions from './components/layout/Header/UserOptions';
+import MainHeader from './components/layout/Header/MainHeader';
+// import Header from './components/layout/Header/Header';
 import NotFound from './components/layout/Not-Found/NotFound';
 import MyOrders from './components/Order/MyOrders';
 import OrderDetails from './components/Order/OrderDetails';
+import ReturnRequest from './components/Order/ReturnRequest';
 import ProductDetails from './components/Product/ProductDetails';
 import Products from './components/Product/Products';
-import Search from './components/Product/Search';
 import ForgotPassword from './components/User/ForgotPassword';
 import LoginAndRegister from './components/User/LoginAndRegister';
 // import LoginSignup from './components/User/LoginSignup';
@@ -45,9 +47,6 @@ import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
 
 import './App.css';
-import ReturnRequest from './components/Order/ReturnRequest';
-import ReturnList from './components/Admin/ReturnList';
-import RefundList from './components/Admin/RefundList';
 
 /*
     TODO: #1 Not able to upload image in register page
@@ -56,7 +55,7 @@ import RefundList from './components/Admin/RefundList';
 */
 
 function App() {
-    const { isAuthenticated, user } = useSelector(state => state.user);
+    const { isAuthenticated } = useSelector(state => state.user);
 
     const [stripeApiKey, setStripeApiKey] = useState('');
 
@@ -87,11 +86,7 @@ function App() {
 
     return (
         <Fragment>
-            <Header />
-            {isAuthenticated && <UserOptions user={user} />}
-            <div className='login-button'>
-                {!isAuthenticated && <LoginButton />}
-            </div>
+            <MainHeader />
             {stripeApiKey && (
                 <Elements stripe={stripePromise}>
                     <Routes>
@@ -110,7 +105,7 @@ function App() {
                 <Route path='/product/:id' element={<ProductDetails />} exact />
                 <Route path='/products' element={<Products />} exact />
                 <Route path='/products/:keyword' element={<Products />} exact />
-                <Route path='/search' element={<Search />} exact />
+                {/* <Route path='/search' element={<Search />} exact /> */}
                 <Route path='/about' element={<About />} exact />
                 <Route path='/contact-us' element={<Contact />} exact />
                 {isAuthenticated && (

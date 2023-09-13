@@ -3,6 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+
 import {
     clearErrors,
     getOrderDetails,
@@ -158,7 +161,11 @@ const OrderDetails = () => {
                                 <button
                                     className='refundButton'
                                     onClick={handleOpenDialog}
-                                    disabled={order.isReturned === true || order.orderStatus === 'Processing' || order.orderStatus === 'Shipped'}
+                                    disabled={
+                                        order.isReturned === true ||
+                                        order.orderStatus === 'Processing' ||
+                                        order.orderStatus === 'Shipped'
+                                    }
                                     style={{
                                         backgroundColor: 'tomato',
                                         color: 'white',
@@ -301,16 +308,47 @@ const OrderDetails = () => {
                             <div className='scrollable-content'>
                                 <div className='orderDetailsCartItemsContainer'>
                                     {order.orderItems &&
-                                        order.orderItems.map(item => (
+                                            order.orderItems.map(item => (
                                             <div
                                                 className='orderItem'
                                                 key={item.product}
                                             >
                                                 <div className='orderItemImg'>
-                                                    <img
-                                                        src={item.image}
-                                                        alt='Product'
-                                                    />
+                                                    {/* Check if the product has multiple images */}
+                                                    {item.images.length > 1 ? (
+                                                        // If there are multiple images, display them in a carousel
+                                                        <Carousel
+                                                            showThumbs={false}
+                                                        >
+                                                            {item.images.map(
+                                                                (
+                                                                    images,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                    >
+                                                                        <img
+                                                                            src={
+                                                                                images.url
+                                                                            }
+                                                                            alt={`Product ${index +
+                                                                                1}`}
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </Carousel>
+                                                    ) : (
+                                                        // If there's only one image, display it as a regular image
+                                                        <img
+                                                            src={
+                                                                item.images[0].url                                                            }
+                                                            alt='Product'
+                                                        />
+                                                    )}
                                                 </div>
                                                 <div className='orderItemDetails'>
                                                     <Link

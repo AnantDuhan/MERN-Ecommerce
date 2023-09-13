@@ -13,58 +13,74 @@ const stripe = require('stripe')(
 // create new order
 exports.newOrder = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id);
+            const user = await User.findById(req.user._id);
 
-        const {
-            shippingInfo,
-            orderItems,
-            paymentInfo,
-            itemsPrice,
-            taxPrice,
-            shippingPrice,
-            totalPrice,
-            couponCode
-        } = req.body;
+            const {
+                shippingInfo,
+                orderItems,
+                paymentInfo,
+                itemsPrice,
+                taxPrice,
+                shippingPrice,
+                totalPrice,
+                couponCode
+            } = req.body;
 
-        const coupon = await Coupon.findOne({ code: couponCode });
+            const coupon = await Coupon.findOne({ code: couponCode });
 
-        let discountedTotalPrice = totalPrice;
-        if (coupon) {
-
-            if (
-                totalPrice >= coupon.minOrderAmount &&
-                totalPrice <= coupon.maxOrderAmount
-            ) {
-                discountedTotalPrice =
-                    totalPrice - (totalPrice * coupon.discountPercent) / 100;
+            let discountedTotalPrice = totalPrice;
+            if (coupon) {
+                if (
+                    totalPrice >= coupon.minOrderAmount &&
+                    totalPrice <= coupon.maxOrderAmount
+                ) {
+                    discountedTotalPrice =
+                        totalPrice -
+                        (totalPrice * coupon.discountPercent) / 100;
+                }
             }
-        }
 
-        const order = await Order.create({
-            shippingInfo,
-            orderItems,
-            paymentInfo,
-            itemsPrice,
-            taxPrice,
-            shippingPrice,
-            totalPrice: discountedTotalPrice,
-            paidAt: Date.now(),
-            user: req.user._id,
-            couponUsed: coupon ? true : false,
-            couponCode: couponCode
-        });
+            // Modify the orderItems to include the image data
+            const orderItemsWithImages = await Promise.all(
+                orderItems.map(async item => {
+                    const product = await Product.findById(item.product);
+                    if (product) {
+                        return {
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity,
+                            images: product.images, // Include the images from the product
+                            product: item.product
+                        };
+                    }
+                })
+            );
 
-        const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
-        const currentDate = new Date();
-        const estimatedDeliveryDate = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            currentDate.getDate() + randomDays
-        ); // Add random days
+            const order = await Order.create({
+                shippingInfo,
+                orderItems: orderItemsWithImages,
+                paymentInfo,
+                itemsPrice,
+                taxPrice,
+                shippingPrice,
+                totalPrice: discountedTotalPrice,
+                paidAt: Date.now(),
+                user: req.user._id,
+                couponUsed: coupon ? true : false,
+                couponCode: couponCode
+            });
 
-        const imageUrl = order.orderItems.image;
+            const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
+            const currentDate = new Date();
+            const estimatedDeliveryDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                currentDate.getDate() + randomDays
+            ); // Add random days
 
-        const emailMessage = `<html>
+            const imageUrl = order.orderItems.image;
+
+            const emailMessage = `<html>
     <body>
         <p>Hello ${user.name}!</p>
         <p>Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
@@ -75,8 +91,8 @@ exports.newOrder = async (req, res, next) => {
     </body>
     </html>`;
 
-        // For WhatsApp, use the same message without HTML tags
-        const whatsappMessage = `Hello ${user.name}!\n
+            // For WhatsApp, use the same message without HTML tags
+            const whatsappMessage = `Hello ${user.name}!\n
    Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.\n
    Your Order Details:
    Order ID: ${order._id}
@@ -92,24 +108,24 @@ exports.newOrder = async (req, res, next) => {
    Thank you for ordering. For more please visit our website http://www.orderplanning.com.\n
    Happy Shopping.😊`;
 
-        await client.messages.create({
-            body: whatsappMessage,
-            from: 'whatsapp:+14155238886',
-            to: `whatsapp:+91${order.shippingInfo.phoneNumber}`,
-            mediaUrl: [imageUrl]
-        });
+            await client.messages.create({
+                body: whatsappMessage,
+                from: 'whatsapp:+14155238886',
+                to: `whatsapp:+91${order.shippingInfo.phoneNumber}`,
+                mediaUrl: [imageUrl]
+            });
 
-        await sendEmail({
-            email: user.email,
-            subject: `Your Order📦 has been placed successfully`,
-            html: emailMessage
-        });
+            await sendEmail({
+                email: user.email,
+                subject: `Your Order📦 has been placed successfully`,
+                html: emailMessage
+            });
 
-        res.status(200).json({
-            success: true,
-            order
-        });
-    } catch (error) {
+            res.status(200).json({
+                success: true,
+                order
+            });
+        } catch (error) {
         res.status(500).json({
             success: false,
             message: error.message

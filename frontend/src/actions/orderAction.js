@@ -32,34 +32,36 @@ import {
     ALL_REFUNDS_REQUEST,
     ALL_REFUNDS_SUCCESS,
     ALL_REFUNDS_FAIL,
-    CLEAR_ERRORS,
+    CLEAR_ERRORS
 } from '../constants/orderConstants';
 
 import axios from 'axios';
 
 // Create Order
-export const createOrder = (order) => async (dispatch) => {
+export const createOrder = order => async dispatch => {
     try {
         dispatch({ type: CREATE_ORDER_REQUEST });
 
         const config = {
             headers: {
-                'Content-Type': 'application/json',
-            },
+                'Content-Type': 'application/json'
+            }
         };
-        const { data } = await axios.post('/api/v1/order/new', order, {config});
+        const { data } = await axios.post('/api/v1/order/new', order, {
+            config
+        });
 
         dispatch({ type: CREATE_ORDER_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
             type: CREATE_ORDER_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
 // My Orders
-export const myOrders = () => async (dispatch) => {
+export const myOrders = () => async dispatch => {
     try {
         dispatch({ type: MY_ORDERS_REQUEST });
 
@@ -69,13 +71,13 @@ export const myOrders = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: MY_ORDERS_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
 // Get All Orders - admin
-export const getAllOrders = () => async (dispatch) => {
+export const getAllOrders = () => async dispatch => {
     try {
         dispatch({ type: ALL_ORDERS_REQUEST });
 
@@ -85,38 +87,38 @@ export const getAllOrders = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ALL_ORDERS_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
 // Update Order
-export const updateOrder = (id, status) => async (dispatch) => {
+export const updateOrder = (id, status) => async dispatch => {
     try {
         dispatch({ type: UPDATE_ORDER_REQUEST });
 
         const config = {
             headers: {
-                'Content-Type': 'application/json',
-            },
+                'Content-Type': 'application/json'
+            }
         };
         const { data } = await axios.put(
             `/api/v1/admin/order/${id}`,
-            {status},
-            {config}
+            { status },
+            { config }
         );
 
         dispatch({ type: UPDATE_ORDER_SUCCESS, payload: data.success });
     } catch (error) {
         dispatch({
             type: UPDATE_ORDER_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
 // Delete Order
-export const deleteOrder = (id) => async (dispatch) => {
+export const deleteOrder = id => async dispatch => {
     try {
         dispatch({ type: DELETE_ORDER_REQUEST });
 
@@ -126,13 +128,13 @@ export const deleteOrder = (id) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: DELETE_ORDER_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
 // Get Order Details
-export const getOrderDetails = (id) => async (dispatch) => {
+export const getOrderDetails = id => async dispatch => {
     try {
         dispatch({ type: ORDER_DETAILS_REQUEST });
 
@@ -142,37 +144,40 @@ export const getOrderDetails = (id) => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: ORDER_DETAILS_FAIL,
-            payload: error.response.data.message,
+            payload: error.response.data.message
         });
     }
 };
 
-export const returnRequest = (id, returnReason) => async (dispatch) => {
+export const returnRequest = (id, returnReason) => async dispatch => {
     try {
         dispatch({ type: REQUEST_RETURN_REQUEST });
 
         const config = {
             headers: {
-                'Content-Type': 'application/json',
-            },
+                'Content-Type': 'application/json'
+            }
         };
 
-        const { data } = await axios.post(`/api/v1/order/${id}/return`, { returnReason }, { config });
+        const { data } = await axios.post(
+            `/api/v1/order/${id}/return`,
+            { returnReason },
+            { config }
+        );
 
         dispatch({
             type: REQUEST_RETURN_SUCCESS,
             payload: data.order
         });
-
     } catch (error) {
         dispatch({
             type: REQUEST_RETURN_FAIL,
             payload: error.response.data.message
-        })
+        });
     }
 };
 
-export const initiateRefund = (id) => async (dispatch) => {
+export const initiateRefund = id => async dispatch => {
     try {
         dispatch({ type: INITIATE_REFUND_REQUEST });
 
@@ -187,7 +192,11 @@ export const initiateRefund = (id) => async (dispatch) => {
     }
 };
 
-export const updateRefundStatus  = (orderId, refundId, refundStatus) => async dispatch => {
+export const updateRefundStatus = (
+    orderId,
+    refundId,
+    refundStatus
+) => async dispatch => {
     try {
         dispatch({ type: REFUND_STATUS_UPDATE_REQUEST });
 
@@ -218,7 +227,7 @@ export const updateRefundStatus  = (orderId, refundId, refundStatus) => async di
     }
 };
 
-export const allRefunds = () => async (dispatch) => {
+export const allRefunds = () => async dispatch => {
     try {
         dispatch({ type: ALL_REFUNDS_REQUEST });
 
@@ -249,6 +258,6 @@ export const allReturns = () => async dispatch => {
 };
 
 // Clearing Errors
-export const clearErrors = () => async (dispatch) => {
+export const clearErrors = () => async dispatch => {
     dispatch({ type: CLEAR_ERRORS });
 };

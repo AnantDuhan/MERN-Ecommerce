@@ -131,6 +131,18 @@
   margin-top: 20px;
 }
 
+.CarouselImage {
+  max-width: 100%;
+  height: auto;
+}
+
+.carousel {
+  width: 100%;
+  max-width: 400px;
+  /* Adjust the maximum width as needed */
+  margin: 0 auto;
+}
+
 @media screen and (max-width: 768px) {
   .orderDetailsContainer > p {
     font: 400 6vw "Roboto";

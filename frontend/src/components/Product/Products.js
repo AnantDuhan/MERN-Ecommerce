@@ -42,6 +42,14 @@ const Products = () => {
         setCurrentPage(e);
     };
 
+    const getUniqueCategories = products => {
+        const categoriesSet = new Set();
+        products.forEach(product => {
+            categoriesSet.add(product.category);
+        });
+        return Array.from(categoriesSet);
+    };
+
     const priceRanges = [
         [
             { key: 'range1', label: '0 - 1000', value: [0, 1000] },
@@ -119,7 +127,7 @@ const Products = () => {
                         </div>
                         <Typography>Categories</Typography>
                         <ul className='categoryBox'>
-                            {categories.map(category => (
+                            {getUniqueCategories(products).map(category => (
                                 <li
                                     className='category-link'
                                     key={category}

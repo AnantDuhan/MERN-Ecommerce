@@ -16,6 +16,8 @@ const Home = () => {
     const dispatch = useDispatch();
 
     const [email, setEmail] = useState('');
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
 
     const { loading, error, products } = useSelector(state => state.products);
     const { success: subscribeSuccess, error: subscribeError } = useSelector(state => state.subscribe);
@@ -50,17 +52,15 @@ const Home = () => {
                 <Loader />
             ) : (
                 <Fragment>
-                    <MetaData title='ECOMMERCE' />
+                    <MetaData title='Order Planning' />
 
                     <div className='banner'>
-                        <p>Welcome to Ecommerce</p>
-                        <h1>FIND AMAZING PRODUCTS BELOW</h1>
-
-                        <a href='#container'>
-                            <button>
-                                Scroll <CgMouse />
-                            </button>
-                        </a>
+                        <h1>
+                            Welcome to <span>Order Planning!!</span>
+                        </h1>
+                        <p>
+                            FIND OUR AMAZING RANGE OF PRODUCTS BELOW..
+                        </p>
                     </div>
 
                     {/* <h2 className='homeHeading'>Featured Products</h2>
@@ -93,15 +93,16 @@ const Home = () => {
                     {/* Shop All Section */}
                     <h2 className='homeHeading'>Shop All</h2>
                     <div className='shop-all-container'>
-                        {console.log(products.images)}
                         {/* Render a 3x2 grid with 6 product images */}
                         {products &&
-                            products.map(product => (
-                                <ProductGridItem
-                                    key={product._id}
-                                    product={product}
-                                />
-                            ))}
+                            products
+                                .slice(-4)
+                                .map(product => (
+                                    <ProductGridItem
+                                        key={product._id}
+                                        product={product}
+                                    />
+                                ))}
                     </div>
 
                     {/* Newsletter Section */}

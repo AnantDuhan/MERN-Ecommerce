@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const options = {
     autoClose:  3000,
-    position: toast.POSITION.TOP_CENTER,
+    position: toast.POSITION.BOTTOM_CENTER,
     transition: Bounce,
 };
 

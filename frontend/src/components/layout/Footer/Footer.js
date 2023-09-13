@@ -13,7 +13,7 @@ const Footer = () => {
           </div>
 
           <div className='midFooter'>
-              <h1>Ecommerce</h1>
+              <h1>Order Planning</h1>
               <p>High Quality is our first priority.</p>
 
               <p>

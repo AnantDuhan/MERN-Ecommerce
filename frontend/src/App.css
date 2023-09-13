@@ -3,26 +3,6 @@
     scroll-behavior: smooth;
 }
 
-.login-button {
-  position: fixed;
-  top: 40px;
-  right: 20px;
-  z-index: 9999;
-  background-color: tomato;
-  color: white;
-}
-
-.login-button:hover {
-  background-color: red;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
 .greenColor {
   color: green !important;
 }

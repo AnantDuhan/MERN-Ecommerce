@@ -1,5 +1,5 @@
 .banner {
-  background-image: url("../../images/cover.jfif");
+  background-image: url("../../images/Macbook.jpeg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -12,20 +12,37 @@
   color: white;
 }
 
-.banner > h1 {
-  margin: 5vmax;
+.banner span {
+  color: tomato;
+}
 
-  font: 600 2.5vmax "Roboto";
+.image-container {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner > h1 {
+
+  font: 500 4.4vmax "Gotham Black";
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .banner > p {
-  font: 300 1.4vmax "Lucida Sans";
+  margin: 1vmax;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font: 600 1.5vmax "Gotham";
 }
 
 .banner > a > button {
   margin-bottom: 5vmax;
   cursor: pointer;
-  background-color: white;
   border: 1px solid white;
   border-radius: 0;
   padding: 1vmax;
@@ -38,7 +55,7 @@
   color: white;
 }
 
-.banner::after {
+/* .banner::after {
   content: "";
   width: 100vw;
   height: 100vmin;
@@ -46,9 +63,8 @@
   position: absolute;
   top: 0%;
   left: 0;
-  clip-path: polygon(100% 68%, 0 100%, 100% 100%);
   max-width: 100%;
-}
+} */
 
 .homeHeading {
   text-align: center;
@@ -64,7 +80,7 @@
 .container {
   display: flex;
   margin: 2vmax auto;
-  width: 80vw;
+  width: 90vw;
   flex-wrap: wrap;
   justify-content: center;
   max-width: 100%;
@@ -115,13 +131,6 @@
   box-shadow: 0 0 5px rgba(15, 15, 15, 0.26);
 
   transform: translateY(-1vmax);
-}
-
-.login-button {
-  position: fixed;
-  top: 40px;
-  right: 20px;
-  z-index: 9999;
 }
 
 /* Default styles for all screen sizes */

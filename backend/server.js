@@ -1,5 +1,5 @@
 const app = require('./app');
-const cronJob = require('./cronJob');
+// const cronJob = require('./cronJob');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 
@@ -20,7 +20,7 @@ const server = app.listen(process.env.PORT, () => {
     console.log(`Server is working on http://localhost:${process.env.PORT}`)
 })
 
-cronJob.start();
+// cronJob.start();
 
 // Unhandeled Promise Rejection
 process.on("unhandledRejection", err => {

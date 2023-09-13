@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+
 import { addItemsToCart } from '../../actions/cartAction';
 import { clearErrors, getProductDetails, newReview } from '../../actions/productAction';
 import { NEW_REVIEW_RESET } from '../../constants/productConstants';
@@ -97,17 +100,23 @@ const ProductDetails = () => {
             ) : (
                 <Fragment>
                     <MetaData title={`${product.name} -- ECOMMERCE`} />
+
+                    {console.log('product image', product)}
                     <div className='ProductDetails'>
                         <div>
-                            {product.images &&
-                                product.images.map((item, i) => (
-                                    <img
-                                        className='CarouselImage'
-                                        key={i}
-                                        src={item.url}
-                                        alt={`${i} Slide`}
-                                    />
-                                ))}
+                            {product.images && product.images.length > 0 && (
+                                <Carousel showThumbs={false}>
+                                    {product.images.map((item, i) => (
+                                        <div key={i}>
+                                            <img
+                                                className='CarouselImage'
+                                                src={item.url}
+                                                alt={`${i} Slide`}
+                                            />
+                                        </div>
+                                    ))}
+                                </Carousel>
+                            )}
                         </div>
 
                         <div>
@@ -116,10 +125,7 @@ const ProductDetails = () => {
                                 <p>Product # {product._id}</p>
                             </div>
                             <div className='detailsBlock-2'>
-                                <Rating
-                                    name={`rating`}
-                                    {...options}
-                                />
+                                <Rating name={`rating`} {...options} />
                                 <span className='detailsBlock-2-span'>
                                     {' '}
                                     ({product.numOfReviews} Reviews)

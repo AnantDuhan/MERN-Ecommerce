@@ -7,6 +7,18 @@
   display: flex;
 }
 
+.CarouselImage {
+  max-width: 100%;
+  height: auto;
+}
+
+.carousel {
+  width: 100%;
+  max-width: 400px;
+  /* Adjust the maximum width as needed */
+  margin: 0 auto;
+}
+
 .ProductDetails > div {
   width: 100%;
   display: flex;
@@ -22,9 +34,9 @@
   align-items: flex-start;
 }
 
-.CarouselImage {
+/* .CarouselImage {
   height: 450px;
-}
+} */
 
 .detailsBlock-1 > h2 {
   color: rgb(54, 54, 54);
