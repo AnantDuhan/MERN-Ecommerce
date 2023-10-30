@@ -31,7 +31,16 @@ import {
     DELETE_REVIEW_SUCCESS,
     DELETE_REVIEW_FAIL,
     DELETE_REVIEW_RESET,
-    CLEAR_ERRORS,
+    ALL_WISHLIST_PRODUCTS_REQUEST,
+    ALL_WISHLIST_PRODUCTS_SUCCESS,
+    ALL_WISHLIST_PRODUCTS_FAIL,
+    ADD_PRODUCT_TO_WISHLIST_REQUEST,
+    ADD_PRODUCT_TO_WISHLIST_SUCCESS,
+    ADD_PRODUCT_TO_WISHLIST_FAIL,
+    REMOVE_PRODUCT_FROM_WISHLIST_REQUEST,
+    REMOVE_PRODUCT_FROM_WISHLIST_SUCCESS,
+    REMOVE_PRODUCT_FROM_WISHLIST_FAIL,
+    CLEAR_ERRORS
 } from '../constants/productConstants';
 
 export const productsReducer = (state = { products: [] }, action) => {
@@ -274,6 +283,52 @@ export const reviewReducer = (state = {}, action) => {
                 ...state,
                 error: null,
             };
+        default:
+            return state;
+    }
+};
+
+const initialState = {
+    wishlist: [],
+    loading: false,
+    error: null,
+}
+
+export const wishlistReducer = (state = initialState, action) => {
+    switch (action.type) {
+        case ALL_WISHLIST_PRODUCTS_REQUEST:
+        case ADD_PRODUCT_TO_WISHLIST_REQUEST:
+        case REMOVE_PRODUCT_FROM_WISHLIST_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null
+            };
+
+        case ALL_WISHLIST_PRODUCTS_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                wishlist: action.payload
+            };
+
+        case ADD_PRODUCT_TO_WISHLIST_SUCCESS:
+        case REMOVE_PRODUCT_FROM_WISHLIST_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                wishlist: action.payload
+            };
+
+        case ALL_WISHLIST_PRODUCTS_FAIL:
+        case ADD_PRODUCT_TO_WISHLIST_FAIL:
+        case REMOVE_PRODUCT_FROM_WISHLIST_FAIL:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
+            };
+
         default:
             return state;
     }

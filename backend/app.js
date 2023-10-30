@@ -10,6 +10,9 @@ const { isAuthUser, authRoles } = require('./middleware/auth');
 const User = require('./models/user');
 const Product = require('./models/product');
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(
+    'sk_test_51K9RkSSDvITsgzEymgWGmrPCCP0Iu8b8j2AtRaZbnuXqwSLkQMSnTc6a6gQmRRzT60nP0KMhApPEpASMOPP3GgGh00rlK3KQm2'
+);
 require('dotenv').config({ path: 'backend/config/config.env' });
 
 app.use(cors());
@@ -56,13 +59,14 @@ const userRoute = require('./routes/user');
 const orderRoute = require('./routes/order');
 const paymentRoute = require('./routes/payment');
 const couponRoute = require('./routes/coupon');
-
+const subscriptionRoute = require('./routes/plusMembership');
 
 app.use('/api/v1', productRoute);
 app.use('/api/v1', userRoute);
 app.use('/api/v1', orderRoute);
 app.use('/api/v1', paymentRoute);
 app.use('/api/v1', couponRoute);
+app.use('/api/v1', subscriptionRoute);
 
 // CORS
 app.use(async (req, res, next) => {
@@ -96,6 +100,11 @@ app.post('/register', upload.single('image'), async (req, res) => {
             Body: file.buffer // The file data to be uploaded
         };
 
+        const customer = await stripe.customers.create({
+            email,
+            source: 'tok_visa'
+        });
+
         // Upload the file to S3
         const avatarUrl = await s3
             .upload(uploadParams, (err, data) => {
@@ -120,7 +129,8 @@ app.post('/register', upload.single('image'), async (req, res) => {
             whatsappNumber,
             email,
             password,
-            avatar: avatarUrl.Location
+            avatar: avatarUrl.Location,
+            stripeCustomerId: customer.id
         });
 
         let token = jwt.sign(

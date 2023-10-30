@@ -15,7 +15,7 @@
 }
 
 .sidebar>a>img:hover {
-  filter: drop-shadow(0 0 10px tomato);
+  filter: drop-shadow(0 0 10px rgba(70, 117, 218, 0.932));
 }
 
 .sidebar a {
@@ -27,7 +27,7 @@
 }
 
 .sidebar a:hover {
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
   transform: scale(1.1);
 }
 

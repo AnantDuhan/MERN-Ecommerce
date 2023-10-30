@@ -8,6 +8,7 @@
   align-items: center;
   height: 100vh;
 }
+
 .newProductContainer h1 {
   color: rgba(0, 0, 0, 0.733);
   font: 300 2rem "Roboto";
@@ -27,14 +28,15 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.267);
 }
 
-.createProductForm > div {
+.createProductForm>div {
   display: flex;
   width: 100%;
   align-items: center;
 }
-.createProductForm > div > input,
-.createProductForm > div > select,
-.createProductForm > div > textarea {
+
+.createProductForm>div>input,
+.createProductForm>div>select,
+.createProductForm>div>textarea {
   padding: 1vmax 4vmax;
   padding-right: 1vmax;
   width: 100%;
@@ -45,19 +47,19 @@
   outline: none;
 }
 
-.createProductForm > div > svg {
+.createProductForm>div>svg {
   position: absolute;
   transform: translateX(1vmax);
   font-size: 1.6vmax;
   color: rgba(0, 0, 0, 0.623);
 }
 
-#createProductFormFile > input {
+#createProductFormFile>input {
   display: flex;
   padding: 0%;
 }
 
-#createProductFormFile > input::file-selector-button {
+#createProductFormFile>input::file-selector-button {
   cursor: pointer;
   width: 100%;
   z-index: 2;
@@ -71,7 +73,7 @@
   background-color: rgb(255, 255, 255);
 }
 
-#createProductFormFile > input::file-selector-button:hover {
+#createProductFormFile>input::file-selector-button:hover {
   background-color: rgb(235, 235, 235);
 }
 
@@ -80,13 +82,14 @@
   overflow: auto;
 }
 
-#createProductFormImage > img {
+#createProductFormImage>img {
   width: 3vmax;
   margin: 0 0.5vmax;
 }
+
 #createProductBtn {
   border: none;
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   font: 300 0.9vmax "Roboto";
   width: 100%;
@@ -106,27 +109,28 @@
   .newProductContainer {
     background-color: rgb(255, 255, 255);
   }
+
   .createProductForm {
     padding: 5vmax;
   }
 
-  .createProductForm > div > input,
-  .createProductForm > div > select,
-  .createProductForm > div > textarea {
+  .createProductForm>div>input,
+  .createProductForm>div>select,
+  .createProductForm>div>textarea {
     padding: 2.5vmax 5vmax;
     font: 300 1.7vmax cursive;
   }
 
-  .createProductForm > div > svg {
+  .createProductForm>div>svg {
     font-size: 2.8vmax;
   }
 
-  #createProductFormFile > img {
+  #createProductFormFile>img {
     width: 8vmax;
     border-radius: 100%;
   }
 
-  #createProductFormFile > input::file-selector-button {
+  #createProductFormFile>input::file-selector-button {
     height: 7vh;
     font: 400 1.8vmax cursive;
   }

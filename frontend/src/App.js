@@ -27,7 +27,7 @@ import Shipping from './components/Cart/Shipping';
 import Home from './components/Home/Home';
 import About from './components/layout/About/About';
 import Contact from './components/layout/Contact/Contact';
-import Footer from './components/layout/Footer/Footer';
+import AdminHeader from './components/layout/Header/AdminHeader';
 import MainHeader from './components/layout/Header/MainHeader';
 // import Header from './components/layout/Header/Header';
 import NotFound from './components/layout/Not-Found/NotFound';
@@ -47,10 +47,12 @@ import UpdateProfile from './components/User/UpdateProfile';
 import store from './store';
 
 import './App.css';
+// import MainFooter from './components/layout/Footer/MainFooter';
+import PlusMembership from './components/Subscription/PlusMembership';
+import PaymentPlusMembership from './components/Subscription/PaymentPlusMembership';
+import Wishlist from './components/Product/Wishlist';
 
 /*
-    TODO: #1 Not able to upload image in register page
-
     TODO: #5 Sidebar for Admin Dashboard Not Visible
 */
 
@@ -86,7 +88,9 @@ function App() {
 
     return (
         <Fragment>
-            <MainHeader />
+            {!isAdminRoute && <MainHeader />}
+            {isAdminRoute && <AdminHeader />}
+
             {stripeApiKey && (
                 <Elements stripe={stripePromise}>
                     <Routes>
@@ -104,6 +108,7 @@ function App() {
                 <Route path='/' element={<Home />} exact />
                 <Route path='/product/:id' element={<ProductDetails />} exact />
                 <Route path='/products' element={<Products />} exact />
+                <Route path='/wishlist' element={<Wishlist />} exact />
                 <Route path='/products/:keyword' element={<Products />} exact />
                 {/* <Route path='/search' element={<Search />} exact /> */}
                 <Route path='/about' element={<About />} exact />
@@ -167,6 +172,22 @@ function App() {
                     <Route
                         path='/order/:id/return'
                         element={<ReturnRequest />}
+                        exact
+                    />
+                )}
+
+                {isAuthenticated && (
+                    <Route
+                        path='/join/plus-membership'
+                        element={<PlusMembership />}
+                        exact
+                    />
+                )}
+
+                {isAuthenticated && (
+                    <Route
+                        path='/join/plus-membership/:id/pay'
+                        element={<PaymentPlusMembership />}
                         exact
                     />
                 )}
@@ -281,9 +302,9 @@ function App() {
                 />
 
                 {/* Page Not Found Route */}
-                {/* <Route path='*' element={<NotFound />} /> */}
+                {/* <Route path='/*' element={<NotFound />} /> */}
             </Routes>
-            {!isAdminRoute && <Footer />}
+            {/* {!isAdminRoute && <MainFooter />} */}
         </Fragment>
     );
 }

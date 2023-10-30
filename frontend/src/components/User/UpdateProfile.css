@@ -95,7 +95,7 @@
 
 .updateProfileBtn {
   border: none;
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   font: 300 0.9vmax "Roboto";
   width: 100%;

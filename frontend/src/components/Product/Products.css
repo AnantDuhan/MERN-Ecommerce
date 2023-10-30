@@ -36,6 +36,7 @@
   transition: all 0.3s;
   cursor: pointer;
 }
+
 .page-item:first-child {
   border-radius: 5px 0 0 5px;
 }
@@ -43,6 +44,7 @@
 .page-item:last-child {
   border-radius: 0 5px 5px 0;
 }
+
 .page-link {
   text-decoration: none;
   font: 300 0.7vmax "Roboto";
@@ -59,7 +61,7 @@
 }
 
 .pageItemActive {
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
 }
 
 .pageLinkActive {
@@ -85,11 +87,12 @@
   cursor: pointer;
   transition: all 0.5s;
 }
+
 .category-link:hover {
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
 }
 
-.filterBox > fieldset {
+.filterBox>fieldset {
   border: 1px solid rgba(0, 0, 0, 0.329);
 }
 
@@ -120,7 +123,7 @@
   /* Remove right margin for the last button */
 /* } */
 .price-range-button.active {
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: #fff;
 }
 
@@ -140,17 +143,17 @@
     font: 400 1.8vmax "Roboto";
   }
 
-    .price-ranges {
-      flex-direction: column;
-      align-items: flex-start;
-      width: auto;
-      /* Allow buttons to take their natural width */
-    }
+  .price-ranges {
+    flex-direction: column;
+    align-items: flex-start;
+    width: auto;
+    /* Allow buttons to take their natural width */
+  }
 
-    .price-range-button {
-      width: auto;
-      /* Allow buttons to take their natural width */
-      margin: 5px 0;
-      /* Add vertical spacing between buttons */
-    }
+  .price-range-button {
+    width: auto;
+    /* Allow buttons to take their natural width */
+    margin: 5px 0;
+    /* Add vertical spacing between buttons */
+  }
 }

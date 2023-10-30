@@ -9,11 +9,9 @@
 }
 
 .aboutSectionGradient {
-  background-image: linear-gradient(
-    to bottom right,
-    rgb(78, 81, 255),
-    rgb(74, 137, 189)
-  );
+  background-image: linear-gradient(to bottom right,
+      rgb(78, 81, 255),
+      rgb(74, 137, 189));
 }
 
 .aboutSectionContainer {
@@ -31,18 +29,18 @@
   align-items: center;
 }
 
-.aboutSectionContainer > h1 {
+.aboutSectionContainer>h1 {
   font: 400 3vmax "Roboto";
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
   margin: 2vmax;
 }
 
-.aboutSectionContainer > div {
+.aboutSectionContainer>div {
   display: flex;
   width: 100%;
 }
 
-.aboutSectionContainer > div > div {
+.aboutSectionContainer>div>div {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -51,16 +49,16 @@
   box-sizing: border-box;
 }
 
-.aboutSectionContainer > div > div > p {
+.aboutSectionContainer>div>div>p {
   color: rgba(0, 0, 0, 0.623);
   font: 100 1vmax "Roboto";
 }
 
-.aboutSectionContainer > div > div > button {
+.aboutSectionContainer>div>div>button {
   margin: 0.5vmax 0;
 }
 
-.aboutSectionContainer > div > div > span {
+.aboutSectionContainer>div>div>span {
   font: 100 1vmax "Roboto";
   color: rgba(0, 0, 0, 0.616);
   text-align: center;
@@ -71,13 +69,13 @@
   border-left: 1px solid rgba(0, 0, 0, 0.116);
 }
 
-.aboutSectionContainer2 > h2 {
+.aboutSectionContainer2>h2 {
   color: rgba(0, 0, 0, 0.623);
   font: 100 2vmax "Roboto";
   margin: 2vmax;
 }
 
-.aboutSectionContainer2 > a > svg {
+.aboutSectionContainer2>a>svg {
   font-size: 4vmax;
 }
 
@@ -99,20 +97,20 @@
 }
 
 @media screen and (max-width: 600px) {
-  .aboutSectionContainer > div {
+  .aboutSectionContainer>div {
     display: block;
   }
 
-  .aboutSectionContainer > h1 {
+  .aboutSectionContainer>h1 {
     font: 400 5vmax "Roboto";
     margin: 3vmax;
   }
 
-  .aboutSectionContainer > div > div > p {
+  .aboutSectionContainer>div>div>p {
     font: 100 2vmax "Roboto";
   }
 
-  .aboutSectionContainer > div > div > span {
+  .aboutSectionContainer>div>div>span {
     font: 100 1.4vmax "Roboto";
     width: 70%;
   }
@@ -121,12 +119,12 @@
     border-left: none;
   }
 
-  .aboutSectionContainer2 > h2 {
+  .aboutSectionContainer2>h2 {
     font: 100 3vmax "Roboto";
     margin: 2vmax;
   }
 
-  .aboutSectionContainer2 > a > svg {
+  .aboutSectionContainer2>a>svg {
     font-size: 6vmax;
     margin: 1vmax;
   }

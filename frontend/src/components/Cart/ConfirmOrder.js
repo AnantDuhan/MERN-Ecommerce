@@ -83,8 +83,13 @@ const ConfirmOrder = () => {
                                             {item.name}
                                         </Link>{' '}
                                         <span>
-                                            {item.quantity} X ₹{item.price} ={' '}
-                                            <b>₹{item.price * item.quantity}</b>
+                                            {item.quantity} x ₹{item.price} ={' '}
+                                            <span>
+                                                <b>
+                                                    ₹
+                                                    {item.price * item.quantity}
+                                                </b>
+                                            </span>
                                         </span>
                                     </div>
                                 ))}

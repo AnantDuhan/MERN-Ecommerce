@@ -1,13 +1,15 @@
-// import { useState } from '@fortawesome/react-fontawesome';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+
 import { logout } from '../../../actions/userAction';
+
 import './MainHeader.css';
-import { useDispatch, useSelector } from 'react-redux';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const MainHeader =() => {
     const { isAuthenticated, user } = useSelector(state => state.user);
@@ -83,6 +85,12 @@ const MainHeader =() => {
                         </div>
                     </form>
 
+                    <Link to='/wishlist' className='nav-link'>
+                        <div className='wishlist-container'>
+                            <FavoriteIcon className='wishlistIcon' />
+                        </div>
+                    </Link>
+
                     <Link to='/cart' className='nav-link'>
                         <div className='cart-icon-container'>
                             <ShoppingCartIcon />
@@ -93,6 +101,7 @@ const MainHeader =() => {
                             )}
                         </div>
                     </Link>
+
                     {isAuthenticated ? (
                         <div className='user-profile'>
                             <Link to='/account'>
@@ -118,6 +127,9 @@ const MainHeader =() => {
                             Login
                         </Link>
                     )}
+                    <Link to='/join/plus-membership' className='platinum-btn'>
+                        Subscribe
+                    </Link>
                 </div>
             </div>
         </nav>

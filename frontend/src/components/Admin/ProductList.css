@@ -36,11 +36,11 @@
 }
 
 .productListTable a:hover {
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
 }
 
 .editIcon:hover {
-  color:green;
+  color: green;
 }
 
 .deleteIcon:hover {
@@ -61,7 +61,7 @@
 }
 
 .refundButton {
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   padding: 10px 20px;
   border: none;

@@ -13,19 +13,6 @@ import MetaData from '../layout/MetaData';
 
 import './Products.css';
 
-const categories = [
-    'Laptop',
-    'Footwear',
-    'Bottom',
-    'Tops',
-    'Attire',
-    'Camera',
-    'SmartPhones',
-    'Tracksuit',
-    'Jeans',
-    'Liquor'
-];
-
 const Products = () => {
     const dispatch = useDispatch();
 

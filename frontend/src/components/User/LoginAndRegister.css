@@ -3,6 +3,7 @@
     height: 100vh;
     max-width: 100%;
     display: flex;
+    padding-top: 80px;
     justify-content: center;
     align-items: center;
     background-color: rgb(231, 231, 231);
@@ -35,11 +36,11 @@
 }
 
 .login_signUp_toggle>p:hover {
-    color: tomato;
+    color: rgba(70, 117, 218, 0.932);
 }
 
 .LoginSignUpBox>div>button {
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     height: 3px;
     width: 50%;
     border: none;
@@ -132,7 +133,7 @@
 .loginBtn,
 .signUpBtn {
     border: none;
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     color: white;
     font: 300 0.9vmax "Roboto";
     width: 100%;
@@ -146,7 +147,7 @@
 
 .loginBtn:hover,
 .signUpBtn:hover {
-    background-color: rgb(179, 66, 46);
+    background-color: #00008B;
 }
 
 .shiftToLeft {
@@ -185,7 +186,7 @@
 }
 
 .password-icon:hover {
-    color: tomato;
+    color: rgba(70, 117, 218, 0.932);
 }
 
 @media screen and (max-width: 600px) {

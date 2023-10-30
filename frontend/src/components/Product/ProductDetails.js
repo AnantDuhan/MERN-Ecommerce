@@ -5,11 +5,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import Lightbox from 'react-images';
 
 import { addItemsToCart } from '../../actions/cartAction';
-import { clearErrors, getProductDetails, newReview } from '../../actions/productAction';
+import { addProductToWishlist, clearErrors, getProductDetails, newReview, removeProductFromWishlist } from '../../actions/productAction';
 import { NEW_REVIEW_RESET } from '../../constants/productConstants';
 import Loader from '../layout/Loader/Loader';
 import MetaData from '../layout/MetaData';
@@ -24,6 +28,8 @@ const ProductDetails = () => {
     const { product, loading, error } = useSelector(
         state => state.productDetails
     );
+
+    const { wishlist } = useSelector(state => state.wishlist);
 
     const { success, error: reviewError } = useSelector(
         state => state.newReview
@@ -40,6 +46,8 @@ const ProductDetails = () => {
     const [open, setOpen] = useState(false);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [lightboxIsOpen, setLightboxIsOpen] = useState(false);
+    const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
     const increaseQuantity = () => {
         if (product.Stock <= quantity) return;
@@ -60,6 +68,17 @@ const ProductDetails = () => {
         toast.success('Item Added To Cart');
     };
 
+    const wishlistHandler = () => {
+        const isProductInWishlist = wishlist.some(item => item.product === id);
+
+        if (isProductInWishlist) {
+            toast.info('Product is already in the wishlist');
+        } else {
+            dispatch(addProductToWishlist(id));
+            toast.success('Item Added To Wishlist');
+        }
+    }
+
     const submitReviewToggle = () => {
         open ? setOpen(false) : setOpen(true);
     };
@@ -73,6 +92,11 @@ const ProductDetails = () => {
 
         dispatch(newReview(reviewData));
         setOpen(false);
+    };
+
+    const openLightbox = index => {
+        setLightboxImageIndex(index);
+        setLightboxIsOpen(true);
     };
 
     useEffect(() => {
@@ -100,14 +124,15 @@ const ProductDetails = () => {
             ) : (
                 <Fragment>
                     <MetaData title={`${product.name} -- ECOMMERCE`} />
-
-                    {console.log('product image', product)}
                     <div className='ProductDetails'>
                         <div>
                             {product.images && product.images.length > 0 && (
                                 <Carousel showThumbs={false}>
                                     {product.images.map((item, i) => (
-                                        <div key={i}>
+                                        <div
+                                            key={i}
+                                            onClick={() => openLightbox(i)}
+                                        >
                                             <img
                                                 className='CarouselImage'
                                                 src={item.url}
@@ -118,6 +143,31 @@ const ProductDetails = () => {
                                 </Carousel>
                             )}
                         </div>
+
+                        {lightboxIsOpen && (
+                            <Lightbox
+                                images={product.images.map(item => ({
+                                    src: item.url
+                                }))}
+                                isOpen={lightboxIsOpen}
+                                onClose={() => setLightboxIsOpen(false)}
+                                currentImage={lightboxImageIndex}
+                                onClickPrev={() =>
+                                    setLightboxImageIndex(prev =>
+                                        prev === 0
+                                            ? product.images.length - 1
+                                            : prev - 1
+                                    )
+                                }
+                                onClickNext={() =>
+                                    setLightboxImageIndex(prev =>
+                                        prev === product.images.length - 1
+                                            ? 0
+                                            : prev + 1
+                                    )
+                                }
+                            />
+                        )}
 
                         <div>
                             <div className='detailsBlock-1'>
@@ -147,6 +197,12 @@ const ProductDetails = () => {
                                             +
                                         </button>
                                     </div>
+                                    <button
+                                        onClick={wishlistHandler}
+                                        className='submitReview'
+                                    >
+                                        Add to Wishlist
+                                    </button>
                                     <button
                                         disabled={
                                             product.Stock < 1 ? true : false

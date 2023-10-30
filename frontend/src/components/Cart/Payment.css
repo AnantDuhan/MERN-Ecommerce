@@ -11,7 +11,7 @@
   height: 100%;
 }
 
-.paymentForm > p {
+.paymentForm>p {
   font: 400 2vmax "Roboto";
   color: rgba(0, 0, 0, 0.753);
   border-bottom: 1px solid rgba(0, 0, 0, 0.13);
@@ -21,7 +21,7 @@
   margin: auto;
 }
 
-.paymentForm > div {
+.paymentForm>div {
   display: flex;
   align-items: center;
   margin: 2vmax 0;
@@ -37,7 +37,7 @@
   outline: none;
 }
 
-.paymentForm > div > svg {
+.paymentForm>div>svg {
   position: absolute;
   transform: translateX(1vmax);
   font-size: 1.6vmax;
@@ -46,7 +46,7 @@
 
 .paymentFormBtn {
   border: none;
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   font: 300 0.9vmax "Roboto";
   width: 100%;
@@ -65,13 +65,13 @@
     width: 90%;
   }
 
-  .paymentForm > p {
+  .paymentForm>p {
     font: 400 8vw "Roboto";
     padding: 4vw 0;
     width: 60%;
   }
 
-  .paymentForm > div {
+  .paymentForm>div {
     margin: 10vw 0;
   }
 
@@ -79,7 +79,7 @@
     padding: 4vw 10vw;
   }
 
-  .paymentForm > div > svg {
+  .paymentForm>div>svg {
     font-size: 6vw;
   }
 

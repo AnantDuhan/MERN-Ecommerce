@@ -5,7 +5,8 @@
     "main": "backend/server.js",
     "scripts": {
         "start": "node backend/server.js",
-        "dev": "nodemon backend/server.js --ignore frontend"
+        "dev": "nodemon backend/server.js --ignore frontend",
+        "test": "mocha 'backend/test/unit/user.test.js'"
     },
     "author": "Anant Duhan",
     "license": "ISC",
@@ -51,8 +52,13 @@
         "webfontloader": "^1.6.28"
     },
     "devDependencies": {
+        "chai": "^4.3.8",
+        "chai-as-promised": "^7.1.1",
         "eslint-config-prettier": "^8.4.0",
         "eslint-plugin-prettier": "^4.0.0",
+        "mocha": "^10.2.0",
+        "sinon": "^16.0.0",
+        "sinon-chai": "^3.7.0",
         "webpack": "^5.69.1"
     }
 }

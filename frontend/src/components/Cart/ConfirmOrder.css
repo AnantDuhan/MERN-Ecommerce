@@ -5,7 +5,7 @@
   grid-template-columns: 6fr 3fr;
 }
 
-.confirmOrderPage > div:last-child {
+.confirmOrderPage>div:last-child {
   border-left: 1px solid rgba(0, 0, 0, 0.247);
 }
 
@@ -14,7 +14,7 @@
   padding-bottom: 0%;
 }
 
-.confirmShippingArea > p {
+.confirmShippingArea>p {
   font: 400 1.8vmax "Roboto";
 }
 
@@ -23,22 +23,23 @@
   margin: 2vmax;
 }
 
-.confirmShippingAreaBox > div {
+.confirmShippingAreaBox>div {
   display: flex;
   margin: 1vmax 0;
 }
 
-.confirmShippingAreaBox > div > p {
+.confirmShippingAreaBox>div>p {
   font: 400 1vmax "Roboto";
   color: black;
 }
-.confirmShippingAreaBox > div > span {
+
+.confirmShippingAreaBox>div>span {
   margin: 0 1vmax;
   font: 100 1vmax "Roboto";
   color: #575757;
 }
 
-.confirmCartItems > p {
+.confirmCartItems>p {
   font: 400 1.8vmax "Roboto";
 }
 
@@ -52,7 +53,7 @@
   overflow-y: auto;
 }
 
-.confirmCartItemsContainer > div {
+.confirmCartItemsContainer>div {
   display: flex;
   font: 400 1vmax "Roboto";
   align-items: center;
@@ -60,20 +61,25 @@
   margin: 2vmax 0;
 }
 
-.confirmCartItemsContainer > div > img {
+.confirmCartItemsContainer>div>img {
   width: 3vmax;
 }
 
-.confirmCartItemsContainer > div > a {
+.confirmCartItemsContainer>div>a {
   color: #575757;
   margin: 0 2vmax;
   width: 60%;
   text-decoration: none;
 }
 
-.confirmCartItemsContainer > div > span {
+.confirmCartItemsContainer>div>span {
   font: 100 1vmax "Roboto";
   color: #5e5e5e;
+}
+
+.confirmCartItemsContainer>div>span>span {
+  font: 100 1vmax "Roboto";
+  color: #00008B;
 }
 
 .couponSelection {
@@ -97,7 +103,7 @@
   padding: 7vmax;
 }
 
-.orderSummary > p {
+.orderSummary>p {
   text-align: center;
   font: 400 1.8vmax "Roboto";
   border-bottom: 1px solid rgba(0, 0, 0, 0.267);
@@ -107,13 +113,14 @@
   box-sizing: border-box;
 }
 
-.orderSummary > div > div {
+.orderSummary>div>div {
   display: flex;
   font: 300 1vmax "Roboto";
   justify-content: space-between;
   margin: 2vmax 0;
 }
-.orderSummary > div > div > span {
+
+.orderSummary>div>div>span {
   color: rgba(0, 0, 0, 0.692);
 }
 
@@ -125,8 +132,8 @@
   padding: 1vmax 0;
 }
 
-.orderSummary > button {
-  background-color: tomato;
+.orderSummary>button {
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   width: 100%;
   padding: 1vmax;
@@ -137,8 +144,8 @@
   font: 400 1vmax "Roboto";
 }
 
-.orderSummary > button:hover {
-  background-color: rgb(192, 71, 50);
+.orderSummary>button:hover {
+  background-color: #00008B;
 }
 
 @media screen and (max-width: 600px) {
@@ -147,28 +154,29 @@
     height: unset;
   }
 
-  .confirmOrderPage > div:last-child {
+  .confirmOrderPage>div:last-child {
     border-left: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.247);
   }
 
-  .confirmshippingArea > p {
+  .confirmshippingArea>p {
     font: 400 6vw "Roboto";
   }
 
-  .confirmshippingAreaBox > div {
+  .confirmshippingAreaBox>div {
     display: flex;
     margin: 6vw 0;
   }
 
-  .confirmshippingAreaBox > div > p {
+  .confirmshippingAreaBox>div>p {
     font: 400 4vw "Roboto";
   }
-  .confirmshippingAreaBox > div > span {
+
+  .confirmshippingAreaBox>div>span {
     font: 100 4vw "Roboto";
   }
 
-  .confirmCartItems > p {
+  .confirmCartItems>p {
     font: 400 6vw "Roboto";
   }
 
@@ -176,21 +184,21 @@
     max-height: 50vw;
   }
 
-  .confirmCartItemsContainer > div {
+  .confirmCartItemsContainer>div {
     font: 400 4vw "Roboto";
     margin: 4vw 0;
   }
 
-  .confirmCartItemsContainer > div > img {
+  .confirmCartItemsContainer>div>img {
     width: 10vw;
   }
 
-  .confirmCartItemsContainer > div > a {
+  .confirmCartItemsContainer>div>a {
     margin: 0;
     width: 30%;
   }
 
-  .confirmCartItemsContainer > div > span {
+  .confirmCartItemsContainer>div>span {
     font: 100 4vw "Roboto";
   }
 
@@ -198,12 +206,12 @@
     padding: 12vw;
   }
 
-  .orderSummary > p {
+  .orderSummary>p {
     font: 400 6vw "Roboto";
     padding: 4vw;
   }
 
-  .orderSummary > div > div {
+  .orderSummary>div>div {
     font: 300 4vw "Roboto";
   }
 
@@ -212,7 +220,7 @@
     padding: 5vw 0;
   }
 
-  .orderSummary > button {
+  .orderSummary>button {
     padding: 4vw;
     margin: 4vw auto;
     font: 400 4vw "Roboto";

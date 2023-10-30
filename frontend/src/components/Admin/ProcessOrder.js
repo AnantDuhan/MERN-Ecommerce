@@ -197,7 +197,8 @@ const ProcessOrder = () => {
                                         order.isReturned === false
                                     }
                                     style={{
-                                        backgroundColor: 'tomato',
+                                        backgroundColor:
+                                            'rgba(70, 117, 218, 0.932)',
                                         color: 'white',
                                         padding: '10px 20px',
                                         border: 'none',
@@ -216,7 +217,8 @@ const ProcessOrder = () => {
                                         order.isReturned === false
                                     }
                                     style={{
-                                        backgroundColor: 'tomato',
+                                        backgroundColor:
+                                            'rgba(70, 117, 218, 0.932)',
                                         color: 'white',
                                         padding: '10px 20px',
                                         border: 'none',

@@ -42,7 +42,7 @@
 .returnRequestBox>input[type="submit"] {
     height: 8%;
     border-radius: 0%;
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     border: none;
     padding: 1vmax;
     width: 10%;

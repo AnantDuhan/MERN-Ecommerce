@@ -61,7 +61,7 @@ body {
 }
 
 .nav-link:hover {
-    color: tomato;
+    color: rgba(70, 117, 218, 0.932);
 }
 
 .nav-search {
@@ -138,7 +138,7 @@ body {
 }
 
 .login-button {
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -147,10 +147,11 @@ body {
     font-size: 1rem;
     height: 30px;
     margin-right: 10px;
+    text-decoration: none;
 }
 
 .logout-button {
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -159,11 +160,28 @@ body {
     font-size: 1rem;
     height: 30px;
     margin-right: 10px;
+    text-decoration: none;
 }
 
-.nav-link.shopping-cart{
+.platinum-btn {
+    background-color: #00008B;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 1rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    height: 30px;
+    margin-right: 10px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link.shopping-cart {
     margin-right: 0;
 }
+
 .searchBox {
     display: flex;
     align-items: center;
@@ -195,7 +213,7 @@ body {
 }
 
 .searchIcon:hover {
-    color: tomato;
+    color: rgba(70, 117, 218, 0.932);
 }
 
 .cart-icon-container {
@@ -204,11 +222,21 @@ body {
     cursor: pointer;
 }
 
+.wishlist-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.wishlistIcon:hover {
+    color: rgba(70, 117, 218, 0.932);
+}
+
 .cart-badge {
     position: absolute;
     top: -10px;
     right: -7px;
-    background-color: tomato;
+    background-color: rgba(70, 117, 218, 0.932);
     color: white;
     border-radius: 50%;
     padding: 4px 4px;

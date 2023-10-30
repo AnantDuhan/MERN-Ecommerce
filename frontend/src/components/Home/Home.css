@@ -13,7 +13,7 @@
 }
 
 .banner span {
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
 }
 
 .image-container {
@@ -28,19 +28,19 @@
   object-fit: cover;
 }
 
-.banner > h1 {
+.banner>h1 {
 
   font: 500 4.4vmax "Gotham Black";
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.banner > p {
+.banner>p {
   margin: 1vmax;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   font: 600 1.5vmax "Gotham";
 }
 
-.banner > a > button {
+.banner>a>button {
   margin-bottom: 5vmax;
   cursor: pointer;
   border: 1px solid white;
@@ -50,7 +50,8 @@
   width: 9vmax;
   font: 500 1vmax "Roboto";
 }
-.banner > a > button:hover {
+
+.banner>a>button:hover {
   background-color: rgba(255, 255, 255, 0);
   color: white;
 }
@@ -97,11 +98,11 @@
   padding-bottom: 0.5vmax;
 }
 
-.productCard > img {
+.productCard>img {
   width: 14vmax;
 }
 
-.productCard > div {
+.productCard>div {
   margin: 0.5vmax;
   display: flex;
   justify-content: flex-start;
@@ -113,16 +114,16 @@
   font: 300 0.7vmax "Roboto";
 }
 
-.productCard > p {
+.productCard>p {
   font-family: "Roboto";
   font-size: 1.2vmax;
   margin: 1vmax 0.5vmax;
   margin-bottom: 0;
 }
 
-.productCard > span {
+.productCard>span {
   margin: 0.5vmax;
-  color: tomato;
+  color: rgba(70, 117, 218, 0.932);
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   font-size: 1vmax;
 }
@@ -163,6 +164,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 60px;
 }
 
 .newsletter-input {
@@ -172,9 +174,39 @@
   border-radius: 4px;
 }
 
+.addToWishlistButton {
+  background-color: rgba(70, 117, 218, 0.932);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.addToWishlistButton:hover {
+  background-color: #00008B;
+}
+
+.deleteButton {
+  background-color: rgba(70, 117, 218, 0.932);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.deleteButton:hover {
+  background-color: #00008B;
+}
+
 /* Style for the Subscribe button */
 .subscribe-button {
-  background-color: tomato;
+  background-color: rgba(70, 117, 218, 0.932);
   color: white;
   border: none;
   border-radius: 4px;
@@ -184,7 +216,7 @@
 
 .subscribe-button:hover {
   background-color: #ff6347;
-  /* Change the button color on hover to a lighter shade of tomato */
+  /* Change the button color on hover to a lighter shade of rgba(70, 117, 218, 0.932) */
 }
 
 /* Media queries for responsiveness */
@@ -203,26 +235,26 @@
 }
 
 @media screen and (max-width: 600px) {
-  .productCard > p {
+  .productCard>p {
     font-size: 1.7vmax;
   }
 
-  .productCard > div {
+  .productCard>div {
     margin: 0vmax;
     display: block;
   }
 
-  .productCard > span {
+  .productCard>span {
     font-size: 1.5vmax;
   }
 
-  .productCard > div > span {
+  .productCard>div>span {
     margin: 0 0.5vmax;
     font: 300 1vmax "Roboto";
   }
 
-    .shop-all-container {
-      grid-template-columns: 1fr;
-      /* 1x1 grid for mobile */
-    }
+  .shop-all-container {
+    grid-template-columns: 1fr;
+    /* 1x1 grid for mobile */
+  }
 }

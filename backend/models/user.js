@@ -23,15 +23,62 @@ const userSchema = new mongoose.Schema({
         minLength: [6, 'Password must be atleast of 6 characters long'],
         select: false
     },
+    whatsappNumber: {
+        type: Number,
+        required: true,
+        unique: [true, 'This number is already in use by another account!']
+    },
+    otp: {
+        code: {
+            type: Number,
+            select: false
+        },
+        expiry: Date
+    },
     avatar: {
         type: String,
         required: true
     },
-    whatsappNumber: {
-        type: Number,
-        required: true,
-        unique :[true,'This number is already in use by another account!']
+    wishlist: {
+        type: [
+            {
+                name: {
+                    type: String,
+                    required: [true, 'Please Enter product Name'],
+                    trim: true
+                },
+                description: {
+                    type: String,
+                    required: [true, 'Please Enter product description']
+                },
+                price: {
+                    type: Number,
+                    required: [true, 'Please Enter product price'],
+                    maxLength: [6, "Price can't exceed 6 figures"]
+                },
+                ratings: {
+                    type: Number,
+                    default: 0
+                },
+                images: [
+                    {
+                        url: {
+                            type: String,
+                            required: true
+                        }
+                    }
+                ],
+                product: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Product'
+                }
+            }
+        ],
+        default: []
     },
+    stripeCustomerId: String,
+    plusSubscriptionId: String,
+    plusSubscriptionExpiry: Date,
     role: {
         type: String,
         default: 'user'

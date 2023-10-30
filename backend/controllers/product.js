@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const User = require('../models/user');
 const ApiFeatures = require('../utils/apifeatures');
 
 // get all products
@@ -94,6 +95,129 @@ exports.createProductReview = async (req, res, next) => {
         success: true,
         review
     });
+};
+
+exports.getAllWishlistProducts = async (req, res) => {
+    try {
+        // Find the current user
+        const user = await User.findById(req.user._id).populate(
+            'wishlist.product'
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Extract wishlist products from the user object
+        const wishlistProducts = user.wishlist.map(item => item.product);
+
+        res.status(200).json({
+            success: true,
+            wishlistProducts
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.addToWishList = async (req, res) => {
+    try {
+
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        const isProductInWishlist = user.wishlist.some(
+            item => item.product.toString() === req.params.id
+        );
+        if (isProductInWishlist) {
+            return res.status(400).json({
+                success: false,
+                message: 'Product is already in the wishlist'
+            });
+        }
+
+        const wishlistItem = {
+            product: req.params.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            ratings: product.ratings,
+            images: product.images,
+        };
+
+        user.wishlist.push(wishlistItem);
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Product added to wishlist successfully',
+            wishlist: user.wishlist
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+};
+
+exports.removeFromWishList = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        const isProductInWishlistIndex = user.wishlist.findIndex(
+            item => item.product.toString() === req.params.id
+        );
+
+        if (isProductInWishlistIndex === -1) {
+            return res.status(400).json({
+                success: false,
+                message: 'Product is not in the wishlist'
+            });
+        }
+
+        user.wishlist.splice(isProductInWishlistIndex, 1);
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Product removed from wishlist successfully',
+            wishlist: user.wishlist
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
 };
 
 // Get all reviews of a product

@@ -167,7 +167,8 @@ const OrderDetails = () => {
                                         order.orderStatus === 'Shipped'
                                     }
                                     style={{
-                                        backgroundColor: 'tomato',
+                                        backgroundColor:
+                                            'rgba(70, 117, 218, 0.932)',
                                         color: 'white',
                                         padding: '10px 20px',
                                         border: 'none',
@@ -308,7 +309,7 @@ const OrderDetails = () => {
                             <div className='scrollable-content'>
                                 <div className='orderDetailsCartItemsContainer'>
                                     {order.orderItems &&
-                                            order.orderItems.map(item => (
+                                        order.orderItems.map(item => (
                                             <div
                                                 className='orderItem'
                                                 key={item.product}
@@ -345,7 +346,9 @@ const OrderDetails = () => {
                                                         // If there's only one image, display it as a regular image
                                                         <img
                                                             src={
-                                                                item.images[0].url                                                            }
+                                                                item.images[0]
+                                                                    .url
+                                                            }
                                                             alt='Product'
                                                         />
                                                     )}

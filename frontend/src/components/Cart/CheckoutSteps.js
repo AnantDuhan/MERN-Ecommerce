@@ -7,24 +7,23 @@ import React, { Fragment } from 'react';
 import './CheckoutSteps.css';
 
 const CheckoutSteps = ({ activeStep }) => {
-
     const steps = [
         {
             label: <Typography>Shipping Details</Typography>,
-            icon: <LocalShippingIcon />,
+            icon: <LocalShippingIcon />
         },
         {
             label: <Typography>Confirm Order</Typography>,
-            icon: <LibraryAddCheckIcon />,
+            icon: <LibraryAddCheckIcon />
         },
         {
             label: <Typography>Payment</Typography>,
-            icon: <AccountBalanceIcon />,
-        },
+            icon: <AccountBalanceIcon />
+        }
     ];
 
     const stepStyles = {
-        boxSizing: 'border-box',
+        boxSizing: 'border-box'
     };
 
     return (
@@ -44,8 +43,8 @@ const CheckoutSteps = ({ activeStep }) => {
                             style={{
                                 color:
                                     activeStep >= index
-                                        ? 'tomato'
-                                        : 'rgba(0, 0, 0, 0.649)',
+                                        ? '#00008B'
+                                        : 'rgba(0, 0, 0, 0.649)'
                             }}
                             icon={item.icon}
                         >

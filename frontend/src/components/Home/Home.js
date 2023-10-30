@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { CgMouse } from 'react-icons/cg';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -16,7 +15,6 @@ const Home = () => {
     const dispatch = useDispatch();
 
     const [email, setEmail] = useState('');
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
 
     const { loading, error, products } = useSelector(state => state.products);

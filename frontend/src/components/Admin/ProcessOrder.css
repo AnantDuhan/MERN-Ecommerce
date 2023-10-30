@@ -1,7 +1,7 @@
  .updateOrderForm {
-    margin: -2vmax 0;
-    padding: 2vmax;
-    background-color: white;
+   margin: -2vmax 0;
+   padding: 2vmax;
+   background-color: white;
  }
 
  .updateOrderForm>div {
@@ -46,7 +46,7 @@
  .orderDetailsContainer>h1 {
    font: 300 3vmax "Roboto";
    margin: 4vmax 0;
-   color: tomato;
+   color: rgba(70, 117, 218, 0.932);
  }
 
  .orderDetailsContainer>p {
@@ -153,10 +153,10 @@
  }
 
  .orderItemImg img {
-    max-width: 100%;
-    height: auto;
-    width: auto;
-    align-items: flex-start;
+   max-width: 100%;
+   height: auto;
+   width: auto;
+   align-items: flex-start;
  }
 
  .orderItemDetails {
@@ -174,8 +174,8 @@
    justify-content: space-between;
    align-items: flex-start;
    margin-top: 20px;
-    gap: 10px;
-    /* Adjust as needed */
+   gap: 10px;
+   /* Adjust as needed */
  }
 
  @media screen and (max-width: 768px) {
@@ -217,45 +217,45 @@
      font: 100 4vw "Roboto";
    }
 
-     .orderDetailsContainer,
-     .orderDetailsItems,
-     .processOrderContainer {
-       flex: 100%;
-       padding: 10px;
-       border: none;
-     }
+   .orderDetailsContainer,
+   .orderDetailsItems,
+   .processOrderContainer {
+     flex: 100%;
+     padding: 10px;
+     border: none;
+   }
 
-     .orderDetailsPage {
-       flex-direction: column;
-     }
+   .orderDetailsPage {
+     flex-direction: column;
+   }
 
-     .orderDetailsContainer,
-     .processOrderContainer {
-       margin-bottom: 20px;
-       border-right: none;
-     }
+   .orderDetailsContainer,
+   .processOrderContainer {
+     margin-bottom: 20px;
+     border-right: none;
+   }
 
-     .orderItem {
-       flex-direction: column;
-       margin-bottom: 15px;
-       padding-bottom: 15px;
-       border: none;
-     }
+   .orderItem {
+     flex-direction: column;
+     margin-bottom: 15px;
+     padding-bottom: 15px;
+     border: none;
+   }
 
-     .orderItemImg {
-       height: auto;
-       width: auto;
-       flex: none;
-       margin-right: 0;
-       margin-bottom: 10px;
-     }
+   .orderItemImg {
+     height: auto;
+     width: auto;
+     flex: none;
+     margin-right: 0;
+     margin-bottom: 10px;
+   }
 
-     .orderItemImg img {
-       max-height: none;
-       width: auto;
-     }
+   .orderItemImg img {
+     max-height: none;
+     width: auto;
+   }
 
-     .orderItemDetails {
-       text-align: center;
-     }
+   .orderItemDetails {
+     text-align: center;
+   }
  }
