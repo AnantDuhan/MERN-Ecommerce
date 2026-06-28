@@ -70,10 +70,10 @@ export default function OnboardingScreen() {
   }).current;
 
   const handleNext = () => {
-    if (
-      currentIndex ===
-      ONBOARDING_DATA.length - 1
-    ) {
+    console.log("Current Index:", currentIndex);
+
+    if (currentIndex === ONBOARDING_DATA.length - 1) {
+      console.log("Navigate to Login");
       router.replace("/login");
       return;
     }
