@@ -45,7 +45,7 @@ export default function LoginScreen() {
   const onSubmit = (data: LoginForm) => {
     console.log(data);
 
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/");
   };
 
   return (

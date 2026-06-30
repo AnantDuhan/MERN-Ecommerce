@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import FloatingBlob from "./FloatingBlob";
-import CenterGlow from "./CenterGlow";
+// import CenterGlow from "./CenterGlow";
 
 export default function AnimatedBackground() {
 
@@ -30,9 +30,9 @@ export default function AnimatedBackground() {
 
       {/* Ambient Glow */}
 
-      <View style={styles.centerGlow}>
+      {/* <View style={styles.centerGlow}>
         <CenterGlow />
-      </View>
+      </View> */}
 
       {/* Top Left */}
 
