@@ -67,7 +67,6 @@ export default function AuthTextField({
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
 
         <TextInput
-          {...props}
           style={styles.input}
           placeholderTextColor="#94A3B8"
           secureTextEntry={hidePassword}
@@ -95,6 +94,7 @@ export default function AuthTextField({
 
             onBlur?.(e);
           }}
+          {...props}
         />
 
         <View style={styles.rightIcon}>

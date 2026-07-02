@@ -25,27 +25,30 @@ import AuthHeader from "@/components/auth/AuthHeader";
 import AuthTextField from "@/components/auth/AuthTextField";
 import PrimaryButton from "@/components/onboarding/PrimaryButton";
 
-import { loginSchema, LoginForm } from "@/validation/auth.schema";
 import AuthFooter from "@/components/auth/AuthFooter";
+import { useLogin } from "@/features/auth/hooks/useLogin";
+import {
+  loginSchema,
+  LoginFormData,
+} from "@/features/auth/validation/login.schema";
 
 export default function LoginScreen() {
+  const loginMutation = useLogin();
+
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: LoginForm) => {
-    console.log(data);
-
-    router.replace("/(tabs)/");
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -79,6 +82,7 @@ export default function LoginScreen() {
                   error={errors.email?.message}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
                   leftIcon={
                     <Ionicons name="mail-outline" size={22} color="#64748B" />
                   }
@@ -97,6 +101,8 @@ export default function LoginScreen() {
                   onChangeText={field.onChange}
                   error={errors.password?.message}
                   secureTextEntry
+                  returnKeyType="done"
+                  onSubmitEditing={handleSubmit(onSubmit)}
                   leftIcon={
                     <Ionicons
                       name="lock-closed-outline"
@@ -109,24 +115,32 @@ export default function LoginScreen() {
             />
 
             <Animated.View entering={FadeInDown.delay(400)}>
-              <Pressable 
-                onPress={() =>
-                  router.push("/forgot-password")
-              }>
+              <Pressable
+                disabled={loginMutation.isPending}
+                onPress={() => router.push("/forgot-password")}
+              >
                 <Text style={styles.forgot}>Forgot Password?</Text>
               </Pressable>
             </Animated.View>
 
             <View style={{ height: 16 }} />
 
-            <PrimaryButton title="Sign In" onPress={handleSubmit(onSubmit)} />
+            <PrimaryButton
+              title="Sign In"
+              loading={loginMutation.isPending}
+              disabled={loginMutation.isPending}
+              onPress={handleSubmit(onSubmit)}
+            />
+
+            {loginMutation.isError && (
+              <Text style={styles.error}>{loginMutation.error.message}</Text>
+            )}
 
             <AuthDivider />
 
-            <GoogleButton
-              onPress={() => {
-                console.log("Google Login");
-              }}
+          <GoogleButton
+              disabled={loginMutation.isPending}
+              onPress={() => {}}
             />
           </AuthCard>
           <Animated.View entering={FadeInDown.delay(500)}>
@@ -134,6 +148,7 @@ export default function LoginScreen() {
               text="Don't have an account?"
               actionText="Create Account"
               onPress={() => router.push("/register")}
+              disabled={loginMutation.isPending}
             />
           </Animated.View>
         </ScrollView>
@@ -170,5 +185,12 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     paddingTop: 12,
     alignItems: "center",
+  },
+
+  error: {
+    marginTop: 12,
+    textAlign: "center",
+    color: "#EF4444",
+    fontSize: 14,
   },
 });

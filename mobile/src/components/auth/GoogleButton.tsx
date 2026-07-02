@@ -18,12 +18,24 @@ const AnimatedPressable =
 
 interface Props {
   onPress: () => void;
+  disabled?: boolean;
 }
 
 export default function GoogleButton({
   onPress,
+  disabled = false,
 }: Props) {
   const scale = useSharedValue(1);
+  
+  const handlePressIn = () => {
+    if(!disabled) {
+      scale.value = withSpring(0.97);
+    }
+  }
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  }
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -35,14 +47,14 @@ export default function GoogleButton({
 
   return (
     <AnimatedPressable
-      style={animatedStyle}
+      style={[
+        animatedStyle,
+        disabled && styles.disabled,
+      ]}
+      disabled={disabled}
       onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.97);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1);
-      }}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
     >
       <BlurView
         intensity={60}
@@ -114,5 +126,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#202124",
     letterSpacing: 0.2,
+  },
+
+  disabled: {
+    opacity: 0.55,
   },
 });

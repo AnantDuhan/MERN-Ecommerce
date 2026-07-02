@@ -21,7 +21,7 @@ const Product = require("./models/product");
 const jwt = require("jsonwebtoken");
 const Snowflake = require("@theinternetfolks/snowflake");
 const { generateEmbedding } = require('./utils/generateEmbedding');
-const redisClientPromise = require('./config/redisClientUpstash');
+// const redisClientPromise = require('./config/redisClientUpstash');
 require("dotenv").config({ path: "./config/config.env" });
 
 app.use(cookieParser());
@@ -452,21 +452,21 @@ app.put(
       //   console.error("Redis cache sync error:", cacheError);
       // }
 
-      try {
-        const cacheKey = `product:${productId}`;
+      // try {
+      //   const cacheKey = `product:${productId}`;
 
-        await redisClient.del(cacheKey);
+      //   await redisClient.del(cacheKey);
 
-        await redisClient.set(
-            cacheKey,
-            JSON.stringify(updatedProduct),
-            {
-                ex: 3600
-            }
-        );
-      } catch (cacheError) {
-          console.error("⚠️ Redis cache sync error:", cacheError);
-      }
+      //   await redisClient.set(
+      //       cacheKey,
+      //       JSON.stringify(updatedProduct),
+      //       {
+      //           ex: 3600
+      //       }
+      //   );
+      // } catch (cacheError) {
+      //     console.error("⚠️ Redis cache sync error:", cacheError);
+      // }
 
       res.status(200).json({
         success: true,

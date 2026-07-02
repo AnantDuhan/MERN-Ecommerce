@@ -10,12 +10,14 @@ interface Props {
   text: string;
   actionText: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
 export default function AuthFooter({
   text,
   actionText,
   onPress,
+  disabled = false,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -23,8 +25,8 @@ export default function AuthFooter({
         {text}
       </Text>
 
-      <Pressable onPress={onPress}>
-        <Text style={styles.action}>
+      <Pressable onPress={onPress} disabled={disabled}>
+        <Text style={[styles.action, disabled && styles.disabled]}>
           {actionText}
         </Text>
       </Pressable>
@@ -50,5 +52,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#2F80ED",
+  },
+  
+  disabled: {
+    opacity: 0.5,
   },
 });

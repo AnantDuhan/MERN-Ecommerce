@@ -78,7 +78,9 @@ exports.registerUser = async (req, res, next) => {
 
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
         };
 
         const finalToken = user.getJWTToken();
@@ -145,11 +147,14 @@ exports.loginUser = async (req, res, next) => {
 
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
         };
 
         res.status(201).cookie('token', token, options).json({
             success: true,
+            token,
             user
         });
     } catch (err) {
