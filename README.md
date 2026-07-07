@@ -4,9 +4,9 @@
 
 A full-stack e-commerce application built with the MERN stack (MongoDB, Express.js, React.js, Node.js) that provides a comprehensive online shopping experience. This platform offers advanced features for both customers and administrators, including secure payments, inventory management, user reviews, and more.
 
-## 🚀 Features
+##  Features
 
-### 🛒 Customer Features
+###  Customer Features
 - **User Authentication & Security**
   - Secure registration and login with JWT tokens
   - Google OAuth integration
@@ -39,7 +39,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
   - Order history and reordering
   - Personalized recommendations (AI-powered embeddings)
 
-### 👨‍💼 Admin Features
+###  Admin Features
 - **Dashboard Management**
   - Comprehensive admin dashboard
   - User management and analytics
@@ -83,7 +83,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
   - Code quality assurance
   - Error handling and logging
 
-### 🌟 Premium Features
+###  Premium Features
 - **Plus Membership**
   - Subscription-based premium features
   - Enhanced shopping experience
@@ -93,7 +93,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
   - Email marketing integration
   - User engagement tools
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Backend
 - **Node.js** - Runtime environment
@@ -120,7 +120,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
 - **NPM** - Package management
 - **VS Code** - Development environment
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Node.js (v14 or higher)
 - MongoDB
@@ -128,7 +128,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
 - AWS account (for S3 and SES)
 - Stripe account (for payments)
 
-## 🚀 Installation
+##  Installation
 
 1. **Clone the repository**
    ```bash
@@ -186,7 +186,7 @@ A full-stack e-commerce application built with the MERN stack (MongoDB, Express.
    AWS_BUCKET_REGION=us-east-1
    ```
 
-## 🏃‍♂️ Running the Application
+##  Running the Application
 
 ### Development Mode
 ```bash
@@ -209,7 +209,7 @@ cd ..
 npm run production
 ```
 
-## 🐳 Docker Deployment
+##  Docker Deployment
 
 The project includes Docker support for easy deployment.
 
@@ -218,7 +218,7 @@ The project includes Docker support for easy deployment.
 docker-compose up --build
 ```
 
-## 📡 API Endpoints
+##  API Endpoints
 
 ### Authentication
 - `POST /api/v1/user/register` - User registration
@@ -248,7 +248,7 @@ docker-compose up --build
 - `GET /api/v1/coupons` - Get all coupons (Admin)
 - `DELETE /api/v1/coupon/:id` - Delete coupon (Admin)
 
-## 🚀 Deployment
+##  Deployment
 
 ### Backend on Render
 
@@ -341,7 +341,7 @@ The application can be deployed on any platform supporting Node.js:
 - **Railway**: Automatic deployment from GitHub
 - **Fly.io**: Docker-based deployment
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
@@ -349,7 +349,7 @@ The application can be deployed on any platform supporting Node.js:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 Upcoming Features
+##  Upcoming Features
 
 - [ ] Advanced filtering functionalities
 - [ ] Multilingual support
