@@ -65,17 +65,16 @@ export class AuthRepository {
   }
 
   static async resetPassword(
-    data: ResetPasswordRequest,
+    request: ResetPasswordRequest
   ): Promise<ResetPasswordResponse> {
-    const response = await api.put<ResetPasswordResponse>(
-      `${API_ENDPOINTS.AUTH.RESET_PASSWORD}/${data.token}`,
-      {
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-      },
+    const { token, ...body } = request;
+
+    const { data } = await api.put<ResetPasswordResponse>(
+      `${API_ENDPOINTS.AUTH.RESET_PASSWORD}/${token}`,
+      body
     );
 
-    return response.data;
+    return data;
   }
 
   static async me(): Promise<MeResponse> {

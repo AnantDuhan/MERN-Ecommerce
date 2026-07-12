@@ -8,19 +8,23 @@ export function toRegisterFormData(
   formData.append("name", data.name);
   formData.append("email", data.email);
   formData.append("password", data.password);
+  formData.append("confirmPassword", data.confirmPassword);
 
   if (data.whatsappNumber) {
-    formData.append(
-      "whatsappNumber",
-      data.whatsappNumber
-    );
+    formData.append("whatsappNumber", data.whatsappNumber);
   }
 
-  formData.append("image", {
-    uri: data.image.uri,
-    name: data.image.fileName ?? "avatar.jpg",
-    type: data.image.mimeType ?? "image/jpeg",
-  } as unknown as Blob);
+  for(const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  if (data.avatar) {
+    formData.append("image", {
+      uri: data.avatar.uri,
+      name: data.avatar.fileName ?? "avatar.jpg",
+      type: data.avatar.mimeType ?? "image/jpeg",
+    } as any);
+  }
 
   return formData;
 }

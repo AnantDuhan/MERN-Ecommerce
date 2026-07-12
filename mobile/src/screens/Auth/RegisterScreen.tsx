@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -26,12 +27,17 @@ import AuthFooter from "@/components/auth/AuthFooter";
 
 import PrimaryButton from "@/components/onboarding/PrimaryButton";
 
-import { registerSchema, RegisterForm } from "@/validation/register.schema";
+import {
+  registerSchema,
+  RegisterFormData,
+} from "@/features/auth/validation/auth.schema";
+import { useRegister } from "@/features/auth/hooks/useRegister";
+import { ImagePickerAsset } from "expo-image-picker";
 
 export default function RegisterScreen() {
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<ImagePickerAsset | null>(null);
 
-  const { control, handleSubmit } = useForm<RegisterForm>({
+  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
 
     defaultValues: {
@@ -42,13 +48,21 @@ export default function RegisterScreen() {
     },
   });
 
-  const onSubmit = (data: RegisterForm) => {
-    console.log({
+  const registerMutation = useRegister();
+
+  const onSubmit = (data: RegisterFormData) => {
+    if (!avatar) {
+      Alert.alert(
+        "Profile Picture Required",
+        "Please select a profile picture."
+      );
+      return;
+    }
+
+    registerMutation.mutate({
       ...data,
       avatar,
     });
-
-    router.replace("/login");
   };
 
   return (
@@ -75,13 +89,13 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="name"
-              render={({ field, fieldState }) => (
+              render={({ field }) => (
                 <AuthTextField
                   label="Full Name"
                   placeholder="Enter your full name"
                   value={field.value}
                   onChangeText={field.onChange}
-                  error={fieldState.error?.message}
+                  error={errors.name?.message}
                   autoCapitalize="words"
                   leftIcon={
                     <Ionicons name="person-outline" size={22} color="#64748B" />
@@ -93,15 +107,16 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="email"
-              render={({ field, fieldState }) => (
+              render={({ field }) => (
                 <AuthTextField
                   label="Email"
                   placeholder="Enter your email"
                   value={field.value}
                   onChangeText={field.onChange}
-                  error={fieldState.error?.message}
+                  error={errors.email?.message}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
                   leftIcon={
                     <Ionicons name="mail-outline" size={22} color="#64748B" />
                   }
@@ -112,14 +127,15 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="password"
-              render={({ field, fieldState }) => (
+              render={({ field }) => (
                 <AuthTextField
                   label="Password"
                   placeholder="Create a password"
                   value={field.value}
                   onChangeText={field.onChange}
-                  error={fieldState.error?.message}
+                  error={errors.password?.message}
                   secureTextEntry
+                  returnKeyType="next"
                   leftIcon={
                     <Ionicons
                       name="lock-closed-outline"
@@ -134,13 +150,13 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="confirmPassword"
-              render={({ field, fieldState }) => (
+              render={({ field }) => (
                 <AuthTextField
                   label="Confirm Password"
                   placeholder="Confirm your password"
                   value={field.value}
                   onChangeText={field.onChange}
-                  error={fieldState.error?.message}
+                  error={errors.confirmPassword?.message}
                   secureTextEntry
                   leftIcon={
                     <Ionicons
@@ -149,21 +165,24 @@ export default function RegisterScreen() {
                       color="#64748B"
                     />
                   }
+                  returnKeyType="done"
+                  onSubmitEditing={handleSubmit(onSubmit)}
                 />
               )}
             />
 
             <PrimaryButton
               title="Create Account"
+              loading={registerMutation.isPending}
+              disabled={registerMutation.isPending}
               onPress={handleSubmit(onSubmit)}
             />
 
             <AuthDivider />
 
             <GoogleButton
-              onPress={() => {
-                console.log("Google Register");
-              }}
+              disabled={registerMutation.isPending}
+              onPress={() => {}}
             />
           </AuthCard>
 
@@ -172,6 +191,7 @@ export default function RegisterScreen() {
               text="Already have an account?"
               actionText="Sign In"
               onPress={() => router.replace("/login")}
+              disabled={registerMutation.isPending}
             />
           </Animated.View>
         </ScrollView>

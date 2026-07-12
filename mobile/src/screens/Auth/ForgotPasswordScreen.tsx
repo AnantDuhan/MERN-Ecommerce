@@ -1,9 +1,11 @@
 import React from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
+  Text,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,9 +14,7 @@ import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Animated, {
-  FadeInDown,
-} from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { Ionicons } from "@expo/vector-icons";
 
@@ -27,34 +27,28 @@ import AuthFooter from "@/components/auth/AuthFooter";
 
 import {
   forgotPasswordSchema,
-  ForgotPasswordForm,
-} from "@/validation/forgotPassword.schema";
+  ForgotPasswordFormData,
+} from "@/features/auth/validation/auth.schema";
+
+import { useForgotPassword } from "@/features/auth/hooks/useForgotPassword";
 
 export default function ForgotPasswordScreen() {
   const {
     control,
     handleSubmit,
-  } = useForm<ForgotPasswordForm>({
-    resolver: zodResolver(
-      forgotPasswordSchema
-    ),
-
+    formState: { errors },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
     },
   });
 
-  const onSubmit = (
-    data: ForgotPasswordForm
-  ) => {
-    console.log(data);
+  const forgotPasswordMutation = useForgotPassword();
 
-    router.replace({
-        pathname: "/check-email",
-        params: {
-            email: data.email,
-        },
-    });
+  const onSubmit = (data: ForgotPasswordFormData) => {
+    Keyboard.dismiss();
+    forgotPasswordMutation.mutate(data);
   };
 
   return (
@@ -63,18 +57,13 @@ export default function ForgotPasswordScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : undefined
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerStyle={
-            styles.content
-          }
+          contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          scrollEnabled={!forgotPasswordMutation.isPending}
         >
           <AuthHeader
             title="Forgot Password?"
@@ -85,29 +74,20 @@ export default function ForgotPasswordScreen() {
             <Controller
               control={control}
               name="email"
-              render={({
-                field,
-                fieldState,
-              }) => (
+              render={({ field }) => (
                 <AuthTextField
+                  autoFocus
                   label="Email"
                   placeholder="Enter your email"
                   value={field.value}
-                  onChangeText={
-                    field.onChange
-                  }
-                  error={
-                    fieldState.error
-                      ?.message
-                  }
+                  onChangeText={field.onChange}
+                  error={errors.email?.message}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="done"
+                  onSubmitEditing={handleSubmit(onSubmit)}
                   leftIcon={
-                    <Ionicons
-                      name="mail-outline"
-                      size={22}
-                      color="#64748B"
-                    />
+                    <Ionicons name="mail-outline" size={22} color="#64748B" />
                   }
                 />
               )}
@@ -115,23 +95,24 @@ export default function ForgotPasswordScreen() {
 
             <PrimaryButton
               title="Send Reset Link"
-              onPress={handleSubmit(
-                onSubmit
-              )}
+              loading={forgotPasswordMutation.isPending}
+              disabled={forgotPasswordMutation.isPending}
+              onPress={handleSubmit(onSubmit)}
             />
+
+            {forgotPasswordMutation.isError && (
+              <Text style={styles.error}>
+                {forgotPasswordMutation.error.message}
+              </Text>
+            )}
           </AuthCard>
 
-          <Animated.View
-            entering={FadeInDown.delay(
-              400
-            )}
-          >
+          <Animated.View entering={FadeInDown.delay(400)}>
             <AuthFooter
               text="Remember your password?"
               actionText="Sign In"
-              onPress={() =>
-                router.back()
-              }
+              disabled={forgotPasswordMutation.isPending}
+              onPress={() => router.replace("/login")}
             />
           </Animated.View>
         </ScrollView>
@@ -150,5 +131,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 28,
     paddingVertical: 24,
+  },
+
+  error: {
+    marginTop: 12,
+    textAlign: "center",
+    color: "#EF4444",
+    fontSize: 14,
   },
 });

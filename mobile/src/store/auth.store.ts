@@ -13,6 +13,8 @@ interface AuthState {
   logout: () => void;
   initialize: (user: User | null, token: string | null) => void;
   setUser: (user: User) => void;
+  setToken: (token: string | null) => void;
+  clear: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -50,4 +52,19 @@ export const useAuthStore = create<AuthState>((set) => ({
       ...state,
       user,
     })),
+
+  setToken: (token) =>
+    set((state) => ({
+      ...state,
+      token,
+      isAuthenticated: !!token,
+    })),
+
+  clear: () =>
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isInitializing: false,
+    }),
 }));

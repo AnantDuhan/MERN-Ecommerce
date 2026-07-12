@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
 
 import { AuthRepository } from "../repositories/auth.repository";
-
 import {
   ResetPasswordRequest,
   ResetPasswordResponse,
@@ -13,15 +13,10 @@ export function useResetPassword() {
     Error,
     ResetPasswordRequest
   >({
-    mutationFn: (data) =>
-      AuthRepository.resetPassword(data),
+    mutationFn: AuthRepository.resetPassword,
 
     onSuccess: () => {
-      console.log("Password Updated");
-    },
-
-    onError: (error) => {
-      console.error(error);
+      router.replace("/login");
     },
   });
 }

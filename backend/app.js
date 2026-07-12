@@ -3,7 +3,6 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const errorMiddleware = require("./middleware/error");
 const multer = require("multer");
 const url = require("url");
 const {
@@ -102,9 +101,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 process.noDeprecation = true;
-
-// middleware for error
-app.use(errorMiddleware);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

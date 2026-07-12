@@ -4,9 +4,15 @@ import Review from '../models/review.js';
 import ApiFeatures from '../utils/apifeatures.js';
 import { Snowflake } from '@theinternetfolks/snowflake';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import redisClientPromise from '../config/redisClient.js';
+// import redisClientPromise from '../config/redisClient.js';
 import dotenv from 'dotenv';
 import { generateEmbedding } from '../utils/generateEmbedding.js';
+
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
 
 dotenv.config({ path: '../config/config.env' });
 
@@ -56,19 +62,19 @@ export const getAdminProducts = async (req, res, next) => {
 // get product details
 export const getProductDetails = async (req, res, next) => {
 
-    const redisClient = redisClientPromise;
+    // const redisClient = redisClientPromise;
     const productId = req.params.id;
-    const cacheKey = `product:${productId}`;
+    // const cacheKey = `product:${productId}`;
 
     try {
-        const cachedProduct = await redisClient.get(cacheKey);
-        if (cachedProduct) {
-            const productData = JSON.parse(cachedProduct);
-            return res.status(200).json({
-                success: true,
-                product: productData
-            });
-        }
+        // const cachedProduct = await redisClient.get(cacheKey);
+        // if (cachedProduct) {
+        //     const productData = JSON.parse(cachedProduct);
+        //     return res.status(200).json({
+        //         success: true,
+        //         product: productData
+        //     });
+        // }
 
         // --- 2. If Miss, Get from DB ---
         const product = await Product.findById(productId);
@@ -80,9 +86,9 @@ export const getProductDetails = async (req, res, next) => {
             });
         }
         // --- 3. Store in Cache ---
-        await redisClient.set(cacheKey, JSON.stringify(product), {
-            EX: 3600
-        });
+        // await redisClient.set(cacheKey, JSON.stringify(product), {
+        //     EX: 3600
+        // });
 
         res.status(200).json({
             success: true,
@@ -160,15 +166,15 @@ export const updateProduct = async (req, res, next) => {
             runValidators: true,
         });
 
-        try {
-            const redisClient = redisClientPromise; 
-            const cacheKey = `product:${productId}`; 
+        // try {
+        //     const redisClient = redisClientPromise; 
+        //     const cacheKey = `product:${productId}`; 
             
-            await redisClient.del(cacheKey);
-            await redisClient.set(cacheKey, JSON.stringify(updatedProduct), { EX: 3600 });
-        } catch (cacheError) {
-            console.error('Redis cache sync error:', cacheError);
-        }
+        //     await redisClient.del(cacheKey);
+        //     await redisClient.set(cacheKey, JSON.stringify(updatedProduct), { EX: 3600 });
+        // } catch (cacheError) {
+        //     console.error('Redis cache sync error:', cacheError);
+        // }
         
         res.status(200).json({
             success: true,
@@ -229,21 +235,21 @@ export const createProductReview = async (req, res, next) => {
     await product.save({ validateBeforeSave: false });
 
     // Invalidate Redis Cache
-    try {
-        const redisClient = req.app.get('redisClient');
-        const cacheKey = `product:${productId}`;
-        await redisClient.del(cacheKey);
-        await redisClient.set(`product:${productId}`, JSON.stringify(product));
-    } catch (cacheError) {
-        console.error('Redis cache invalidation error:', cacheError);
-    }
+    // try {
+    //     const redisClient = req.app.get('redisClient');
+    //     const cacheKey = `product:${productId}`;
+    //     await redisClient.del(cacheKey);
+    //     await redisClient.set(`product:${productId}`, JSON.stringify(product));
+    // } catch (cacheError) {
+    //     console.error('Redis cache invalidation error:', cacheError);
+    // }
 
-    const io = req.app.get('socketio');
-    io.to(productId).emit('reviewUpdate', {
-        reviews: product.reviews,
-        ratings: product.ratings,
-        numOfReviews: product.numOfReviews,
-    });
+    // const io = req.app.get('socketio');
+    // io.to(productId).emit('reviewUpdate', {
+    //     reviews: product.reviews,
+    //     ratings: product.ratings,
+    //     numOfReviews: product.numOfReviews,
+    // });
 
     res.status(200).json({
         success: true,
@@ -448,14 +454,14 @@ export const deleteReview = async (req, res, next) => {
         }
     );
 
-    try {
-        const redisClient = redisClientPromise;
-        const cacheKey = `product:${productId}`;
-        await redisClient.del(cacheKey);
-        console.log(`CACHE INVALIDATED for product: ${productId}`);
-    } catch (cacheError) {
-        console.error('Redis cache invalidation error:', cacheError);
-    }
+    // try {
+    //     const redisClient = redisClientPromise;
+    //     const cacheKey = `product:${productId}`;
+    //     await redisClient.del(cacheKey);
+    //     console.log(`CACHE INVALIDATED for product: ${productId}`);
+    // } catch (cacheError) {
+    //     console.error('Redis cache invalidation error:', cacheError);
+    // }
 
     const io = req.app.get('socketio');
     io.to(productId).emit('reviewUpdate', {
@@ -518,24 +524,24 @@ export const summerizeProductReviews = async (req, res, next) => {
         product.aiSummary = summary;
         await product.save();
 
-        try {
-            const redisPromise = req.app.get('redisClient'); 
-            if (redisPromise) {
-                const redisClient = await redisPromise; 
+        // try {
+        //     const redisPromise = req.app.get('redisClient'); 
+        //     if (redisPromise) {
+        //         const redisClient = await redisPromise; 
 
-                if (typeof redisClient.del === 'function') {
-                    const cacheKey = `product:${productId}`;
-                    await redisClient.del(cacheKey);
-                    console.log(`✅ CACHE INVALIDATED for product: ${productId}`);
-                } else {
-                    console.log('⚠️ Redis client found, but .del is not available.');
-                }
-            } else {
-                console.log('Redis client not found in app, skipping cache invalidation.');
-            }
-        } catch (cacheError) {
-            console.error('Redis cache invalidation error:', cacheError);
-        }
+        //         if (typeof redisClient.del === 'function') {
+        //             const cacheKey = `product:${productId}`;
+        //             await redisClient.del(cacheKey);
+        //             console.log(`✅ CACHE INVALIDATED for product: ${productId}`);
+        //         } else {
+        //             console.log('⚠️ Redis client found, but .del is not available.');
+        //         }
+        //     } else {
+        //         console.log('Redis client not found in app, skipping cache invalidation.');
+        //     }
+        // } catch (cacheError) {
+        //     console.error('Redis cache invalidation error:', cacheError);
+        // }
 
         res.status(201).json({
             success: true,

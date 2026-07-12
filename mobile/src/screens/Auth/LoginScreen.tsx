@@ -30,7 +30,7 @@ import { useLogin } from "@/features/auth/hooks/useLogin";
 import {
   loginSchema,
   LoginFormData,
-} from "@/features/auth/validation/login.schema";
+} from "@/features/auth/validation/auth.schema";
 
 export default function LoginScreen() {
   const loginMutation = useLogin();

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
 
 import { AuthRepository } from "../repositories/auth.repository";
-
 import {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -13,15 +13,19 @@ export function useForgotPassword() {
     Error,
     ForgotPasswordRequest
   >({
-    mutationFn: (data) =>
-      AuthRepository.forgotPassword(data),
+    mutationFn: AuthRepository.forgotPassword,
 
-    onSuccess: (response) => {
-      console.log(response.message);
+    onSuccess: (_, variables) => {
+      router.replace({
+        pathname: "/check-email",
+        params: {
+          email: variables.email,
+        },
+      });
     },
 
     onError: (error) => {
-      console.error(error);
+      alert(error.message);
     },
   });
 }

@@ -3,13 +3,14 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { ImagePickerAsset } from "expo-image-picker";
 
 interface Props {
-  onImageSelected: (uri: string) => void;
+  onImageSelected: (image: ImagePickerAsset) => void;
 }
 
 export default function AvatarPicker({ onImageSelected }: Props) {
-  const [image, setImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(null);
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -20,16 +21,15 @@ export default function AvatarPicker({ onImageSelected }: Props) {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
+      quality: 0.8,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-
-      setImage(uri);
-      onImageSelected(uri);
+    if (!result.canceled && result.assets.length > 0) {
+      const asset = result.assets[0];
+      setSelectedImage(asset);
+      onImageSelected(asset);
     }
   };
 
@@ -37,8 +37,8 @@ export default function AvatarPicker({ onImageSelected }: Props) {
     <View style={styles.container}>
       <Pressable onPress={pickImage}>
         <View style={styles.avatarContainer}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.avatar} />
+          {selectedImage ? (
+            <Image source={{ uri: selectedImage.uri }} style={styles.avatar} />
           ) : (
             <View style={styles.placeholder}>
               <Ionicons name="person" size={46} color="#94A3B8" />
@@ -52,7 +52,7 @@ export default function AvatarPicker({ onImageSelected }: Props) {
       </Pressable>
 
       <Text style={styles.title}>
-        {image ? "Change Profile Photo" : "Add Profile Photo"}
+        {selectedImage ? "Change Profile Photo" : "Add Profile Photo"}
       </Text>
     </View>
   );

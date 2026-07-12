@@ -3,6 +3,7 @@ const User = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const EmailService = require("../services/email.service");
 require('dotenv').config({ path: 'backend/config/config.env' });
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { fromEnv } = require('@aws-sdk/credential-provider-env');
@@ -50,10 +51,10 @@ exports.registerUser = async (req, res, next) => {
 
         console.log('✅ Image uploaded successfully:', avatarUrl);
 
-        const customer = await stripe.customers.create({
-            email,
-            source: 'tok_visa'
-        });
+        // const customer = await stripe.customers.create({
+        //     email,
+        //     source: 'tok_visa'
+        // });
 
         const user = await User.create({
             _id: Snowflake.Snowflake.generate({
@@ -64,7 +65,7 @@ exports.registerUser = async (req, res, next) => {
             email,
             password,
             avatar: avatarUrl,
-            stripeCustomerId: customer.id
+            // stripeCustomerId: customer.id
         });
 
         let token = jwt.sign(
@@ -191,17 +192,12 @@ exports.forgotPassword = async (req, res, next) => {
 
     // get reset password token
     const resetToken = user.getResetPasswordToken();
-
     await user.save({ validateBeforeSave: false });
 
-    const resetPasswordURL = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+    const resetPasswordURL = `${process.env.REACT_NATIVE_APP_URL}auth/reset-password/${resetToken}`;
 
     try {
-        await sendEmail({
-            email: user.email,
-            subject: `Password Recovery - Ecommerce`,
-            html: `Your password reset token is:- \n\n ${resetPasswordURL} \n\n If you have not requested this email then, please ignore it.`
-        });
+        await EmailService.sendForgotPasswordEmail(user,  resetPasswordURL);
 
         const message = `Your password reset token is:- \n\n ${resetPasswordURL} \n\n If you have not requested this email then, please ignore it.`;
 
@@ -209,9 +205,12 @@ exports.forgotPassword = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: `Email sent to ${user.email} successfully.`
+            message: `Email sent to ${user.email} successfully.`,
+            resetPasswordURL: resetPasswordURL
         });
     } catch (error) {
+        console.error("Forgot Password Error:", error);
+
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 
@@ -219,7 +218,7 @@ exports.forgotPassword = async (req, res, next) => {
 
         return res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };

@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "@/query/queryKeys";
 
 export function useCurrentUser(enabled = true) {
   return useQuery({
-    queryKey: QUERY_KEYS.AUTH.ME,
+    queryKey: QUERY_KEYS.auth.me,
     queryFn: AuthRepository.getCurrentUser,
     enabled,
     staleTime: 1000 * 60 * 5,

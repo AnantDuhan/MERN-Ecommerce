@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/query/queryClient";
@@ -9,6 +9,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          
           <Stack
             screenOptions={{
               headerShown: false,

@@ -1,6 +1,9 @@
 export const QUERY_KEYS = {
-  AUTH: {
-    ME: ["auth", "current-user"] as const,
+  auth: {
+    me: ["auth", "me"] as const,
+    login: ["auth", "login"] as const,
+    register: ["auth", "register"] as const,
+    forgotPassword: ["auth", "forgot-password"] as const,
   },
 
   PRODUCTS: {

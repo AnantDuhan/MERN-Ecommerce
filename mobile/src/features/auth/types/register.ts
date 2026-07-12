@@ -5,8 +5,11 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
+
   whatsappNumber?: string;
-  image: ImagePickerAsset;
+  
+  avatar?: ImagePickerAsset;
 }
 
 export interface RegisterResponse {

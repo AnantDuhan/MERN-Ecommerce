@@ -8,7 +8,10 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
+import {
+  router,
+  useLocalSearchParams,
+} from "expo-router";
 
 import Animated, {
   FadeInDown,
@@ -33,13 +36,10 @@ import {
 
 import { useResetPassword } from "@/features/auth/hooks/useResetPassword";
 
-export default function ResetPasswordScreen() {
-  const params = useLocalSearchParams();
-
-  const token =
-    typeof params.token === "string"
-      ? params.token
-      : "";
+export default function TokenResetPasswordScreen() {
+  const { token } = useLocalSearchParams<{
+    token: string;
+  }>();
 
   const resetPasswordMutation =
     useResetPassword();
@@ -52,6 +52,7 @@ export default function ResetPasswordScreen() {
     resolver: zodResolver(
       resetPasswordSchema
     ),
+
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -61,9 +62,7 @@ export default function ResetPasswordScreen() {
   const onSubmit = (
     data: ResetPasswordFormData
   ) => {
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     resetPasswordMutation.mutate({
       token,
@@ -95,8 +94,8 @@ export default function ResetPasswordScreen() {
           }
         >
           <AuthHeader
-            title="Create New Password"
-            subtitle="Your new password must be different from the previous one."
+            title="Reset Password"
+            subtitle="Create a strong new password."
           />
 
           <AuthCard>
@@ -106,7 +105,7 @@ export default function ResetPasswordScreen() {
               render={({ field }) => (
                 <AuthTextField
                   label="New Password"
-                  placeholder="Enter your new password"
+                  placeholder="Enter password"
                   value={field.value}
                   onChangeText={
                     field.onChange
@@ -134,7 +133,7 @@ export default function ResetPasswordScreen() {
               render={({ field }) => (
                 <AuthTextField
                   label="Confirm Password"
-                  placeholder="Confirm your password"
+                  placeholder="Confirm password"
                   value={field.value}
                   onChangeText={
                     field.onChange
@@ -166,8 +165,7 @@ export default function ResetPasswordScreen() {
                 resetPasswordMutation.isPending
               }
               disabled={
-                resetPasswordMutation.isPending ||
-                !token
+                resetPasswordMutation.isPending
               }
               onPress={handleSubmit(
                 onSubmit
@@ -182,13 +180,6 @@ export default function ResetPasswordScreen() {
                 }
               </Text>
             )}
-
-            {!token && (
-              <Text style={styles.error}>
-                Invalid or expired reset
-                link.
-              </Text>
-            )}
           </AuthCard>
 
           <Animated.View
@@ -197,7 +188,7 @@ export default function ResetPasswordScreen() {
             )}
           >
             <AuthFooter
-              text="Remember your password?"
+              text="Back to login?"
               actionText="Sign In"
               disabled={
                 resetPasswordMutation.isPending
@@ -231,8 +222,8 @@ const styles = StyleSheet.create({
 
   error: {
     marginTop: 12,
-    textAlign: "center",
     color: "#EF4444",
+    textAlign: "center",
     fontSize: 14,
   },
 });
