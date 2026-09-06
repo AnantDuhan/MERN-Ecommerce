@@ -43,31 +43,31 @@ const upload = multer({
 
 const router = express.Router();
 
-router.route('/register').post(upload.single('image'), registerUser);
+router.route('/auth/register').post(upload.single('image'), registerUser);
 
-router.route('/login').post(loginUser);
+router.route('/auth/login').post(loginUser);
 
-router.route('/password/forgot').post(forgotPassword);
+router.route('/auth/forgot-password').post(forgotPassword);
 
-router.route('/password/reset/:token').put(resetPassword);
+router.route('/auth/reset-password/:token').put(resetPassword);
 
-router.route('/logout').get(logout);
+router.route('/auth/logout').post(logout);
 
-router.route('/me').get(isAuthUser, getUserDetails);
+router.route('/auth/me').get(isAuthUser, getUserDetails);
 
-router.route('/password/update').put(isAuthUser, updatePassword);
+router.route('/auth/password/update').put(isAuthUser, updatePassword);
 
-router.route('/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
+router.route('/auth/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 
 router
-    .route('/admin/user/:id')
+    .route('/auth/admin/user/:id')
     .get(isAuthUser, authRoles('admin'), getSingleUser)
     .put(isAuthUser, authRoles('admin'), updateUserRole);
 
 // router.route('/contact-us').post(contactUs);
 
-router.route('/subscribe').post(subscriber);
+router.route('/auth/subscribe').post(subscriber);
 
-router.route('/auth/google').post(googleLogin);
+router.route('/auth/google-login').post(googleLogin);
 
 module.exports = router;

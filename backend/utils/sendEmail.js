@@ -1,27 +1,35 @@
-const nodemailer = require('nodemailer');
+const path = require("path");
+const transporter = require("./transporter");
+const { getCompiledTemplate } = require("./templateCache");
 
-const sendEmail = async options => {
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        auth: {
+const sendEmail = async ({
+    email,
+    subject,
+    template,
+    data,
+}) => {
+    try {
+        const templatePath = path.join(__dirname, "../mails", template);
+
+        console.log({
             user: process.env.SMTP_MAIL,
-            pass: process.env.SMTP_PASSWORD
-        },
-    });
+            passwordLength: process.env.SMTP_PASSWORD?.length,
+            passwordStart: process.env.SMTP_PASSWORD?.substring(0, 4),
+        });
 
-    const mailOptions = {
-        from: 'admin@orderplanning.com',
-        to: options.email,
-        subject: options.subject,
-        html: options.html,
-        headers: {
-            'Content-Type': 'text/html',
-            charset: 'UTF-8'
-        }
-    };
+        const compiledTemplate = getCompiledTemplate(templatePath);
+        const html = compiledTemplate(data);
 
-    await transporter.sendMail(mailOptions);
+        await transporter.sendMail({
+            from: `"Order Planning" <${process.env.SMTP_MAIL}>`,
+            to: email,
+            subject,
+            html,
+        });
+    } catch (error) {
+        console.error("Email Error:", error);
+        throw error;
+    }
 };
 
 module.exports = sendEmail;

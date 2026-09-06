@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 const http = require('http');
 const { Server } = require('socket.io');
-const redisClient = require('./config/redisClient');
+const transporter = require("./utils/transporter");
+// const redisClient = require('./config/redisClient');
 
 // Handling Uncaught Exceptions
 // process.on('uncaughtException', (err) => {
@@ -12,6 +13,14 @@ const redisClient = require('./config/redisClient');
 //     console.log(`Shutting down the server due to Uncaught Exceptions`);
 //     process.exit(1);
 // })
+
+transporter.verify()
+    .then(() => {
+        console.log("📧 SMTP Connected");
+    })
+    .catch((err) => {
+        console.error("SMTP Error:", err);
+    });
 
 // config
 dotenv.config({ path: './backend/config/config.env' });
@@ -24,7 +33,7 @@ const io = new Server(createServer, {
 });
 
 app.set('socketio', io);
-app.set('redisClient', redisClient);
+// app.set('redisClient', redisClient);
 
 //connecting to database
 connectDB();
