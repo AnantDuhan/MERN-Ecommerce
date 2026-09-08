@@ -8,6 +8,7 @@ const redisClient = require('./config/redisClientUpstash');
 const { warmUpEmailTransport } = require('./utils/sendEmail');
 const runWeeklyNewsletter = require('./newsletterJob');
 const runWishlistReminders = require('./wishlistJob');
+const { transporter } = require('./utils/transporter');
 
 // Handling Uncaught Exceptions
 // process.on('uncaughtException', (err) => {

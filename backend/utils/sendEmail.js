@@ -11,7 +11,7 @@ const { getCompiledTemplate } = require("./templateCache");
  * Nodemailer's pool keeps sockets open and reuses them, so only the first
  * message pays that cost.
  */
-let transporter = null;
+// let transporter = null;
 
 const getTransporter = () => {
     if (transporter) return transporter;
