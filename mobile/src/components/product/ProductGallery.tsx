@@ -7,16 +7,13 @@ import {
   Pressable,
   StyleSheet,
   View,
+  ViewStyle,
 } from "react-native";
-
-import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
-
-import Animated, {
-  FadeIn,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import { Product } from "@/types/product";
+import { useTheme } from "@/theme/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
@@ -26,62 +23,36 @@ interface Props {
   onFavourite?: () => void;
 }
 
-export default function ProductGallery({
-  product,
-  onBack,
-  onFavourite,
-}: Props) {
+export default function ProductGallery({ product, onBack, onFavourite }: Props) {
+  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef<FlatList<ImageSourcePropType>>(null);
 
-  const flatListRef =
-    useRef<FlatList<ImageSourcePropType>>(null);
+  const iconBtn: ViewStyle = {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  };
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(500)}
-      style={styles.container}
-    >
-      {/* Floating Buttons */}
-
+    <Animated.View entering={FadeIn.duration(500)} style={styles.container}>
       <View style={styles.topBar}>
-        <Pressable onPress={onBack}>
-          <BlurView
-            intensity={70}
-            tint="light"
-            style={styles.iconButton}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={22}
-              color="#0F172A"
-            />
-          </BlurView>
+        <Pressable onPress={onBack} style={iconBtn}>
+          <Ionicons name="arrow-back" size={20} color={colors.ink} />
         </Pressable>
 
-        <Pressable onPress={onFavourite}>
-          <BlurView
-            intensity={70}
-            tint="light"
-            style={styles.iconButton}
-          >
-            <Ionicons
-              name={
-                product.favourite
-                  ? "heart"
-                  : "heart-outline"
-              }
-              size={22}
-              color={
-                product.favourite
-                  ? "#EF4444"
-                  : "#0F172A"
-              }
-            />
-          </BlurView>
+        <Pressable onPress={onFavourite} style={iconBtn}>
+          <Ionicons
+            name={product.favourite ? "heart" : "heart-outline"}
+            size={20}
+            color={product.favourite ? colors.danger : colors.ink}
+          />
         </Pressable>
       </View>
-
-      {/* Images */}
 
       <FlatList
         ref={flatListRef}
@@ -90,41 +61,29 @@ export default function ProductGallery({
         pagingEnabled
         bounces={false}
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, index) =>
-          index.toString()
-        }
+        keyExtractor={(_, index) => index.toString()}
         onMomentumScrollEnd={(event) => {
-          const index = Math.round(
-            event.nativeEvent.contentOffset.x /
-              width
+          setCurrentIndex(
+            Math.round(event.nativeEvent.contentOffset.x / width)
           );
-
-          setCurrentIndex(index);
         }}
         renderItem={({ item }) => (
-          <View
-            style={styles.imageContainer}
-          >
-            <Image
-              source={item}
-              resizeMode="contain"
-              style={styles.image}
-            />
+          <View style={styles.imageContainer}>
+            <Image source={item} resizeMode="contain" style={styles.image} />
           </View>
         )}
       />
-
-      {/* Pagination */}
 
       <View style={styles.pagination}>
         {product.images.map((_, index) => (
           <View
             key={index}
-            style={[
-              styles.dot,
-              currentIndex === index &&
-                styles.activeDot,
-            ]}
+            style={{
+              height: 3,
+              width: currentIndex === index ? 24 : 8,
+              backgroundColor: currentIndex === index ? colors.brass : colors.line,
+              marginHorizontal: 3,
+            }}
           />
         ))}
       </View>
@@ -133,11 +92,7 @@ export default function ProductGallery({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    height: 430,
-    marginBottom: 24,
-  },
-
+  container: { height: 430, marginBottom: 24 },
   topBar: {
     position: "absolute",
     top: 10,
@@ -147,57 +102,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor:
-      "rgba(255,255,255,0.18)",
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.14,
-    shadowRadius: 16,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    elevation: 8,
-  },
-
-  imageContainer: {
-    width,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  image: {
-    width: width * 0.8,
-    height: 300,
-  },
-
+  imageContainer: { width, justifyContent: "center", alignItems: "center" },
+  image: { width: width * 0.8, height: 300 },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 16,
-  },
-
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#CBD5E1",
-    marginHorizontal: 5,
-  },
-
-  activeDot: {
-    width: 24,
-    borderRadius: 4,
-    backgroundColor: "#2F80ED",
   },
 });

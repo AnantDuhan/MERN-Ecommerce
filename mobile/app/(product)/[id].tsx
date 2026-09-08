@@ -1,6 +1,7 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { router, useLocalSearchParams } from "expo-router";
 
 import ProductGallery from "@/components/product/ProductGallery";
@@ -13,24 +14,33 @@ import SpecificationCard from "@/components/product/SpecificationCard";
 import ReviewsPreview from "@/components/product/ReviewsPreview";
 import SimilarProducts from "@/components/product/SimilarProducts";
 import StickyBottomBar from "@/components/product/StickyBottomBar";
+import { Body } from "@/components/ui/Text";
+import { useTheme } from "@/theme/ThemeContext";
 
 export default function ProductDetailsScreen() {
+  const { colors, isDark } = useTheme();
   const params = useLocalSearchParams();
-
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-
   const product = flashSaleProducts.find((p) => p.id === String(id));
 
   if (!product) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text>Product not found</Text>
+      <SafeAreaView
+        style={[styles.container, styles.center, { backgroundColor: colors.canvas }]}
+      >
+        <StatusBar style={isDark ? "light" : "dark"} />
+        <Body tone="soft">Product not found</Body>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.canvas }]}
+      edges={["top"]}
+    >
+      <StatusBar style={isDark ? "light" : "dark"} />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         <ProductGallery product={product} onBack={() => router.back()} />
 
@@ -40,12 +50,8 @@ export default function ProductDetailsScreen() {
           <SizeSelector sizes={product.sizes} defaultSize={product.sizes[0]} />
         )}
 
-        <QuantitySelector
-          initialValue={1}
-          onChange={(quantity) => {
-            console.log(quantity);
-          }}
-        />
+        <QuantitySelector initialValue={1} onChange={() => {}} />
+
         <DescriptionCard description={product.description} />
 
         <SpecificationCard specifications={product.specifications} />
@@ -78,6 +84,7 @@ export default function ProductDetailsScreen() {
           onSeeAll={() => {}}
         />
       </ScrollView>
+
       <StickyBottomBar
         price={product.price}
         originalPrice={product.originalPrice}
@@ -89,8 +96,6 @@ export default function ProductDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
+  container: { flex: 1 },
+  center: { justifyContent: "center", alignItems: "center" },
 });

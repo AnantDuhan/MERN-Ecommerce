@@ -1,10 +1,12 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-
-import { BlurView } from "expo-blur";
+import { StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { Card } from "@/components/ui/Card";
+import { H2, BodySm, Txt } from "@/components/ui/Text";
+import { type } from "@/theme/tokens";
 
 interface Specification {
   title: string;
@@ -16,17 +18,17 @@ interface Props {
 }
 
 export default function SpecificationCard({ specifications = [] }: Props) {
+  const { colors } = useTheme();
   if (specifications.length === 0) {
     return null;
   }
 
   return (
     <Animated.View entering={FadeInDown.duration(600)} style={styles.wrapper}>
-      <BlurView intensity={55} tint="light" style={styles.card}>
+      <Card>
         <View style={styles.header}>
-          <Text style={styles.title}>Specifications</Text>
-
-          <Ionicons name="grid-outline" size={20} color="#2F80ED" />
+          <H2>Specifications</H2>
+          <Ionicons name="grid-outline" size={18} color={colors.brass} />
         </View>
 
         {specifications.map((item, index) => (
@@ -34,79 +36,44 @@ export default function SpecificationCard({ specifications = [] }: Props) {
             key={`${item.title}-${index}`}
             style={[
               styles.row,
-              index !== specifications.length - 1 && styles.border,
+              index !== specifications.length - 1 && {
+                borderBottomWidth: 1,
+                borderBottomColor: colors.line,
+              },
             ]}
           >
-            <Text style={styles.label}>{item.title}</Text>
-
-            <Text style={styles.value}>{item.value}</Text>
+            <BodySm tone="faint" style={{ flex: 1 }}>
+              {item.title}
+            </BodySm>
+            <Txt
+              style={{
+                ...type.bodySm,
+                fontFamily: type.h3.fontFamily,
+                flex: 1,
+                textAlign: "right",
+              }}
+            >
+              {item.value}
+            </Txt>
           </View>
         ))}
-      </BlurView>
+      </Card>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginTop: 28,
-    paddingHorizontal: 24,
-  },
-
-  card: {
-    borderRadius: 24,
-    overflow: "hidden",
-    padding: 22,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    elevation: 8,
-  },
-
+  wrapper: { marginTop: 28, paddingHorizontal: 24 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 14,
-  },
-
-  border: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-  },
-
-  label: {
-    flex: 1,
-    fontSize: 15,
-    color: "#64748B",
-    fontWeight: "500",
-  },
-
-  value: {
-    flex: 1,
-    textAlign: "right",
-    fontSize: 16,
-    color: "#0F172A",
-    fontWeight: "700",
   },
 });

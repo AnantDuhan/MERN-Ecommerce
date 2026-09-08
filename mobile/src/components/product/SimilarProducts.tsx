@@ -1,10 +1,11 @@
 import React from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import ProductCard from "./ProductCard";
 import { Product } from "@/types/product";
+import { H2, Txt } from "@/components/ui/Text";
+import { type } from "@/theme/tokens";
 
 interface Props {
   products: Product[];
@@ -15,10 +16,11 @@ export default function SimilarProducts({ products, onSeeAll }: Props) {
   return (
     <Animated.View entering={FadeInDown.duration(700)} style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Similar Products</Text>
-
-        <Pressable onPress={onSeeAll}>
-          <Text style={styles.seeAll}>See All</Text>
+        <H2>Similar Products</H2>
+        <Pressable onPress={onSeeAll} hitSlop={8}>
+          <Txt tone="brass" style={{ ...type.eyebrow }}>
+            See All
+          </Txt>
         </Pressable>
       </View>
 
@@ -47,33 +49,13 @@ export default function SimilarProducts({ products, onSeeAll }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 28,
-    marginBottom: 120,
-  },
-
+  container: { marginTop: 28, marginBottom: 120 },
   header: {
     paddingHorizontal: 24,
     marginBottom: 18,
-
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-  seeAll: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#2F80ED",
-  },
-
-  list: {
-    paddingHorizontal: 24,
-  },
+  list: { paddingHorizontal: 24 },
 });

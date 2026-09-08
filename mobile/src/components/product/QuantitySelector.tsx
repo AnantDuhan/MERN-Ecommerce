@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
+import { Pressable, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
-
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { H3, Txt } from "@/components/ui/Text";
+import { radii, spacing, type } from "@/theme/tokens";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -26,32 +27,35 @@ interface ActionButtonProps {
 }
 
 function ActionButton({ icon, onPress }: ActionButtonProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
-
   const handlePress = async () => {
     scale.value = withSpring(0.9);
-
     await Haptics.selectionAsync();
-
     onPress();
-
     scale.value = withSpring(1);
   };
-
   return (
     <AnimatedPressable
       onPress={handlePress}
-      style={[styles.button, animatedStyle]}
+      style={[
+        {
+          width: 40,
+          height: 40,
+          borderRadius: radii.xs,
+          borderWidth: 1,
+          borderColor: colors.line,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.surface,
+        },
+        animatedStyle,
+      ]}
     >
-      <Ionicons
-        name={icon === "add" ? "add" : "remove"}
-        size={22}
-        color="#2F80ED"
-      />
+      <Ionicons name={icon === "add" ? "add" : "remove"} size={20} color={colors.ink} />
     </AnimatedPressable>
   );
 }
@@ -62,34 +66,31 @@ export default function QuantitySelector({
   max = 99,
   onChange,
 }: Props) {
+  const { colors } = useTheme();
   const [quantity, setQuantity] = useState(initialValue);
-
   const updateQuantity = (value: number) => {
     setQuantity(value);
     onChange?.(value);
   };
-
   const decrease = () => {
     if (quantity <= min) return;
-
     updateQuantity(quantity - 1);
   };
-
   const increase = () => {
     if (quantity >= max) return;
-
     updateQuantity(quantity + 1);
   };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Quantity</Text>
-
-      <View style={styles.selector}>
+      <H3 style={{ marginBottom: spacing.md }}>Quantity</H3>
+      <View
+        style={[
+          styles.selector,
+          { borderColor: colors.line, backgroundColor: colors.surface },
+        ]}
+      >
         <ActionButton icon="remove" onPress={decrease} />
-
-        <Text style={styles.quantity}>{quantity}</Text>
-
+        <Txt style={{ ...type.h3 }}>{`${quantity}`}</Txt>
         <ActionButton icon="add" onPress={increase} />
       </View>
     </View>
@@ -97,52 +98,16 @@ export default function QuantitySelector({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 28,
-    paddingHorizontal: 24,
-  },
-
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginBottom: 14,
-  },
-
+  container: { marginTop: 28, paddingHorizontal: 24 },
   selector: {
-    height: 52,
-    borderRadius: 16,
+    height: 56,
+    borderRadius: radii.xs,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 8,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    elevation: 4,
-  },
-
-  button: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#F8FAFC",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-
-  quantity: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
+    alignSelf: "flex-start",
+    width: 160,
   },
 });

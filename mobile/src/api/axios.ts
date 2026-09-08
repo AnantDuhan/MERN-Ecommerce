@@ -7,7 +7,9 @@ import {
 } from "./interceptors";
 
 export const api = axios.create({
-  baseURL: "http://localhost:4000/api/v1",
+  baseURL:
+    process.env.EXPO_PUBLIC_BACKEND_URL ||
+    "https://mern-ecommerce-7ojo.onrender.com/api/v1",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

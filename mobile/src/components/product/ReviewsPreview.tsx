@@ -1,10 +1,12 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
-import { BlurView } from "expo-blur";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { Card } from "@/components/ui/Card";
+import { H2, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
+import { radii, type } from "@/theme/tokens";
 
 interface Review {
   id: string;
@@ -27,173 +29,102 @@ export default function ReviewsPreview({
   reviews,
   onSeeAll,
 }: Props) {
+  const { colors } = useTheme();
+  const shown = Math.min(reviews.length, 2);
+
   return (
     <Animated.View entering={FadeInDown.duration(600)} style={styles.wrapper}>
-      <BlurView intensity={55} tint="light" style={styles.card}>
+      <Card>
         <View style={styles.header}>
-          <Text style={styles.title}>Reviews</Text>
-
-          <Pressable onPress={onSeeAll}>
-            <Text style={styles.seeAll}>See All</Text>
+          <H2>Reviews</H2>
+          <Pressable onPress={onSeeAll} hitSlop={8}>
+            <Txt tone="brass" style={{ ...type.eyebrow }}>
+              See All
+            </Txt>
           </Pressable>
         </View>
 
         <View style={styles.summary}>
-          <Ionicons name="star" size={26} color="#FBBF24" />
-
-          <Text style={styles.rating}>{rating}</Text>
-
-          <Text style={styles.count}>
-            ({reviewsCount.toLocaleString()} Reviews)
-          </Text>
+          <Ionicons name="star" size={22} color={colors.brass} />
+          <Txt style={{ ...type.h1, marginLeft: 8 }}>{`${rating}`}</Txt>
+          <Caption tone="faint" style={{ marginLeft: 10 }}>
+            {`(${reviewsCount.toLocaleString()} Reviews)`}
+          </Caption>
         </View>
 
-        {reviews.slice(0, 2).map((review) => (
-          <View key={review.id} style={styles.reviewCard}>
+        {reviews.slice(0, 2).map((review, index) => (
+          <View
+            key={review.id}
+            style={[
+              styles.reviewCard,
+              index !== shown - 1 && {
+                borderBottomWidth: 1,
+                borderBottomColor: colors.line,
+              },
+            ]}
+          >
             <View style={styles.userRow}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{review.user.charAt(0)}</Text>
+              <View
+                style={[
+                  styles.avatar,
+                  { backgroundColor: colors.surface2, borderColor: colors.line },
+                ]}
+              >
+                <Txt style={{ ...type.h3 }}>{review.user.charAt(0)}</Txt>
               </View>
 
               <View style={{ flex: 1 }}>
-                <Text style={styles.user}>{review.user}</Text>
-
+                <BodySm style={{ fontFamily: type.h3.fontFamily }}>
+                  {review.user}
+                </BodySm>
                 <View style={styles.stars}>
-                  {Array.from({
-                    length: 5,
-                  }).map((_, index) => (
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <Ionicons
-                      key={index}
-                      name={index < review.rating ? "star" : "star-outline"}
-                      size={14}
-                      color="#FBBF24"
+                      key={i}
+                      name={i < review.rating ? "star" : "star-outline"}
+                      size={13}
+                      color={colors.brass}
                     />
                   ))}
                 </View>
               </View>
 
-              <Text style={styles.date}>{review.date}</Text>
+              <Caption tone="faint">{review.date}</Caption>
             </View>
 
-            <Text style={styles.comment}>{review.comment}</Text>
+            <Body tone="soft" style={{ marginTop: 12 }}>
+              {review.comment}
+            </Body>
           </View>
         ))}
-      </BlurView>
+      </Card>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginTop: 28,
-    paddingHorizontal: 24,
-    marginBottom: 28,
-  },
-
-  card: {
-    borderRadius: 24,
-    overflow: "hidden",
-    padding: 22,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor: "rgba(255,255,255,0.18)",
-
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    elevation: 8,
-  },
-
+  wrapper: { marginTop: 28, paddingHorizontal: 24, marginBottom: 28 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-  seeAll: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#2F80ED",
-  },
-
   summary: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 20,
     marginBottom: 24,
   },
-
-  rating: {
-    marginLeft: 8,
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-
-  count: {
-    marginLeft: 10,
-    fontSize: 15,
-    color: "#64748B",
-  },
-
-  reviewCard: {
-    marginBottom: 20,
-    paddingBottom: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-  },
-
-  userRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
+  reviewCard: { marginBottom: 20, paddingBottom: 18 },
+  userRow: { flexDirection: "row", alignItems: "center" },
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: "#2F80ED",
+    borderRadius: radii.xs,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
-
-  avatarText: {
-    color: "#FFF",
-    fontWeight: "700",
-    fontSize: 18,
-  },
-
-  user: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-
-  stars: {
-    flexDirection: "row",
-    marginTop: 4,
-  },
-
-  date: {
-    fontSize: 13,
-    color: "#94A3B8",
-  },
-
-  comment: {
-    marginTop: 12,
-    fontSize: 15,
-    lineHeight: 24,
-    color: "#64748B",
-  },
+  stars: { flexDirection: "row", marginTop: 4 },
 });
