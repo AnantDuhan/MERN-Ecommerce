@@ -1,60 +1,47 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import BrandLogo from "@/components/layout/BrandLogo";
+import { Eyebrow, Display, Body } from "@/components/ui/Text";
+import { Rule } from "@/components/ui/Rule";
+import { spacing } from "@/theme/tokens";
 
 interface Props {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
 }
 
 export default function AuthHeader({
   title,
   subtitle,
+  eyebrow = "Order Planning",
 }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={{ alignItems: "center", marginBottom: spacing.xl }}>
       <Animated.View entering={FadeInDown.delay(100).duration(700)}>
-        <BrandLogo size={72} />
+        <Eyebrow>{eyebrow}</Eyebrow>
       </Animated.View>
 
-      <Animated.Text
-        entering={FadeInDown.delay(250).duration(700)}
-        style={styles.title}
-      >
-        {title}
-      </Animated.Text>
+      <Animated.View entering={FadeInDown.delay(250).duration(700)}>
+        <Display center style={{ marginTop: spacing.md }}>
+          {title}
+        </Display>
+      </Animated.View>
 
-      <Animated.Text
-        entering={FadeInDown.delay(350).duration(700)}
-        style={styles.subtitle}
-      >
-        {subtitle}
-      </Animated.Text>
+      <Rule style={{ width: 80, marginTop: spacing.md, alignSelf: "center" }} />
+
+      {subtitle ? (
+        <Animated.View entering={FadeInDown.delay(350).duration(700)}>
+          <Body
+            tone="soft"
+            center
+            style={{ marginTop: spacing.md, paddingHorizontal: spacing.lg }}
+          >
+            {subtitle}
+          </Body>
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  title: {
-    marginTop: 22,
-    fontSize: 34,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-
-  subtitle: {
-    marginTop: 10,
-    fontSize: 17,
-    lineHeight: 26,
-    textAlign: "center",
-    color: "#64748B",
-    paddingHorizontal: 20,
-  },
-});

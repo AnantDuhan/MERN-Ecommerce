@@ -7,6 +7,8 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 
+import { useTheme } from "@/theme/ThemeContext";
+
 interface Props {
   dataLength: number;
   scrollX: SharedValue<number>;
@@ -17,51 +19,41 @@ interface DotProps {
   index: number;
   scrollX: SharedValue<number>;
   width: number;
+  active: string;
+  inactive: string;
 }
 
-function Dot({ index, scrollX, width }: DotProps) {
+function Dot({ index, scrollX, width, active, inactive }: DotProps) {
   const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
+    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
 
-    const dotWidth = interpolate(
-      scrollX.value,
-      inputRange,
-      [10, 32, 10],
-      "clamp",
-    );
-
-    const opacity = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.35, 1, 0.35],
-      "clamp",
-    );
-
+    const barWidth = interpolate(scrollX.value, inputRange, [16, 40, 16], "clamp");
+    const opacity = interpolate(scrollX.value, inputRange, [0.5, 1, 0.5], "clamp");
     const backgroundColor = interpolateColor(scrollX.value, inputRange, [
-      "#CBD5E1",
-      "#2F80ED",
-      "#CBD5E1",
+      inactive,
+      active,
+      inactive,
     ]);
 
-    return {
-      width: dotWidth,
-      opacity,
-      backgroundColor,
-    };
+    return { width: barWidth, opacity, backgroundColor };
   });
 
-  return <Animated.View style={[styles.dot, animatedStyle]} />;
+  return <Animated.View style={[styles.bar, animatedStyle]} />;
 }
 
 export default function Pagination({ dataLength, scrollX, width }: Props) {
+  const { colors } = useTheme();
   return (
     <View style={styles.container}>
       {Array.from({ length: dataLength }).map((_, index) => (
-        <Dot key={index} index={index} scrollX={scrollX} width={width} />
+        <Dot
+          key={index}
+          index={index}
+          scrollX={scrollX}
+          width={width}
+          active={colors.brass}
+          inactive={colors.line}
+        />
       ))}
     </View>
   );
@@ -74,11 +66,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 24,
   },
-
-  dot: {
-    height: 10,
-    width: 10,
-    borderRadius: 20,
-    marginHorizontal: 5,
+  bar: {
+    height: 3,
+    borderRadius: 2,
+    marginHorizontal: 4,
   },
 });

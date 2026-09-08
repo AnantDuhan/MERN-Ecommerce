@@ -1,79 +1,53 @@
 import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { router } from "expo-router";
-import {
-  AnimatedBackground,
-  AppContainer,
-  BrandLogo,
-} from "@/components/layout";
-import { Colors } from "@/theme";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+
+import { Screen } from "@/components/ui/Screen";
+import { Eyebrow, Display, Body } from "@/components/ui/Text";
+import { Rule } from "@/components/ui/Rule";
+import { useTheme } from "@/theme/ThemeContext";
+import { spacing } from "@/theme/tokens";
 
 export default function SplashScreen() {
+  const { colors } = useTheme();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace("/onboarding");
     }, 2500);
-
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <AppContainer>
-
-        <AnimatedBackground />
-
-        <SafeAreaView 
-            edges={["left", "right", "bottom"]}
-            style={{ flex: 1 }}
+    <Screen padded>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Animated.View
+          entering={FadeInDown.duration(700)}
+          style={{ alignItems: "center" }}
         >
-            <View style={styles.content}>
+          <Eyebrow>Curated Commerce</Eyebrow>
 
-                <BrandLogo size={140} />
+          <Display center style={{ marginTop: spacing.md }}>
+            Order Planning
+          </Display>
 
-                <Text style={styles.title}>
-                    Order Planning
-                </Text>
+          <Rule
+            style={{ width: 120, marginTop: spacing.lg, alignSelf: "center" }}
+          />
 
-                <Text style={styles.subtitle}>
-                    Discover Amazing Deals
-                </Text>
+          <Body tone="soft" center style={{ marginTop: spacing.lg }}>
+            Discover amazing deals
+          </Body>
+        </Animated.View>
+      </View>
 
-                <ActivityIndicator
-                    size="large"
-                    color="#2F80ED"
-                    style={{ marginTop: 50 }}
-                />
-
-            </View>
-        </SafeAreaView>
-
-    </AppContainer>
+      <Animated.View
+        entering={FadeIn.delay(400).duration(700)}
+        style={{ alignItems: "center", paddingBottom: spacing.xl }}
+      >
+        <ActivityIndicator size="small" color={colors.brass} />
+      </Animated.View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  title: {
-    marginTop: 25,
-    fontSize: 34,
-    fontWeight: "700",
-    color: Colors.text,
-  },
-
-  subtitle: {
-    marginTop: 10,
-    fontSize: 17,
-    color: Colors.textSecondary,
-  },
-});

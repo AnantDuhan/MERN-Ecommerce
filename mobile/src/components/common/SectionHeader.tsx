@@ -1,9 +1,11 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
+import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { H2, Txt } from "@/components/ui/Text";
+import { type } from "@/theme/tokens";
 
 interface Props {
   title: string;
@@ -16,14 +18,21 @@ export default function SectionHeader({
   actionText = "See All",
   onPress,
 }: Props) {
+  const { colors } = useTheme();
   return (
     <Animated.View entering={FadeInDown.duration(700)} style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <H2>{title}</H2>
 
-      <Pressable style={styles.action} onPress={onPress}>
-        <Text style={styles.actionText}>{actionText}</Text>
-
-        <Ionicons name="chevron-forward" size={16} color="#2F80ED" />
+      <Pressable style={styles.action} onPress={onPress} hitSlop={8}>
+        <Txt tone="brass" style={{ ...type.eyebrow }}>
+          {actionText}
+        </Txt>
+        <Ionicons
+          name="arrow-forward"
+          size={14}
+          color={colors.brass}
+          style={{ marginLeft: 6 }}
+        />
       </Pressable>
     </Animated.View>
   );
@@ -31,28 +40,11 @@ export default function SectionHeader({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 18,
+    marginBottom: 16,
     paddingHorizontal: 24,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end",
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-
-  action: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  actionText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#2F80ED",
-    marginRight: 2,
-  },
+  action: { flexDirection: "row", alignItems: "center" },
 });

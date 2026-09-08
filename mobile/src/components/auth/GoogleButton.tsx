@@ -1,134 +1,43 @@
 import React from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { BlurView } from "expo-blur";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
-import { Image } from "react-native";
-const AnimatedPressable =
-  Animated.createAnimatedComponent(Pressable);
+import { Image, Pressable } from "react-native";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { Txt } from "@/components/ui/Text";
+import { radii, spacing, type } from "@/theme/tokens";
 
 interface Props {
   onPress: () => void;
   disabled?: boolean;
 }
 
-export default function GoogleButton({
-  onPress,
-  disabled = false,
-}: Props) {
-  const scale = useSharedValue(1);
-  
-  const handlePressIn = () => {
-    if(!disabled) {
-      scale.value = withSpring(0.97);
-    }
-  }
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  }
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: scale.value,
-      },
-    ],
-  }));
-
+/** Editorial outline button carrying the Google mark. */
+export default function GoogleButton({ onPress, disabled = false }: Props) {
+  const { colors } = useTheme();
   return (
-    <AnimatedPressable
-      style={[
-        animatedStyle,
-        disabled && styles.disabled,
-      ]}
-      disabled={disabled}
+    <Pressable
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      disabled={disabled}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.sm,
+        paddingVertical: 15,
+        paddingHorizontal: spacing.xl,
+        borderWidth: 1,
+        borderRadius: radii.none,
+        borderColor: pressed ? colors.brass : colors.line,
+        opacity: disabled ? 0.5 : 1,
+      })}
     >
-      <BlurView
-        intensity={60}
-        tint="light"
-        style={styles.container}
-        >
-        <View style={styles.logoContainer}>
-            <Image
-            source={require("../../assets/icons/Google.png")}
-            style={styles.logo}
-            />
-        </View>
-
-        <Text style={styles.text}>
-            Continue with Google
-        </Text>
-      </BlurView>
-    </AnimatedPressable>
+      <Image
+        source={require("@/assets/icons/Google.png")}
+        style={{ width: 18, height: 18, resizeMode: "contain" }}
+      />
+      <Txt tone="ink" style={{ ...type.eyebrow, fontSize: 12 }}>
+        Continue with Google
+      </Txt>
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    height: 52,
-
-    borderRadius: 30,
-
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "rgba(255,255,255,0.82)",
-
-    borderWidth: 1,
-    borderColor: "rgba(66,133,244,0.18)",
-
-    shadowColor: "#4285F4",
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    elevation: 6,
-
-    paddingHorizontal: 24,
-  },
-
-  logoContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "rgba(66,133,244,0.08)",
-  },
-
-  logo: {
-    width: 22,
-    height: 22,
-    resizeMode: "contain",
-  },
-
-  text: {
-    marginLeft: 14,
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#202124",
-    letterSpacing: 0.2,
-  },
-
-  disabled: {
-    opacity: 0.55,
-  },
-});

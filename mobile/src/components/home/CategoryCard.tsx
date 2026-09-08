@@ -1,23 +1,18 @@
 import React from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
-import { BlurView } from "expo-blur";
+import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 
-const AnimatedPressable =
-  Animated.createAnimatedComponent(Pressable);
+import { useTheme } from "@/theme/ThemeContext";
+import { BodySm } from "@/components/ui/Text";
+import { radii } from "@/theme/tokens";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface Props {
   title: string;
@@ -25,28 +20,13 @@ interface Props {
   onPress?: () => void;
 }
 
-export default function CategoryCard({
-  title,
-  icon,
-  onPress,
-}: Props) {
+export default function CategoryCard({ title, icon, onPress }: Props) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: scale.value,
-      },
-    ],
+    transform: [{ scale: scale.value }],
   }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.92);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
 
   const handlePress = async () => {
     await Haptics.selectionAsync();
@@ -57,60 +37,38 @@ export default function CategoryCard({
     <AnimatedPressable
       style={[styles.container, animatedStyle]}
       onPress={handlePress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      onPressIn={() => {
+        scale.value = withSpring(0.94);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}
     >
-      <BlurView
-        intensity={70}
-        tint="light"
-        style={styles.iconContainer}
+      <Animated.View
+        style={[
+          styles.tile,
+          { borderColor: colors.line, backgroundColor: colors.surface },
+        ]}
       >
-        <Ionicons
-          name={icon}
-          size={30}
-          color="#2F80ED"
-        />
-      </BlurView>
+        <Ionicons name={icon} size={26} color={colors.ink} />
+      </Animated.View>
 
-      <Text style={styles.title}>
+      <BodySm tone="soft" center style={styles.title}>
         {title}
-      </Text>
+      </BodySm>
     </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: 88,
-    alignItems: "center",
-    marginRight: 18,
-  },
-
-  iconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  container: { width: 84, alignItems: "center", marginRight: 16 },
+  tile: {
+    width: 68,
+    height: 68,
+    borderRadius: radii.xs,
     justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.14,
-    shadowRadius: 16,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    elevation: 8,
   },
-
-  title: {
-    marginTop: 12,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#334155",
-    textAlign: "center",
-  },
+  title: { marginTop: 10 },
 });

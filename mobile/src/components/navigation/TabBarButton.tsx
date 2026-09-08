@@ -1,11 +1,6 @@
 import React, { useEffect } from "react";
-import {
-  Pressable,
-  StyleSheet,
-} from "react-native";
-
+import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -14,6 +9,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { TabItem } from "./TabConfig";
+import { useTheme } from "@/theme/ThemeContext";
+import { Txt } from "@/components/ui/Text";
+import { type } from "@/theme/tokens";
 
 interface Props {
   route: TabItem;
@@ -21,109 +19,55 @@ interface Props {
   onPress: () => void;
 }
 
-const AnimatedPressable =
-  Animated.createAnimatedComponent(Pressable);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export default function TabBarButton({
-  route,
-  focused,
-  onPress,
-}: Props) {
-
-  const progress = useSharedValue(
-    focused ? 1 : 0
-  );
+export default function TabBarButton({ route, focused, onPress }: Props) {
+  const { colors } = useTheme();
+  const progress = useSharedValue(focused ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withSpring(
-      focused ? 1 : 0,
-      {
-        damping: 16,
-        stiffness: 180,
-      }
-    );
+    progress.value = withSpring(focused ? 1 : 0, {
+      damping: 16,
+      stiffness: 180,
+    });
   }, [focused]);
 
-  const iconStyle =
-    useAnimatedStyle(() => ({
-      transform: [
-        {
-          scale: interpolate(
-            progress.value,
-            [0, 1],
-            [1, 1.15]
-          ),
-        },
-      ],
-    }));
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0, 1], [1, 1.1]) }],
+  }));
 
-  const labelStyle =
-    useAnimatedStyle(() => ({
-      opacity: interpolate(
-        progress.value,
-        [0, 1],
-        [0, 1]
-      ),
-
-      transform: [
-        {
-          translateY: interpolate(
-            progress.value,
-            [0, 1],
-            [6, 0]
-          ),
-        },
-      ],
-    }));
+  const labelStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 1], [0, 1]),
+    transform: [{ translateY: interpolate(progress.value, [0, 1], [4, 0]) }],
+  }));
 
   return (
-    <AnimatedPressable
-      style={styles.container}
-      onPress={onPress}
-    >
+    <AnimatedPressable style={styles.container} onPress={onPress}>
       <Animated.View style={iconStyle}>
         <Ionicons
-          name={
-            focused
-              ? route.activeIcon
-              : route.inactiveIcon
-          }
-          size={24}
-          color={
-            focused
-              ? "#2F80ED"
-              : "#94A3B8"
-          }
+          name={focused ? route.activeIcon : route.inactiveIcon}
+          size={22}
+          color={focused ? colors.brass : colors.inkFaint}
         />
       </Animated.View>
 
       {focused && (
-        <Animated.Text
-          style={[
-            styles.label,
-            labelStyle,
-          ]}
-        >
-          {route.label}
-        </Animated.Text>
+        <Animated.View style={labelStyle}>
+          <Txt tone="brass" style={{ ...type.eyebrow, fontSize: 9, marginTop: 4 }}>
+            {route.label}
+          </Txt>
+        </Animated.View>
       )}
     </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
+    paddingTop: 6,
     zIndex: 10,
-  },
-
-  label: {
-    marginTop: 4,
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#2F80ED",
   },
 });

@@ -5,43 +5,41 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import Animated, { FadeInDown } from "react-native-reanimated";
 
-import { Ionicons } from "@expo/vector-icons";
-
-import AnimatedBackground from "@/components/layout/AnimatedBackground";
 import AuthCard from "@/components/auth/AuthCard";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthTextField from "@/components/auth/AuthTextField";
-import PrimaryButton from "@/components/onboarding/PrimaryButton";
 import AuthFooter from "@/components/auth/AuthFooter";
+import PrimaryButton from "@/components/onboarding/PrimaryButton";
+import { Txt } from "@/components/ui/Text";
 
+import { useTheme } from "@/theme/ThemeContext";
+import { spacing } from "@/theme/tokens";
 import {
   forgotPasswordSchema,
   ForgotPasswordFormData,
 } from "@/features/auth/validation/auth.schema";
-
 import { useForgotPassword } from "@/features/auth/hooks/useForgotPassword";
 
 export default function ForgotPasswordScreen() {
+  const { colors, isDark } = useTheme();
+
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues: { email: "" },
   });
 
   const forgotPasswordMutation = useForgotPassword();
@@ -52,8 +50,8 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AnimatedBackground />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -66,8 +64,8 @@ export default function ForgotPasswordScreen() {
           scrollEnabled={!forgotPasswordMutation.isPending}
         >
           <AuthHeader
-            title="Forgot Password?"
-            subtitle="Enter your email address and we'll send you a password reset link."
+            title="Forgot password?"
+            subtitle="Enter your email and we'll send you a reset link."
           />
 
           <AuthCard>
@@ -86,9 +84,7 @@ export default function ForgotPasswordScreen() {
                   autoCapitalize="none"
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit(onSubmit)}
-                  leftIcon={
-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
-                  }
+                  icon="mail-outline"
                 />
               )}
             />
@@ -101,9 +97,9 @@ export default function ForgotPasswordScreen() {
             />
 
             {forgotPasswordMutation.isError && (
-              <Text style={styles.error}>
+              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
                 {forgotPasswordMutation.error.message}
-              </Text>
+              </Txt>
             )}
           </AuthCard>
 
@@ -122,21 +118,11 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
+  container: { flex: 1 },
   content: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     paddingVertical: 24,
-  },
-
-  error: {
-    marginTop: 12,
-    textAlign: "center",
-    color: "#EF4444",
-    fontSize: 14,
   },
 });

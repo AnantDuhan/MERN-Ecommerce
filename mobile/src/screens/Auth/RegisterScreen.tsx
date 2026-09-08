@@ -8,14 +8,13 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+import { ImagePickerAsset } from "expo-image-picker";
 
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthCard from "@/components/auth/AuthCard";
@@ -24,22 +23,25 @@ import AvatarPicker from "@/components/auth/AvatarPicker";
 import AuthDivider from "@/components/auth/AuthDivider";
 import GoogleButton from "@/components/auth/GoogleButton";
 import AuthFooter from "@/components/auth/AuthFooter";
-
 import PrimaryButton from "@/components/onboarding/PrimaryButton";
 
+import { useTheme } from "@/theme/ThemeContext";
 import {
   registerSchema,
   RegisterFormData,
 } from "@/features/auth/validation/auth.schema";
 import { useRegister } from "@/features/auth/hooks/useRegister";
-import { ImagePickerAsset } from "expo-image-picker";
 
 export default function RegisterScreen() {
+  const { colors, isDark } = useTheme();
   const [avatar, setAvatar] = useState<ImagePickerAsset | null>(null);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-
     defaultValues: {
       name: "",
       email: "",
@@ -52,22 +54,15 @@ export default function RegisterScreen() {
 
   const onSubmit = (data: RegisterFormData) => {
     if (!avatar) {
-      Alert.alert(
-        "Profile Picture Required",
-        "Please select a profile picture."
-      );
+      Alert.alert("Profile Picture Required", "Please select a profile picture.");
       return;
     }
-
-    registerMutation.mutate({
-      ...data,
-      avatar,
-    });
+    registerMutation.mutate({ ...data, avatar });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AnimatedBackground />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -79,7 +74,7 @@ export default function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           <AuthHeader
-            title="Create Account"
+            title="Create account"
             subtitle="Join us and start shopping smarter."
           />
 
@@ -97,9 +92,7 @@ export default function RegisterScreen() {
                   onChangeText={field.onChange}
                   error={errors.name?.message}
                   autoCapitalize="words"
-                  leftIcon={
-                    <Ionicons name="person-outline" size={22} color="#64748B" />
-                  }
+                  icon="person-outline"
                 />
               )}
             />
@@ -117,9 +110,7 @@ export default function RegisterScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   returnKeyType="next"
-                  leftIcon={
-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
-                  }
+                  icon="mail-outline"
                 />
               )}
             />
@@ -136,13 +127,7 @@ export default function RegisterScreen() {
                   error={errors.password?.message}
                   secureTextEntry
                   returnKeyType="next"
-                  leftIcon={
-                    <Ionicons
-                      name="lock-closed-outline"
-                      size={22}
-                      color="#64748B"
-                    />
-                  }
+                  icon="lock-closed-outline"
                 />
               )}
             />
@@ -158,15 +143,9 @@ export default function RegisterScreen() {
                   onChangeText={field.onChange}
                   error={errors.confirmPassword?.message}
                   secureTextEntry
-                  leftIcon={
-                    <Ionicons
-                      name="shield-checkmark-outline"
-                      size={22}
-                      color="#64748B"
-                    />
-                  }
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit(onSubmit)}
+                  icon="shield-checkmark-outline"
                 />
               )}
             />
@@ -201,14 +180,11 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
+  container: { flex: 1 },
   content: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     paddingVertical: 24,
   },
 });

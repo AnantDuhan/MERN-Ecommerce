@@ -1,10 +1,8 @@
 import React from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, View } from "react-native";
+
+import { Body, Txt } from "@/components/ui/Text";
+import { spacing, type } from "@/theme/tokens";
 
 interface Props {
   text: string;
@@ -20,41 +18,21 @@ export default function AuthFooter({
   disabled = false,
 }: Props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>
-        {text}
-      </Text>
-
-      <Pressable onPress={onPress} disabled={disabled}>
-        <Text style={[styles.action, disabled && styles.disabled]}>
+    <View
+      style={{
+        marginTop: spacing.xl,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: spacing.sm,
+      }}
+    >
+      <Body tone="soft">{text}</Body>
+      <Pressable onPress={onPress} disabled={disabled} hitSlop={8}>
+        <Txt tone={disabled ? "faint" : "brass"} style={{ ...type.eyebrow }}>
           {actionText}
-        </Text>
+        </Txt>
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 32,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  text: {
-    fontSize: 15,
-    color: "#64748B",
-  },
-
-  action: {
-    marginLeft: 6,
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#2F80ED",
-  },
-  
-  disabled: {
-    opacity: 0.5,
-  },
-});

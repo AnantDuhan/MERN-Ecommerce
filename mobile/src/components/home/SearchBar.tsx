@@ -1,10 +1,10 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-
-import { BlurView } from "expo-blur";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { Body } from "@/components/ui/Text";
 
 interface Props {
   onPress?: () => void;
@@ -17,92 +17,51 @@ export default function SearchBar({
   onVoicePress,
   onCameraPress,
 }: Props) {
+  const { colors } = useTheme();
   return (
     <Animated.View
       entering={FadeInDown.delay(150).duration(700)}
       style={styles.wrapper}
     >
-      <Pressable onPress={onPress}>
-        <BlurView intensity={70} tint="light" style={styles.container}>
-          <View style={styles.left}>
-            <Ionicons name="search" size={22} color="#64748B" />
+      <Pressable
+        onPress={onPress}
+        style={[
+          styles.container,
+          { borderColor: colors.line, backgroundColor: colors.surface },
+        ]}
+      >
+        <View style={styles.left}>
+          <Ionicons name="search-outline" size={20} color={colors.inkFaint} />
+          <Body tone="faint" style={{ marginLeft: 12 }}>
+            Search products
+          </Body>
+        </View>
 
-            <Text style={styles.placeholder}>Search products...</Text>
-          </View>
-
-          <View style={styles.right}>
-            <Pressable hitSlop={10} onPress={onVoicePress}>
-              <Ionicons name="mic-outline" size={22} color="#64748B" />
-            </Pressable>
-
-            <View style={styles.divider} />
-
-            <Pressable hitSlop={10} onPress={onCameraPress}>
-              <Ionicons name="camera-outline" size={22} color="#64748B" />
-            </Pressable>
-          </View>
-        </BlurView>
+        <View style={styles.right}>
+          <Pressable hitSlop={10} onPress={onVoicePress}>
+            <Ionicons name="mic-outline" size={20} color={colors.inkFaint} />
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: colors.line }]} />
+          <Pressable hitSlop={10} onPress={onCameraPress}>
+            <Ionicons name="camera-outline" size={20} color={colors.inkFaint} />
+          </Pressable>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: 24,
-    marginBottom: 28,
-  },
-
+  wrapper: { paddingHorizontal: 24, marginBottom: 24 },
   container: {
-    height: 60,
-
+    height: 56,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
-    borderRadius: 22,
-
-    paddingHorizontal: 20,
-
-    overflow: "hidden",
-
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-
-    backgroundColor: "rgba(255,255,255,0.18)",
-
-    shadowColor: "#5EA8FF",
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-
-    elevation: 8,
+    paddingHorizontal: 18,
   },
-
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  placeholder: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: "#94A3B8",
-    fontWeight: "500",
-  },
-
-  right: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  divider: {
-    width: 1,
-    height: 22,
-    backgroundColor: "#E2E8F0",
-    marginHorizontal: 14,
-  },
+  left: { flexDirection: "row", alignItems: "center", flex: 1 },
+  right: { flexDirection: "row", alignItems: "center" },
+  divider: { width: 1, height: 20, marginHorizontal: 14 },
 });

@@ -1,20 +1,28 @@
 import React, { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { ImagePickerAsset } from "expo-image-picker";
 
+import { useTheme } from "@/theme/ThemeContext";
+import { Eyebrow } from "@/components/ui/Text";
+import { radii, spacing } from "@/theme/tokens";
+
 interface Props {
   onImageSelected: (image: ImagePickerAsset) => void;
 }
 
+const SIZE = 96;
+
 export default function AvatarPicker({ onImageSelected }: Props) {
-  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(null);
+  const { colors } = useTheme();
+  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
+    null
+  );
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (!permission.granted) {
       return;
     }
@@ -34,89 +42,66 @@ export default function AvatarPicker({ onImageSelected }: Props) {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        alignItems: "center",
+        marginTop: spacing.sm,
+        marginBottom: spacing.lg,
+      }}
+    >
       <Pressable onPress={pickImage}>
-        <View style={styles.avatarContainer}>
+        <View>
           {selectedImage ? (
-            <Image source={{ uri: selectedImage.uri }} style={styles.avatar} />
+            <Image
+              source={{ uri: selectedImage.uri }}
+              style={{
+                width: SIZE,
+                height: SIZE,
+                borderRadius: radii.xs,
+                borderWidth: 1,
+                borderColor: colors.line,
+              }}
+            />
           ) : (
-            <View style={styles.placeholder}>
-              <Ionicons name="person" size={46} color="#94A3B8" />
+            <View
+              style={{
+                width: SIZE,
+                height: SIZE,
+                borderRadius: radii.xs,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: colors.surface2,
+                borderWidth: 1,
+                borderColor: colors.line,
+              }}
+            >
+              <Ionicons name="person-outline" size={40} color={colors.inkFaint} />
             </View>
           )}
 
-          <View style={styles.editButton}>
-            <Ionicons name="pencil" size={16} color="#FFFFFF" />
+          <View
+            style={{
+              position: "absolute",
+              right: -6,
+              bottom: -6,
+              width: 28,
+              height: 28,
+              borderRadius: radii.xs,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: colors.brass,
+              borderWidth: 2,
+              borderColor: colors.canvas,
+            }}
+          >
+            <Ionicons name="pencil" size={13} color={colors.onBrass} />
           </View>
         </View>
       </Pressable>
 
-      <Text style={styles.title}>
-        {selectedImage ? "Change Profile Photo" : "Add Profile Photo"}
-      </Text>
+      <Eyebrow tone="soft" style={{ marginTop: spacing.md }}>
+        {selectedImage ? "Change Photo" : "Add Photo"}
+      </Eyebrow>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 20,
-  },
-
-  avatarContainer: {
-    position: "relative",
-  },
-
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 3,
-    borderColor: "#D9EAFE",
-  },
-
-  placeholder: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "#EEF6FF",
-
-    borderWidth: 2,
-    borderColor: "#D9EAFE",
-  },
-
-  editButton: {
-    position: "absolute",
-
-    right: -2,
-    bottom: -2,
-
-    width: 32,
-    height: 32,
-
-    borderRadius: 16,
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "#2F80ED",
-
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
-  },
-
-  title: {
-    marginTop: 10,
-
-    fontSize: 15,
-    fontWeight: "600",
-
-    color: "#475569",
-  },
-});

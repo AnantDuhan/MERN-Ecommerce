@@ -1,0 +1,5439 @@
+diff --git a/mobile/app/(tabs)/index.tsx b/mobile/app/(tabs)/index.tsx
+index ed681c8..cad2919 100644
+--- a/mobile/app/(tabs)/index.tsx
++++ b/mobile/app/(tabs)/index.tsx
+@@ -1,9 +1,8 @@
+ import React from "react";
+ import { ScrollView, StyleSheet } from "react-native";
+-
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ 
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+ import HomeHeader from "@/components/home/HomeHeader";
+ import SearchBar from "@/components/home/SearchBar";
+ import PromoCard from "@/components/home/PromoCard";
+@@ -12,72 +11,55 @@ import CategoryList from "@/components/home/CategoryList";
+ import { categories } from "@/components/home/data/categories";
+ import ProductCard from "@/components/product/ProductCard";
+ import { flashSaleProducts } from "@/components/home/data/product";
++import { useTheme } from "@/theme/ThemeContext";
+ 
+ export default function HomeScreen() {
++  const { colors, isDark } = useTheme();
++
+   return (
+-    <SafeAreaView style={styles.container} edges={["top"]}>
+-      <AnimatedBackground />
++    <SafeAreaView
++      style={[styles.container, { backgroundColor: colors.canvas }]}
++      edges={["top"]}
++    >
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <ScrollView
+         contentContainerStyle={styles.content}
+         showsVerticalScrollIndicator={false}
+       >
+-        <SearchBar
+-          onPress={() => console.log("Search")}
+-          onVoicePress={() => console.log("Voice")}
+-          onCameraPress={() => console.log("Camera")}
+-        />
+-
+         <HomeHeader
+           userName="Anant"
+           location="Coimbatore, Tamil Nadu"
+-          onNotificationPress={() => {
+-            console.log("Notifications");
+-          }}
++          onNotificationPress={() => {}}
++        />
++
++        <SearchBar
++          onPress={() => {}}
++          onVoicePress={() => {}}
++          onCameraPress={() => {}}
+         />
+ 
+         <PromoCard
+           title="Summer Sale"
+-          subtitle="Up to 50% OFF"
++          subtitle="Up to 50% Off"
+           description="Discover the latest arrivals."
+           button="Shop Now"
+-          colors={["#5EA8FF", "#2F80ED"]}
+           image={require("@/assets/banners/shoe.png")}
+         />
+ 
+-        {/* CategoryList goes here */}
+-
+-        {/* <SectionHeader
+-          title="Flash Sale"
+-          onPress={() => {}}
+-        />
+-
+-        {/* FlashSaleList goes here */}
+-
+-        {/* <SectionHeader
+-          title="Featured Products"
+-          onPress={() => {}}
+-        /> */}
+-
+-        <CategoryList
+-          categories={categories}
+-          onCategoryPress={(category) => {
+-            console.log(category.title);
+-          }}
+-        />
++        <SectionHeader title="Categories" onPress={() => {}} />
++        <CategoryList categories={categories} onCategoryPress={() => {}} />
+ 
++        <SectionHeader title="Featured" onPress={() => {}} />
+         <ScrollView
+           horizontal
+           showsHorizontalScrollIndicator={false}
+-          contentContainerStyle={{
+-            paddingHorizontal: 24,
+-            paddingBottom: 24,
+-          }}
++          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+         >
+           {flashSaleProducts.map((product) => (
+             <ProductCard
+-              id={product.id}
+               key={product.id}
++              id={product.id}
+               name={product.name}
+               category={product.category}
+               image={product.images[0]}
+@@ -98,13 +80,6 @@ export default function HomeScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-    backgroundColor: "#F8FAFC",
+-  },
+-
+-  content: {
+-    paddingTop: 12,
+-    paddingBottom: 120,
+-  },
++  container: { flex: 1 },
++  content: { paddingTop: 8, paddingBottom: 140 },
+ });
+diff --git a/mobile/app/_layout.tsx b/mobile/app/_layout.tsx
+index 277d40a..8ce6c48 100644
+--- a/mobile/app/_layout.tsx
++++ b/mobile/app/_layout.tsx
+@@ -1,23 +1,45 @@
++import { useEffect } from "react";
+ import { SplashScreen, Stack } from "expo-router";
++import { useFonts } from "expo-font";
+ import { SafeAreaProvider } from "react-native-safe-area-context";
+ import { QueryClientProvider } from "@tanstack/react-query";
++
+ import { queryClient } from "@/query/queryClient";
+ import AuthProvider from "@/providers/AuthProvider";
++import { ThemeProvider } from "@/theme/ThemeContext";
++import { fontMap } from "@/theme/fonts";
++
++// Keep the native splash up until the editorial fonts are ready.
++SplashScreen.preventAutoHideAsync();
+ 
+ export default function RootLayout() {
++  const [fontsLoaded, fontError] = useFonts(fontMap);
++
++  useEffect(() => {
++    if (fontsLoaded || fontError) {
++      SplashScreen.hideAsync();
++    }
++  }, [fontsLoaded, fontError]);
++
++  // Hold render until fonts resolve so we never flash system type.
++  if (!fontsLoaded && !fontError) {
++    return null;
++  }
++
+   return (
+     <SafeAreaProvider>
+-      <QueryClientProvider client={queryClient}>
+-        <AuthProvider>
+-          
+-          <Stack
+-            screenOptions={{
+-              headerShown: false,
+-              animation: "fade",
+-            }}
+-          />
+-        </AuthProvider>
+-      </QueryClientProvider>
++      <ThemeProvider>
++        <QueryClientProvider client={queryClient}>
++          <AuthProvider>
++            <Stack
++              screenOptions={{
++                headerShown: false,
++                animation: "fade",
++              }}
++            />
++          </AuthProvider>
++        </QueryClientProvider>
++      </ThemeProvider>
+     </SafeAreaProvider>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/mobile/app/auth/reset-password/[token].tsx b/mobile/app/auth/reset-password/[token].tsx
+index 5ab3d2d..a62cd0b 100644
+--- a/mobile/app/auth/reset-password/[token].tsx
++++ b/mobile/app/auth/reset-password/[token].tsx
+@@ -1,229 +1,3 @@
+-import React from "react";
+-import {
+-  KeyboardAvoidingView,
+-  Platform,
+-  ScrollView,
+-  StyleSheet,
+-  Text,
+-} from "react-native";
+-
+-import { SafeAreaView } from "react-native-safe-area-context";
+-import {
+-  router,
+-  useLocalSearchParams,
+-} from "expo-router";
+-
+-import Animated, {
+-  FadeInDown,
+-} from "react-native-reanimated";
+-
+-import { Ionicons } from "@expo/vector-icons";
+-
+-import { Controller, useForm } from "react-hook-form";
+-import { zodResolver } from "@hookform/resolvers/zod";
+-
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+-import AuthHeader from "@/components/auth/AuthHeader";
+-import AuthCard from "@/components/auth/AuthCard";
+-import AuthTextField from "@/components/auth/AuthTextField";
+-import PrimaryButton from "@/components/onboarding/PrimaryButton";
+-import AuthFooter from "@/components/auth/AuthFooter";
+-
+-import {
+-  resetPasswordSchema,
+-  ResetPasswordFormData,
+-} from "@/features/auth/validation/auth.schema";
+-
+-import { useResetPassword } from "@/features/auth/hooks/useResetPassword";
+-
+-export default function TokenResetPasswordScreen() {
+-  const { token } = useLocalSearchParams<{
+-    token: string;
+-  }>();
+-
+-  const resetPasswordMutation =
+-    useResetPassword();
+-
+-  const {
+-    control,
+-    handleSubmit,
+-    formState: { errors },
+-  } = useForm<ResetPasswordFormData>({
+-    resolver: zodResolver(
+-      resetPasswordSchema
+-    ),
+-
+-    defaultValues: {
+-      password: "",
+-      confirmPassword: "",
+-    },
+-  });
+-
+-  const onSubmit = (
+-    data: ResetPasswordFormData
+-  ) => {
+-    if (!token) return;
+-
+-    resetPasswordMutation.mutate({
+-      token,
+-      password: data.password,
+-      confirmPassword:
+-        data.confirmPassword,
+-    });
+-  };
+-
+-  return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
+-
+-      <KeyboardAvoidingView
+-        style={styles.flex}
+-        behavior={
+-          Platform.OS === "ios"
+-            ? "padding"
+-            : undefined
+-        }
+-      >
+-        <ScrollView
+-          contentContainerStyle={
+-            styles.content
+-          }
+-          keyboardShouldPersistTaps="handled"
+-          showsVerticalScrollIndicator={
+-            false
+-          }
+-        >
+-          <AuthHeader
+-            title="Reset Password"
+-            subtitle="Create a strong new password."
+-          />
+-
+-          <AuthCard>
+-            <Controller
+-              control={control}
+-              name="password"
+-              render={({ field }) => (
+-                <AuthTextField
+-                  label="New Password"
+-                  placeholder="Enter password"
+-                  value={field.value}
+-                  onChangeText={
+-                    field.onChange
+-                  }
+-                  error={
+-                    errors.password
+-                      ?.message
+-                  }
+-                  secureTextEntry
+-                  returnKeyType="next"
+-                  leftIcon={
+-                    <Ionicons
+-                      name="lock-closed-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
+-                />
+-              )}
+-            />
+-
+-            <Controller
+-              control={control}
+-              name="confirmPassword"
+-              render={({ field }) => (
+-                <AuthTextField
+-                  label="Confirm Password"
+-                  placeholder="Confirm password"
+-                  value={field.value}
+-                  onChangeText={
+-                    field.onChange
+-                  }
+-                  error={
+-                    errors
+-                      .confirmPassword
+-                      ?.message
+-                  }
+-                  secureTextEntry
+-                  returnKeyType="done"
+-                  onSubmitEditing={handleSubmit(
+-                    onSubmit
+-                  )}
+-                  leftIcon={
+-                    <Ionicons
+-                      name="shield-checkmark-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
+-                />
+-              )}
+-            />
+-
+-            <PrimaryButton
+-              title="Reset Password"
+-              loading={
+-                resetPasswordMutation.isPending
+-              }
+-              disabled={
+-                resetPasswordMutation.isPending
+-              }
+-              onPress={handleSubmit(
+-                onSubmit
+-              )}
+-            />
+-
+-            {resetPasswordMutation.isError && (
+-              <Text style={styles.error}>
+-                {
+-                  resetPasswordMutation
+-                    .error.message
+-                }
+-              </Text>
+-            )}
+-          </AuthCard>
+-
+-          <Animated.View
+-            entering={FadeInDown.delay(
+-              400
+-            )}
+-          >
+-            <AuthFooter
+-              text="Back to login?"
+-              actionText="Sign In"
+-              disabled={
+-                resetPasswordMutation.isPending
+-              }
+-              onPress={() =>
+-                router.replace("/login")
+-              }
+-            />
+-          </Animated.View>
+-        </ScrollView>
+-      </KeyboardAvoidingView>
+-    </SafeAreaView>
+-  );
+-}
+-
+-const styles = StyleSheet.create({
+-  flex: {
+-    flex: 1,
+-  },
+-
+-  container: {
+-    flex: 1,
+-  },
+-
+-  content: {
+-    flexGrow: 1,
+-    justifyContent: "center",
+-    paddingHorizontal: 28,
+-    paddingVertical: 24,
+-  },
+-
+-  error: {
+-    marginTop: 12,
+-    color: "#EF4444",
+-    textAlign: "center",
+-    fontSize: 14,
+-  },
+-});
+\ No newline at end of file
++// Deep-link route (/auth/reset-password/:token). The shared editorial screen
++// reads the token from useLocalSearchParams, so we just re-export it.
++export { default } from "@/screens/Auth/ResetPasswordScreen";
+diff --git a/mobile/app/index.tsx b/mobile/app/index.tsx
+index 707abfd..e79a5f0 100644
+--- a/mobile/app/index.tsx
++++ b/mobile/app/index.tsx
+@@ -1,5 +1,7 @@
+ import { Redirect } from "expo-router";
+ 
++// Entry → editorial splash → onboarding → login.
++// (Was redirecting straight to /login during early dev.)
+ export default function Index() {
+-  return <Redirect href="/login" />;
+-}
+\ No newline at end of file
++  return <Redirect href="/splash" />;
++}
+diff --git a/mobile/package.json b/mobile/package.json
+index 02cadb9..4f3e4e1 100644
+--- a/mobile/package.json
++++ b/mobile/package.json
+@@ -3,6 +3,8 @@
+   "version": "1.0.0",
+   "main": "expo-router/entry",
+   "dependencies": {
++    "@expo-google-fonts/cormorant-garamond": "^0.4.1",
++    "@expo-google-fonts/jost": "^0.4.2",
+     "@expo/vector-icons": "^15.0.2",
+     "@hookform/resolvers": "^5.4.0",
+     "@react-navigation/bottom-tabs": "^7.18.3",
+diff --git a/mobile/src/components/auth/AuthCard.tsx b/mobile/src/components/auth/AuthCard.tsx
+index f8e3e1b..6c96ffb 100644
+--- a/mobile/src/components/auth/AuthCard.tsx
++++ b/mobile/src/components/auth/AuthCard.tsx
+@@ -1,39 +1,16 @@
+ import React from "react";
+-import { Platform, StyleSheet, View, ViewProps } from "react-native";
+-import { BlurView } from "expo-blur";
++import { ViewProps, ViewStyle } from "react-native";
++import { Card } from "@/components/ui/Card";
+ 
+ interface Props extends ViewProps {
+   children: React.ReactNode;
+ }
+ 
++/** Auth panel = the editorial bordered Card with the soft luxe shadow. */
+ export default function AuthCard({ children, style }: Props) {
+   return (
+-    <BlurView intensity={60} tint="light" style={[styles.container, style]}>
+-      <View style={styles.inner}>{children}</View>
+-    </BlurView>
++    <Card elevated style={style as ViewStyle}>
++      {children}
++    </Card>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    borderRadius: 28,
+-    overflow: "hidden",
+-    borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-    shadowColor: "#5EA8FF",
+-    shadowOpacity: 0.12,
+-    shadowRadius: 35,
+-    shadowOffset: {
+-      width: 0,
+-      height: 16,
+-    },
+-
+-    elevation: Platform.OS === "android" ? 10 : 0,
+-  },
+-
+-  inner: {
+-    paddingHorizontal: 20,
+-    paddingVertical: 18
+-  },
+-});
+diff --git a/mobile/src/components/auth/AuthDivider.tsx b/mobile/src/components/auth/AuthDivider.tsx
+index 6c296a8..c651e5c 100644
+--- a/mobile/src/components/auth/AuthDivider.tsx
++++ b/mobile/src/components/auth/AuthDivider.tsx
+@@ -1,41 +1,25 @@
+ import React from "react";
+-import {
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
++import { View } from "react-native";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { Eyebrow } from "@/components/ui/Text";
++import { spacing } from "@/theme/tokens";
+ 
+ export default function AuthDivider() {
++  const { colors } = useTheme();
+   return (
+-    <View style={styles.container}>
+-      <View style={styles.line} />
+-
+-      <Text style={styles.text}>
+-        OR
+-      </Text>
+-
+-      <View style={styles.line} />
++    <View
++      style={{
++        flexDirection: "row",
++        alignItems: "center",
++        marginVertical: spacing.lg,
++      }}
++    >
++      <View style={{ flex: 1, height: 1, backgroundColor: colors.line }} />
++      <Eyebrow tone="faint" style={{ marginHorizontal: spacing.md }}>
++        or
++      </Eyebrow>
++      <View style={{ flex: 1, height: 1, backgroundColor: colors.line }} />
+     </View>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    flexDirection: "row",
+-    alignItems: "center",
+-    marginVertical: 18,
+-  },
+-
+-  line: {
+-    flex: 1,
+-    height: 1,
+-    backgroundColor: "#D6E3F3",
+-  },
+-
+-  text: {
+-    marginHorizontal: 16,
+-    color: "#64748B",
+-    fontWeight: "600",
+-    letterSpacing: 1,
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/components/auth/AuthFooter.tsx b/mobile/src/components/auth/AuthFooter.tsx
+index 26a51ef..095fdf5 100644
+--- a/mobile/src/components/auth/AuthFooter.tsx
++++ b/mobile/src/components/auth/AuthFooter.tsx
+@@ -1,10 +1,8 @@
+ import React from "react";
+-import {
+-  Pressable,
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
++import { Pressable, View } from "react-native";
++
++import { Body, Txt } from "@/components/ui/Text";
++import { spacing, type } from "@/theme/tokens";
+ 
+ interface Props {
+   text: string;
+@@ -20,41 +18,21 @@ export default function AuthFooter({
+   disabled = false,
+ }: Props) {
+   return (
+-    <View style={styles.container}>
+-      <Text style={styles.text}>
+-        {text}
+-      </Text>
+-
+-      <Pressable onPress={onPress} disabled={disabled}>
+-        <Text style={[styles.action, disabled && styles.disabled]}>
++    <View
++      style={{
++        marginTop: spacing.xl,
++        flexDirection: "row",
++        justifyContent: "center",
++        alignItems: "center",
++        gap: spacing.sm,
++      }}
++    >
++      <Body tone="soft">{text}</Body>
++      <Pressable onPress={onPress} disabled={disabled} hitSlop={8}>
++        <Txt tone={disabled ? "faint" : "brass"} style={{ ...type.eyebrow }}>
+           {actionText}
+-        </Text>
++        </Txt>
+       </Pressable>
+     </View>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    marginTop: 32,
+-    flexDirection: "row",
+-    justifyContent: "center",
+-    alignItems: "center",
+-  },
+-
+-  text: {
+-    fontSize: 15,
+-    color: "#64748B",
+-  },
+-
+-  action: {
+-    marginLeft: 6,
+-    fontSize: 15,
+-    fontWeight: "700",
+-    color: "#2F80ED",
+-  },
+-  
+-  disabled: {
+-    opacity: 0.5,
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/components/auth/AuthHeader.tsx b/mobile/src/components/auth/AuthHeader.tsx
+index 9490433..4270dd5 100644
+--- a/mobile/src/components/auth/AuthHeader.tsx
++++ b/mobile/src/components/auth/AuthHeader.tsx
+@@ -1,60 +1,47 @@
+ import React from "react";
+-import { StyleSheet, Text, View } from "react-native";
++import { View } from "react-native";
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
+-import BrandLogo from "@/components/layout/BrandLogo";
++import { Eyebrow, Display, Body } from "@/components/ui/Text";
++import { Rule } from "@/components/ui/Rule";
++import { spacing } from "@/theme/tokens";
+ 
+ interface Props {
+   title: string;
+   subtitle?: string;
++  eyebrow?: string;
+ }
+ 
+ export default function AuthHeader({
+   title,
+   subtitle,
++  eyebrow = "Order Planning",
+ }: Props) {
+   return (
+-    <View style={styles.container}>
++    <View style={{ alignItems: "center", marginBottom: spacing.xl }}>
+       <Animated.View entering={FadeInDown.delay(100).duration(700)}>
+-        <BrandLogo size={72} />
++        <Eyebrow>{eyebrow}</Eyebrow>
+       </Animated.View>
+ 
+-      <Animated.Text
+-        entering={FadeInDown.delay(250).duration(700)}
+-        style={styles.title}
+-      >
+-        {title}
+-      </Animated.Text>
++      <Animated.View entering={FadeInDown.delay(250).duration(700)}>
++        <Display center style={{ marginTop: spacing.md }}>
++          {title}
++        </Display>
++      </Animated.View>
+ 
+-      <Animated.Text
+-        entering={FadeInDown.delay(350).duration(700)}
+-        style={styles.subtitle}
+-      >
+-        {subtitle}
+-      </Animated.Text>
++      <Rule style={{ width: 80, marginTop: spacing.md, alignSelf: "center" }} />
++
++      {subtitle ? (
++        <Animated.View entering={FadeInDown.delay(350).duration(700)}>
++          <Body
++            tone="soft"
++            center
++            style={{ marginTop: spacing.md, paddingHorizontal: spacing.lg }}
++          >
++            {subtitle}
++          </Body>
++        </Animated.View>
++      ) : null}
+     </View>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    alignItems: "center",
+-    marginBottom: 20,
+-  },
+-
+-  title: {
+-    marginTop: 22,
+-    fontSize: 34,
+-    fontWeight: "800",
+-    color: "#0F172A",
+-  },
+-
+-  subtitle: {
+-    marginTop: 10,
+-    fontSize: 17,
+-    lineHeight: 26,
+-    textAlign: "center",
+-    color: "#64748B",
+-    paddingHorizontal: 20,
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/components/auth/AuthTextField.tsx b/mobile/src/components/auth/AuthTextField.tsx
+index 9da5a83..dacf937 100644
+--- a/mobile/src/components/auth/AuthTextField.tsx
++++ b/mobile/src/components/auth/AuthTextField.tsx
+@@ -1,181 +1,33 @@
+-import React, { useState } from "react";
+-import {
+-  Pressable,
+-  StyleSheet,
+-  Text,
+-  TextInput,
+-  TextInputProps,
+-  View,
+-} from "react-native";
+-import { BlurView } from "expo-blur";
++import React, { forwardRef } from "react";
++import { TextInput, TextInputProps } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+-import Animated, {
+-  interpolateColor,
+-  useAnimatedStyle,
+-  useSharedValue,
+-  withTiming,
+-} from "react-native-reanimated";
++
++import { Field } from "@/components/ui/Field";
++import { spacing } from "@/theme/tokens";
+ 
+ interface Props extends TextInputProps {
+   label: string;
+   error?: string;
+-  leftIcon?: React.ReactNode;
+-  rightIcon?: React.ReactNode;
++  icon?: keyof typeof Ionicons.glyphMap;
+   secureTextEntry?: boolean;
+ }
+ 
+-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+-
+-export default function AuthTextField({
+-  label,
+-  error,
+-  leftIcon,
+-  rightIcon,
+-  secureTextEntry = false,
+-  onFocus,
+-  onBlur,
+-  autoCapitalize,
+-  ...props
+-}: Props) {
+-  const [hidePassword, setHidePassword] = useState(secureTextEntry);
+-
+-  const focused = useSharedValue(0);
+-  const scale = useSharedValue(1);
+-
+-  const animatedStyle = useAnimatedStyle(() => ({
+-    borderColor: interpolateColor(
+-      focused.value,
+-      [0, 1],
+-      ["rgba(255,255,255,0.35)", "#2F80ED"],
+-    ),
+-    transform: [
+-      {
+-        scale: scale.value,
+-      },
+-    ],
+-  }));
+-
++/** Auth field = the editorial underline Field with a bottom gutter. */
++const AuthTextField = forwardRef<TextInput, Props>(function AuthTextField(
++  { label, error, icon, secureTextEntry, ...rest },
++  ref
++) {
+   return (
+-    <View style={styles.wrapper}>
+-      <Text style={styles.label}>{label}</Text>
+-
+-      <AnimatedBlurView
+-        intensity={45}
+-        tint="light"
+-        style={[styles.container, animatedStyle]}
+-      >
+-        {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+-
+-        <TextInput
+-          style={styles.input}
+-          placeholderTextColor="#94A3B8"
+-          secureTextEntry={hidePassword}
+-          autoCorrect={!secureTextEntry}
+-          autoCapitalize={secureTextEntry ? "none" : autoCapitalize}
+-          onFocus={(e) => {
+-            focused.value = withTiming(1, {
+-              duration: 180,
+-            });
+-
+-            scale.value = withTiming(1.015, {
+-              duration: 180,
+-            });
+-
+-            onFocus?.(e);
+-          }}
+-          onBlur={(e) => {
+-            focused.value = withTiming(0, {
+-              duration: 180,
+-            });
+-
+-            scale.value = withTiming(1, {
+-              duration: 180,
+-            });
+-
+-            onBlur?.(e);
+-          }}
+-          {...props}
+-        />
+-
+-        <View style={styles.rightIcon}>
+-          {secureTextEntry ? (
+-            <Pressable
+-              hitSlop={10}
+-              onPress={() => setHidePassword(!hidePassword)}
+-              accessibilityRole="button"
+-              accessibilityLabel={
+-                hidePassword ? "Show password" : "Hide password"
+-              }
+-            >
+-              <Ionicons
+-                name={hidePassword ? "eye-off-outline" : "eye-outline"}
+-                size={22}
+-                color="#64748B"
+-              />
+-            </Pressable>
+-          ) : (
+-            rightIcon
+-          )}
+-        </View>
+-      </AnimatedBlurView>
+-
+-      {!!error && <Text style={styles.error}>{error}</Text>}
+-    </View>
++    <Field
++      ref={ref}
++      label={label}
++      error={error}
++      left={icon}
++      secure={secureTextEntry}
++      containerStyle={{ marginBottom: spacing.lg }}
++      {...rest}
++    />
+   );
+-}
+-
+-const styles = StyleSheet.create({
+-  wrapper: {
+-    marginBottom: 16,
+-  },
+-
+-  label: {
+-    marginLeft: 4,
+-    marginBottom: 10,
+-
+-    fontSize: 14,
+-    fontWeight: "600",
+-    color: "#475569",
+-  },
+-
+-  container: {
+-    height: 52,
+-    paddingHorizontal: 18,
+-
+-    flexDirection: "row",
+-    alignItems: "center",
+-
+-    borderRadius: 18,
+-    borderWidth: 1,
+-
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-  },
+-
+-  leftIcon: {
+-    marginRight: 12,
+-  },
+-
+-  input: {
+-    flex: 1,
+-    fontSize: 17,
+-    color: "#0F172A",
+-    paddingVertical: 0,
+-    paddingRight: 8,
+-  },
+-
+-  rightIcon: {
+-    width: 28,
+-    marginLeft: 12,
+-
+-    justifyContent: "center",
+-    alignItems: "center",
+-  },
+-
+-  error: {
+-    marginTop: 8,
+-    marginLeft: 4,
+-
+-    fontSize: 13,
+-    color: "#EF4444",
+-  },
+ });
++
++export default AuthTextField;
+diff --git a/mobile/src/components/auth/AvatarPicker.tsx b/mobile/src/components/auth/AvatarPicker.tsx
+index 3f62796..5ef663a 100644
+--- a/mobile/src/components/auth/AvatarPicker.tsx
++++ b/mobile/src/components/auth/AvatarPicker.tsx
+@@ -1,20 +1,28 @@
+ import React, { useState } from "react";
+-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
++import { Image, Pressable, View } from "react-native";
+ 
+ import * as ImagePicker from "expo-image-picker";
+ import { Ionicons } from "@expo/vector-icons";
+ import { ImagePickerAsset } from "expo-image-picker";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { Eyebrow } from "@/components/ui/Text";
++import { radii, spacing } from "@/theme/tokens";
++
+ interface Props {
+   onImageSelected: (image: ImagePickerAsset) => void;
+ }
+ 
++const SIZE = 96;
++
+ export default function AvatarPicker({ onImageSelected }: Props) {
+-  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(null);
++  const { colors } = useTheme();
++  const [selectedImage, setSelectedImage] = useState<ImagePickerAsset | null>(
++    null
++  );
+ 
+   const pickImage = async () => {
+     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+-
+     if (!permission.granted) {
+       return;
+     }
+@@ -34,89 +42,66 @@ export default function AvatarPicker({ onImageSelected }: Props) {
+   };
+ 
+   return (
+-    <View style={styles.container}>
++    <View
++      style={{
++        alignItems: "center",
++        marginTop: spacing.sm,
++        marginBottom: spacing.lg,
++      }}
++    >
+       <Pressable onPress={pickImage}>
+-        <View style={styles.avatarContainer}>
++        <View>
+           {selectedImage ? (
+-            <Image source={{ uri: selectedImage.uri }} style={styles.avatar} />
++            <Image
++              source={{ uri: selectedImage.uri }}
++              style={{
++                width: SIZE,
++                height: SIZE,
++                borderRadius: radii.xs,
++                borderWidth: 1,
++                borderColor: colors.line,
++              }}
++            />
+           ) : (
+-            <View style={styles.placeholder}>
+-              <Ionicons name="person" size={46} color="#94A3B8" />
++            <View
++              style={{
++                width: SIZE,
++                height: SIZE,
++                borderRadius: radii.xs,
++                justifyContent: "center",
++                alignItems: "center",
++                backgroundColor: colors.surface2,
++                borderWidth: 1,
++                borderColor: colors.line,
++              }}
++            >
++              <Ionicons name="person-outline" size={40} color={colors.inkFaint} />
+             </View>
+           )}
+ 
+-          <View style={styles.editButton}>
+-            <Ionicons name="pencil" size={16} color="#FFFFFF" />
++          <View
++            style={{
++              position: "absolute",
++              right: -6,
++              bottom: -6,
++              width: 28,
++              height: 28,
++              borderRadius: radii.xs,
++              justifyContent: "center",
++              alignItems: "center",
++              backgroundColor: colors.brass,
++              borderWidth: 2,
++              borderColor: colors.canvas,
++            }}
++          >
++            <Ionicons name="pencil" size={13} color={colors.onBrass} />
+           </View>
+         </View>
+       </Pressable>
+ 
+-      <Text style={styles.title}>
+-        {selectedImage ? "Change Profile Photo" : "Add Profile Photo"}
+-      </Text>
++      <Eyebrow tone="soft" style={{ marginTop: spacing.md }}>
++        {selectedImage ? "Change Photo" : "Add Photo"}
++      </Eyebrow>
+     </View>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    alignItems: "center",
+-    marginTop: 8,
+-    marginBottom: 20,
+-  },
+-
+-  avatarContainer: {
+-    position: "relative",
+-  },
+-
+-  avatar: {
+-    width: 96,
+-    height: 96,
+-    borderRadius: 48,
+-    borderWidth: 3,
+-    borderColor: "#D9EAFE",
+-  },
+-
+-  placeholder: {
+-    width: 96,
+-    height: 96,
+-    borderRadius: 48,
+-
+-    justifyContent: "center",
+-    alignItems: "center",
+-
+-    backgroundColor: "#EEF6FF",
+-
+-    borderWidth: 2,
+-    borderColor: "#D9EAFE",
+-  },
+-
+-  editButton: {
+-    position: "absolute",
+-
+-    right: -2,
+-    bottom: -2,
+-
+-    width: 32,
+-    height: 32,
+-
+-    borderRadius: 16,
+-
+-    justifyContent: "center",
+-    alignItems: "center",
+-
+-    backgroundColor: "#2F80ED",
+-
+-    borderWidth: 3,
+-    borderColor: "#FFFFFF",
+-  },
+-
+-  title: {
+-    marginTop: 10,
+-
+-    fontSize: 15,
+-    fontWeight: "600",
+-
+-    color: "#475569",
+-  },
+-});
+diff --git a/mobile/src/components/auth/GoogleButton.tsx b/mobile/src/components/auth/GoogleButton.tsx
+index d3e0371..04b5c17 100644
+--- a/mobile/src/components/auth/GoogleButton.tsx
++++ b/mobile/src/components/auth/GoogleButton.tsx
+@@ -1,134 +1,43 @@
+ import React from "react";
+-import {
+-  Pressable,
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
+-import { BlurView } from "expo-blur";
+-import Animated, {
+-  useAnimatedStyle,
+-  useSharedValue,
+-  withSpring,
+-} from "react-native-reanimated";
+-import { Ionicons } from "@expo/vector-icons";
+-import { Image } from "react-native";
+-const AnimatedPressable =
+-  Animated.createAnimatedComponent(Pressable);
++import { Image, Pressable } from "react-native";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { Txt } from "@/components/ui/Text";
++import { radii, spacing, type } from "@/theme/tokens";
+ 
+ interface Props {
+   onPress: () => void;
+   disabled?: boolean;
+ }
+ 
+-export default function GoogleButton({
+-  onPress,
+-  disabled = false,
+-}: Props) {
+-  const scale = useSharedValue(1);
+-  
+-  const handlePressIn = () => {
+-    if(!disabled) {
+-      scale.value = withSpring(0.97);
+-    }
+-  }
+-
+-  const handlePressOut = () => {
+-    scale.value = withSpring(1);
+-  }
+-
+-  const animatedStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        scale: scale.value,
+-      },
+-    ],
+-  }));
+-
++/** Editorial outline button carrying the Google mark. */
++export default function GoogleButton({ onPress, disabled = false }: Props) {
++  const { colors } = useTheme();
+   return (
+-    <AnimatedPressable
+-      style={[
+-        animatedStyle,
+-        disabled && styles.disabled,
+-      ]}
+-      disabled={disabled}
++    <Pressable
+       onPress={onPress}
+-      onPressIn={handlePressIn}
+-      onPressOut={handlePressOut}
++      disabled={disabled}
++      accessibilityRole="button"
++      style={({ pressed }) => ({
++        flexDirection: "row",
++        alignItems: "center",
++        justifyContent: "center",
++        gap: spacing.sm,
++        paddingVertical: 15,
++        paddingHorizontal: spacing.xl,
++        borderWidth: 1,
++        borderRadius: radii.none,
++        borderColor: pressed ? colors.brass : colors.line,
++        opacity: disabled ? 0.5 : 1,
++      })}
+     >
+-      <BlurView
+-        intensity={60}
+-        tint="light"
+-        style={styles.container}
+-        >
+-        <View style={styles.logoContainer}>
+-            <Image
+-            source={require("../../assets/icons/Google.png")}
+-            style={styles.logo}
+-            />
+-        </View>
+-
+-        <Text style={styles.text}>
+-            Continue with Google
+-        </Text>
+-      </BlurView>
+-    </AnimatedPressable>
++      <Image
++        source={require("@/assets/icons/Google.png")}
++        style={{ width: 18, height: 18, resizeMode: "contain" }}
++      />
++      <Txt tone="ink" style={{ ...type.eyebrow, fontSize: 12 }}>
++        Continue with Google
++      </Txt>
++    </Pressable>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    height: 52,
+-
+-    borderRadius: 30,
+-
+-    flexDirection: "row",
+-    justifyContent: "center",
+-    alignItems: "center",
+-
+-    backgroundColor: "rgba(255,255,255,0.82)",
+-
+-    borderWidth: 1,
+-    borderColor: "rgba(66,133,244,0.18)",
+-
+-    shadowColor: "#4285F4",
+-    shadowOpacity: 0.12,
+-    shadowRadius: 20,
+-    shadowOffset: {
+-      width: 0,
+-      height: 10,
+-    },
+-    elevation: 6,
+-
+-    paddingHorizontal: 24,
+-  },
+-
+-  logoContainer: {
+-    width: 36,
+-    height: 36,
+-    borderRadius: 18,
+-
+-    justifyContent: "center",
+-    alignItems: "center",
+-
+-    backgroundColor: "rgba(66,133,244,0.08)",
+-  },
+-
+-  logo: {
+-    width: 22,
+-    height: 22,
+-    resizeMode: "contain",
+-  },
+-
+-  text: {
+-    marginLeft: 14,
+-    fontSize: 16,
+-    fontWeight: "700",
+-    color: "#202124",
+-    letterSpacing: 0.2,
+-  },
+-
+-  disabled: {
+-    opacity: 0.55,
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/components/common/SectionHeader.tsx b/mobile/src/components/common/SectionHeader.tsx
+index 46cb0ce..ae28228 100644
+--- a/mobile/src/components/common/SectionHeader.tsx
++++ b/mobile/src/components/common/SectionHeader.tsx
+@@ -1,10 +1,12 @@
+ import React from "react";
+-import { Pressable, StyleSheet, Text, View } from "react-native";
+-
++import { Pressable, StyleSheet } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { H2, Txt } from "@/components/ui/Text";
++import { type } from "@/theme/tokens";
++
+ interface Props {
+   title: string;
+   actionText?: string;
+@@ -16,14 +18,21 @@ export default function SectionHeader({
+   actionText = "See All",
+   onPress,
+ }: Props) {
++  const { colors } = useTheme();
+   return (
+     <Animated.View entering={FadeInDown.duration(700)} style={styles.container}>
+-      <Text style={styles.title}>{title}</Text>
+-
+-      <Pressable style={styles.action} onPress={onPress}>
+-        <Text style={styles.actionText}>{actionText}</Text>
+-
+-        <Ionicons name="chevron-forward" size={16} color="#2F80ED" />
++      <H2>{title}</H2>
++
++      <Pressable style={styles.action} onPress={onPress} hitSlop={8}>
++        <Txt tone="brass" style={{ ...type.eyebrow }}>
++          {actionText}
++        </Txt>
++        <Ionicons
++          name="arrow-forward"
++          size={14}
++          color={colors.brass}
++          style={{ marginLeft: 6 }}
++        />
+       </Pressable>
+     </Animated.View>
+   );
+@@ -31,28 +40,11 @@ export default function SectionHeader({
+ 
+ const styles = StyleSheet.create({
+   container: {
+-    marginBottom: 18,
++    marginBottom: 16,
+     paddingHorizontal: 24,
+     flexDirection: "row",
+     justifyContent: "space-between",
+-    alignItems: "center",
+-  },
+-
+-  title: {
+-    fontSize: 24,
+-    fontWeight: "800",
+-    color: "#0F172A",
+-  },
+-
+-  action: {
+-    flexDirection: "row",
+-    alignItems: "center",
+-  },
+-
+-  actionText: {
+-    fontSize: 15,
+-    fontWeight: "600",
+-    color: "#2F80ED",
+-    marginRight: 2,
++    alignItems: "flex-end",
+   },
++  action: { flexDirection: "row", alignItems: "center" },
+ });
+diff --git a/mobile/src/components/home/CategoryCard.tsx b/mobile/src/components/home/CategoryCard.tsx
+index 8e2c81f..21b3503 100644
+--- a/mobile/src/components/home/CategoryCard.tsx
++++ b/mobile/src/components/home/CategoryCard.tsx
+@@ -1,23 +1,18 @@
+ import React from "react";
+-import {
+-  Pressable,
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
+-
+-import { BlurView } from "expo-blur";
++import { Pressable, StyleSheet } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+ import * as Haptics from "expo-haptics";
+-
+ import Animated, {
+   useAnimatedStyle,
+   useSharedValue,
+   withSpring,
+ } from "react-native-reanimated";
+ 
+-const AnimatedPressable =
+-  Animated.createAnimatedComponent(Pressable);
++import { useTheme } from "@/theme/ThemeContext";
++import { BodySm } from "@/components/ui/Text";
++import { radii } from "@/theme/tokens";
++
++const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+ 
+ interface Props {
+   title: string;
+@@ -25,29 +20,14 @@ interface Props {
+   onPress?: () => void;
+ }
+ 
+-export default function CategoryCard({
+-  title,
+-  icon,
+-  onPress,
+-}: Props) {
++export default function CategoryCard({ title, icon, onPress }: Props) {
++  const { colors } = useTheme();
+   const scale = useSharedValue(1);
+ 
+   const animatedStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        scale: scale.value,
+-      },
+-    ],
++    transform: [{ scale: scale.value }],
+   }));
+ 
+-  const handlePressIn = () => {
+-    scale.value = withSpring(0.92);
+-  };
+-
+-  const handlePressOut = () => {
+-    scale.value = withSpring(1);
+-  };
+-
+   const handlePress = async () => {
+     await Haptics.selectionAsync();
+     onPress?.();
+@@ -57,60 +37,38 @@ export default function CategoryCard({
+     <AnimatedPressable
+       style={[styles.container, animatedStyle]}
+       onPress={handlePress}
+-      onPressIn={handlePressIn}
+-      onPressOut={handlePressOut}
++      onPressIn={() => {
++        scale.value = withSpring(0.94);
++      }}
++      onPressOut={() => {
++        scale.value = withSpring(1);
++      }}
+     >
+-      <BlurView
+-        intensity={70}
+-        tint="light"
+-        style={styles.iconContainer}
++      <Animated.View
++        style={[
++          styles.tile,
++          { borderColor: colors.line, backgroundColor: colors.surface },
++        ]}
+       >
+-        <Ionicons
+-          name={icon}
+-          size={30}
+-          color="#2F80ED"
+-        />
+-      </BlurView>
++        <Ionicons name={icon} size={26} color={colors.ink} />
++      </Animated.View>
+ 
+-      <Text style={styles.title}>
++      <BodySm tone="soft" center style={styles.title}>
+         {title}
+-      </Text>
++      </BodySm>
+     </AnimatedPressable>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    width: 88,
+-    alignItems: "center",
+-    marginRight: 18,
+-  },
+-
+-  iconContainer: {
+-    width: 72,
+-    height: 72,
+-    borderRadius: 36,
++  container: { width: 84, alignItems: "center", marginRight: 16 },
++  tile: {
++    width: 68,
++    height: 68,
++    borderRadius: radii.xs,
+     justifyContent: "center",
+     alignItems: "center",
+-    overflow: "hidden",
+     borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-    shadowColor: "#5EA8FF",
+-    shadowOpacity: 0.14,
+-    shadowRadius: 16,
+-    shadowOffset: {
+-      width: 0,
+-      height: 8,
+-    },
+-    elevation: 8,
+-  },
+-
+-  title: {
+-    marginTop: 12,
+-    fontSize: 14,
+-    fontWeight: "600",
+-    color: "#334155",
+-    textAlign: "center",
+   },
+-});
+\ No newline at end of file
++  title: { marginTop: 10 },
++});
+diff --git a/mobile/src/components/home/HomeHeader.tsx b/mobile/src/components/home/HomeHeader.tsx
+index 2ca7516..59a17e2 100644
+--- a/mobile/src/components/home/HomeHeader.tsx
++++ b/mobile/src/components/home/HomeHeader.tsx
+@@ -1,11 +1,12 @@
+ import React from "react";
+-import { Pressable, StyleSheet, Text, View } from "react-native";
+-
+-import { BlurView } from "expo-blur";
++import { Pressable, StyleSheet, View } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { Eyebrow, Display, BodySm } from "@/components/ui/Text";
++import { spacing } from "@/theme/tokens";
++
+ interface Props {
+   userName: string;
+   location?: string;
+@@ -17,150 +18,58 @@ export default function HomeHeader({
+   location = "Coimbatore, Tamil Nadu",
+   onNotificationPress,
+ }: Props) {
++  const { colors } = useTheme();
++
+   const getGreeting = () => {
+     const hour = new Date().getHours();
+-
+-    if (hour >= 5 && hour < 12) {
+-      return {
+-        emoji: "🌅",
+-        text: "Good Morning",
+-      };
+-    }
+-
+-    if (hour >= 12 && hour < 17) {
+-      return {
+-        emoji: "☀️",
+-        text: "Good Afternoon",
+-      };
+-    }
+-
+-    if (hour >= 17 && hour < 21) {
+-      return {
+-        emoji: "🌇",
+-        text: "Good Evening",
+-      };
+-    }
+-
+-    return {
+-      emoji: "🌙",
+-      text: "Good Night",
+-    };
++    if (hour >= 5 && hour < 12) return "Good Morning";
++    if (hour >= 12 && hour < 17) return "Good Afternoon";
++    if (hour >= 17 && hour < 21) return "Good Evening";
++    return "Good Night";
+   };
+ 
+-  const greeting = getGreeting();
+-
+   return (
+     <Animated.View entering={FadeInDown.duration(700)} style={styles.container}>
+       <View style={styles.row}>
+-        <View>
+-          <Text style={styles.greeting}>
+-            {greeting.emoji} {greeting.text}
+-          </Text>
+-
+-          <Text style={styles.name}>{userName}</Text>
++        <View style={{ flex: 1 }}>
++          <Eyebrow tone="soft">{getGreeting()}</Eyebrow>
++          <Display style={{ marginTop: spacing.xs }}>{userName}</Display>
+         </View>
+ 
+-        <Pressable onPress={onNotificationPress}>
+-          <BlurView
+-            intensity={70}
+-            tint="light"
+-            style={styles.notificationButton}
+-          >
+-            <Ionicons name="notifications-outline" size={24} color="#0F172A" />
+-          </BlurView>
++        <Pressable
++          onPress={onNotificationPress}
++          style={[styles.iconBtn, { borderColor: colors.line }]}
++        >
++          <Ionicons name="notifications-outline" size={22} color={colors.ink} />
+         </Pressable>
+       </View>
+ 
+-      <View style={styles.deliveryContainer}>
+-        <Text style={styles.deliveryLabel}>Deliver to</Text>
+-
+-        <View style={styles.locationRow}>
+-          <Ionicons name="location" size={16} color="#2F80ED" />
+-
+-          <Text style={styles.location}>{location}</Text>
+-        </View>
++      <View style={styles.deliveryRow}>
++        <Ionicons name="location-outline" size={15} color={colors.brass} />
++        <Eyebrow tone="faint" style={{ marginLeft: 6 }}>
++          Deliver to
++        </Eyebrow>
++        <BodySm tone="soft" style={{ marginLeft: 8 }}>
++          {location}
++        </BodySm>
+       </View>
+     </Animated.View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    paddingHorizontal: 24,
+-    paddingTop: 12,
+-    marginBottom: 32,
+-  },
+-
++  container: { paddingHorizontal: 24, paddingTop: 12, marginBottom: 28 },
+   row: {
+     flexDirection: "row",
+     justifyContent: "space-between",
+     alignItems: "flex-start",
+   },
+-
+-  greeting: {
+-    fontSize: 16,
+-    fontWeight: "500",
+-    color: "#64748B",
+-  },
+-
+-  name: {
+-    marginTop: 4,
+-    fontSize: 34,
+-    fontWeight: "800",
+-    color: "#0F172A",
+-  },
+-
+-  notificationButton: {
+-    width: 58,
+-    height: 58,
+-
++  iconBtn: {
++    width: 48,
++    height: 48,
+     justifyContent: "center",
+     alignItems: "center",
+-
+-    borderRadius: 20,
+-
+-    overflow: "hidden",
+-
+     borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-
+-    shadowColor: "#5EA8FF",
+-    shadowOpacity: 0.16,
+-    shadowRadius: 20,
+-
+-    shadowOffset: {
+-      width: 0,
+-      height: 10,
+-    },
+-
+-    elevation: 8,
+-  },
+-
+-  deliveryContainer: {
+-    marginTop: 26,
+-  },
+-
+-  deliveryLabel: {
+-    fontSize: 13,
+-    color: "#94A3B8",
+-    fontWeight: "500",
+-  },
+-
+-  locationRow: {
+-    marginTop: 6,
+-
+-    flexDirection: "row",
+-    alignItems: "center",
+-  },
+-
+-  location: {
+-    marginLeft: 6,
+-
+-    fontSize: 16,
+-    fontWeight: "600",
+-
+-    color: "#475569",
+   },
++  deliveryRow: { marginTop: 20, flexDirection: "row", alignItems: "center" },
+ });
+diff --git a/mobile/src/components/home/PromoCard.tsx b/mobile/src/components/home/PromoCard.tsx
+index 76c1274..36810e9 100644
+--- a/mobile/src/components/home/PromoCard.tsx
++++ b/mobile/src/components/home/PromoCard.tsx
+@@ -2,15 +2,9 @@ import React, { useEffect } from "react";
+ import {
+   Image,
+   ImageSourcePropType,
+-  Pressable,
+   StyleSheet,
+-  Text,
+   View,
+ } from "react-native";
+-
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, {
+   FadeInDown,
+   useAnimatedStyle,
+@@ -20,205 +14,91 @@ import Animated, {
+   Easing,
+ } from "react-native-reanimated";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { Eyebrow, Display, Body } from "@/components/ui/Text";
++import { Button } from "@/components/ui/Button";
++import { radii, spacing } from "@/theme/tokens";
++
+ interface Props {
+   title: string;
+   subtitle: string;
+   description: string;
+   button: string;
+-  colors: readonly [string, string];
++  colors?: readonly [string, string]; // kept for API compatibility (unused)
+   image?: ImageSourcePropType;
+   onPress?: () => void;
+ }
+ 
++/** Editorial hero: bordered surface panel, brass eyebrow, serif headline, floating product. */
+ export default function PromoCard({
+   title,
+   subtitle,
+   description,
+   button,
+-  colors,
+   image,
+   onPress,
+ }: Props) {
++  const { colors } = useTheme();
+   const translateY = useSharedValue(0);
+ 
+   useEffect(() => {
+     translateY.value = withRepeat(
+-      withTiming(-9, {
+-        duration: 800,
+-        easing: Easing.inOut(Easing.ease),
+-      }),
++      withTiming(-9, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+       -1,
+-      true,
++      true
+     );
+   }, []);
+ 
+   const animatedImageStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        translateY: translateY.value,
+-      },
+-      {
+-        rotate: "-8deg",
+-      },
+-    ],
++    transform: [{ translateY: translateY.value }, { rotate: "-8deg" }],
+   }));
++
+   return (
+     <Animated.View entering={FadeInDown.duration(700)} style={styles.wrapper}>
+-      <LinearGradient
+-        colors={colors}
+-        start={{ x: 0, y: 0 }}
+-        end={{ x: 1, y: 1 }}
+-        style={styles.container}
++      <View
++        style={[
++          styles.container,
++          { backgroundColor: colors.surface, borderColor: colors.line },
++        ]}
+       >
+-        {/* Decorative Shapes */}
+-
+-        <View style={styles.circleLarge} />
+-
+-        <View style={styles.circleSmall} />
+-
+-        <View style={styles.row}>
+-          <View style={styles.left}>
+-            <Text style={styles.title}>{title.toUpperCase()}</Text>
+-
+-            <Text style={styles.subtitle}>{subtitle}</Text>
+-
+-            <Text style={styles.description}>{description}</Text>
+-
+-            <Pressable style={styles.button} onPress={onPress}>
+-              <Text style={styles.buttonText}>{button}</Text>
+-
+-              <Ionicons name="arrow-forward" size={16} color="#2F80ED" />
+-            </Pressable>
+-          </View>
++        <View style={styles.left}>
++          <Eyebrow>{title}</Eyebrow>
++          <Display style={{ marginTop: spacing.sm }}>{subtitle}</Display>
++          <Body tone="soft" style={{ marginTop: spacing.sm }}>
++            {description}
++          </Body>
++          <Button
++            label={button}
++            onPress={onPress ?? (() => {})}
++            style={{ marginTop: spacing.md, alignSelf: "flex-start" }}
++          />
++        </View>
+ 
++        {image && (
+           <View style={styles.right}>
+-            {image && (
+-              <Animated.Image
+-                source={image}
+-                resizeMode="contain"
+-                style={[styles.image, animatedImageStyle]}
+-              />
+-            )}
++            <Animated.Image
++              source={image}
++              resizeMode="contain"
++              style={[styles.image, animatedImageStyle]}
++            />
+           </View>
+-        </View>
+-      </LinearGradient>
++        )}
++      </View>
+     </Animated.View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  wrapper: {
+-    paddingHorizontal: 24,
+-  },
+-
++  wrapper: { paddingHorizontal: 24, marginBottom: 8 },
+   container: {
+-    height: 215,
+-    borderRadius: 28,
++    borderWidth: 1,
++    borderRadius: radii.xs,
+     overflow: "hidden",
+-    justifyContent: "center",
+-    paddingHorizontal: 24,
+-    shadowColor: "#000",
+-    shadowOpacity: 0.18,
+-    shadowRadius: 22,
+-    shadowOffset: {
+-      width: 0,
+-      height: 12,
+-    },
+-    elevation: 10,
+-  },
+-
+-  title: {
+-    marginTop: 4,
+-    fontSize: 18,
+-    fontWeight: "900",
+-    letterSpacing: 2,
+-    color: "rgba(255,255,255,0.9)",
+-  },
+-
+-  subtitle: {
+-    marginTop: 8,
+-    fontSize: 17,
+-    fontWeight: "700",
+-    color: "#FFFFFF",
+-  },
+-
+-  description: {
+-    marginTop: 8,
+-    fontSize: 16,
+-    lineHeight: 24,
+-    color: "rgba(255,255,255,0.9)",
+-    width: "80%",
+-  },
+-
+-  button: {
+-    marginTop: 17,
+-    marginBottom: 11,
+-    alignSelf: "flex-start",
+     flexDirection: "row",
+-    alignItems: "center",
+-    paddingHorizontal: 22,
+-    paddingVertical: 13,
+-    borderRadius: 22,
+-    backgroundColor: "#FFFFFF",
+-    shadowColor: "#000",
+-    shadowOpacity: 0.15,
+-    shadowRadius: 12,
+-    shadowOffset: {
+-      width: 0,
+-      height: 6,
+-    },
+-    elevation: 4,
+-  },
+-
+-  buttonText: {
+-    fontSize: 15,
+-    fontWeight: "700",
+-    color: "#2F80ED",
+-    marginRight: 8,
+-  },
+-
+-  circleLarge: {
+-    position: "absolute",
+-    width: 320,
+-    height: 320,
+-    borderRadius: 160,
+-    backgroundColor: "rgba(255,255,255,0.05)",
+-    top: -120,
+-    right: -90,
+-  },
+-
+-  circleSmall: {
+-    position: "absolute",
+-    width: 150,
+-    height: 150,
+-    borderRadius: 75,
+-    backgroundColor: "rgba(255,255,255,0.08)",
+-    bottom: -35,
+-    right: 30,
+-  },
+-
+-  row: {
+-    flex: 1,
+-    flexDirection: "row",
+-    alignItems: "center",
+-    zIndex: 2,
+-  },
+-
+-  left: {
+-    flex: 1,
+-    paddingTop: 6,
+-  },
+-
+-  right: {
+-    width: 170,
+-    justifyContent: "center",
+-    alignItems: "center",
+-  },
+-
+-  image: {
+-    width: 210,
+-    height: 210,
+-    marginRight: -30,
+-    marginTop: 10,
++    padding: spacing.lg,
++    minHeight: 200,
+   },
++  left: { flex: 1, justifyContent: "center" },
++  right: { width: 120, justifyContent: "center", alignItems: "center" },
++  image: { width: 160, height: 160, marginRight: -20 },
+ });
+diff --git a/mobile/src/components/home/SearchBar.tsx b/mobile/src/components/home/SearchBar.tsx
+index 87ec36b..4133050 100644
+--- a/mobile/src/components/home/SearchBar.tsx
++++ b/mobile/src/components/home/SearchBar.tsx
+@@ -1,11 +1,11 @@
+ import React from "react";
+-import { Pressable, StyleSheet, Text, View } from "react-native";
+-
+-import { BlurView } from "expo-blur";
++import { Pressable, StyleSheet, View } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { Body } from "@/components/ui/Text";
++
+ interface Props {
+   onPress?: () => void;
+   onVoicePress?: () => void;
+@@ -17,92 +17,51 @@ export default function SearchBar({
+   onVoicePress,
+   onCameraPress,
+ }: Props) {
++  const { colors } = useTheme();
+   return (
+     <Animated.View
+       entering={FadeInDown.delay(150).duration(700)}
+       style={styles.wrapper}
+     >
+-      <Pressable onPress={onPress}>
+-        <BlurView intensity={70} tint="light" style={styles.container}>
+-          <View style={styles.left}>
+-            <Ionicons name="search" size={22} color="#64748B" />
+-
+-            <Text style={styles.placeholder}>Search products...</Text>
+-          </View>
+-
+-          <View style={styles.right}>
+-            <Pressable hitSlop={10} onPress={onVoicePress}>
+-              <Ionicons name="mic-outline" size={22} color="#64748B" />
+-            </Pressable>
+-
+-            <View style={styles.divider} />
+-
+-            <Pressable hitSlop={10} onPress={onCameraPress}>
+-              <Ionicons name="camera-outline" size={22} color="#64748B" />
+-            </Pressable>
+-          </View>
+-        </BlurView>
++      <Pressable
++        onPress={onPress}
++        style={[
++          styles.container,
++          { borderColor: colors.line, backgroundColor: colors.surface },
++        ]}
++      >
++        <View style={styles.left}>
++          <Ionicons name="search-outline" size={20} color={colors.inkFaint} />
++          <Body tone="faint" style={{ marginLeft: 12 }}>
++            Search products
++          </Body>
++        </View>
++
++        <View style={styles.right}>
++          <Pressable hitSlop={10} onPress={onVoicePress}>
++            <Ionicons name="mic-outline" size={20} color={colors.inkFaint} />
++          </Pressable>
++          <View style={[styles.divider, { backgroundColor: colors.line }]} />
++          <Pressable hitSlop={10} onPress={onCameraPress}>
++            <Ionicons name="camera-outline" size={20} color={colors.inkFaint} />
++          </Pressable>
++        </View>
+       </Pressable>
+     </Animated.View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  wrapper: {
+-    paddingHorizontal: 24,
+-    marginBottom: 28,
+-  },
+-
++  wrapper: { paddingHorizontal: 24, marginBottom: 24 },
+   container: {
+-    height: 60,
+-
++    height: 56,
+     flexDirection: "row",
+     justifyContent: "space-between",
+     alignItems: "center",
+-
+-    borderRadius: 22,
+-
+-    paddingHorizontal: 20,
+-
+-    overflow: "hidden",
+-
+     borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-
+-    shadowColor: "#5EA8FF",
+-    shadowOpacity: 0.12,
+-    shadowRadius: 20,
+-    shadowOffset: {
+-      width: 0,
+-      height: 10,
+-    },
+-
+-    elevation: 8,
+-  },
+-
+-  left: {
+-    flexDirection: "row",
+-    alignItems: "center",
+-  },
+-
+-  placeholder: {
+-    marginLeft: 12,
+-    fontSize: 16,
+-    color: "#94A3B8",
+-    fontWeight: "500",
+-  },
+-
+-  right: {
+-    flexDirection: "row",
+-    alignItems: "center",
+-  },
+-
+-  divider: {
+-    width: 1,
+-    height: 22,
+-    backgroundColor: "#E2E8F0",
+-    marginHorizontal: 14,
++    paddingHorizontal: 18,
+   },
++  left: { flexDirection: "row", alignItems: "center", flex: 1 },
++  right: { flexDirection: "row", alignItems: "center" },
++  divider: { width: 1, height: 20, marginHorizontal: 14 },
+ });
+diff --git a/mobile/src/components/navigation/ActivePill.tsx b/mobile/src/components/navigation/ActivePill.tsx
+index 38c55a2..e6ad68c 100644
+--- a/mobile/src/components/navigation/ActivePill.tsx
++++ b/mobile/src/components/navigation/ActivePill.tsx
+@@ -1,25 +1,22 @@
+ import React, { useEffect } from "react";
+-import { StyleSheet } from "react-native";
+-
+-import { BlurView } from "expo-blur";
+-import { LinearGradient } from "expo-linear-gradient";
+-
++import { StyleSheet, View } from "react-native";
+ import Animated, {
+   useAnimatedStyle,
+   useSharedValue,
+   withSpring,
+ } from "react-native-reanimated";
+-import { View } from "react-native";
+ 
+-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
++import { useTheme } from "@/theme/ThemeContext";
+ 
+ interface Props {
+   index: number;
+   tabWidth: number;
+ }
+ 
++/** A slim brass indicator that slides to sit above the active tab. */
+ export default function ActivePill({ index, tabWidth }: Props) {
+-  const translateX = useSharedValue(0);
++  const { colors } = useTheme();
++  const translateX = useSharedValue(index * tabWidth);
+ 
+   useEffect(() => {
+     translateX.value = withSpring(index * tabWidth, {
+@@ -30,84 +27,21 @@ export default function ActivePill({ index, tabWidth }: Props) {
+   }, [index, tabWidth]);
+ 
+   const animatedStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        translateX: translateX.value,
+-      },
+-    ],
++    transform: [{ translateX: translateX.value }],
+   }));
+ 
+   return (
+-    <Animated.View style={animatedStyle}>
+-      <View
+-        style={[
+-          styles.wrapper,
+-          {
+-            width: tabWidth - 12,
+-          },
+-        ]}
+-      >
+-        <BlurView intensity={70} tint="light" style={styles.blur}>
+-          <LinearGradient
+-            colors={[
+-              "rgba(47,128,237,0.22)",
+-              "rgba(94,168,255,0.16)",
+-              "rgba(255,255,255,0.10)",
+-            ]}
+-            start={{
+-              x: 0,
+-              y: 0,
+-            }}
+-            end={{
+-              x: 1,
+-              y: 1,
+-            }}
+-            style={StyleSheet.absoluteFill}
+-          />
+-
+-          {/* Inner Highlight */}
+-
+-          <LinearGradient
+-            colors={["rgba(255,255,255,0.28)", "transparent"]}
+-            style={styles.highlight}
+-          />
+-        </BlurView>
+-      </View>
++    <Animated.View style={[styles.track, { width: tabWidth }, animatedStyle]}>
++      <View style={{ width: 28, height: 2, backgroundColor: colors.brass }} />
+     </Animated.View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  wrapper: {
+-    position: "absolute",
+-    left: 6,
+-    top: 8,
+-    height: 62,
+-    borderRadius: 24,
+-    shadowColor: "#2F80ED",
+-    shadowOpacity: 0.16,
+-    shadowRadius: 18,
+-    shadowOffset: {
+-      width: 0,
+-      height: 10,
+-    },
+-    elevation: 8,
+-  },
+-
+-  blur: {
+-    flex: 1,
+-    overflow: "hidden",
+-    borderRadius: 24,
+-    borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.35)",
+-  },
+-
+-  highlight: {
++  track: {
+     position: "absolute",
+-    left: 10,
+-    right: 10,
+-    top: 2,
+-    height: 16,
+-    borderRadius: 12,
++    top: 0,
++    left: 0,
++    alignItems: "center",
+   },
+ });
+diff --git a/mobile/src/components/navigation/CustomTabBar.tsx b/mobile/src/components/navigation/CustomTabBar.tsx
+index e8b436e..e6aaf3d 100644
+--- a/mobile/src/components/navigation/CustomTabBar.tsx
++++ b/mobile/src/components/navigation/CustomTabBar.tsx
+@@ -1,44 +1,38 @@
+ import React from "react";
+-import { Dimensions, StyleSheet } from "react-native";
+-
+-import { BlurView } from "expo-blur";
++import { Dimensions, StyleSheet, View } from "react-native";
+ import { useSafeAreaInsets } from "react-native-safe-area-context";
++import * as Haptics from "expo-haptics";
+ 
+ import ActivePill from "./ActivePill";
+ import TabBarButton from "./TabBarButton";
+ import { TABS } from "./TabConfig";
+-
+-import * as Haptics from "expo-haptics";
++import { useTheme } from "@/theme/ThemeContext";
+ 
+ const { width: SCREEN_WIDTH } = Dimensions.get("window");
+ 
+-const HORIZONTAL_MARGIN = 20;
+-
+ interface Props {
+   state: {
+     index: number;
+-    routes: {
+-      key: string;
+-      name: string;
+-    }[];
++    routes: { key: string; name: string }[];
+   };
+-
+   navigation: any;
+ }
+ 
++/** Docked editorial tab bar: surface panel, hairline top edge, brass active tick. */
+ export default function CustomTabBar({ state, navigation }: Props) {
++  const { colors } = useTheme();
+   const insets = useSafeAreaInsets();
+ 
+-  const tabWidth = (SCREEN_WIDTH - HORIZONTAL_MARGIN * 2) / state.routes.length;
++  const tabWidth = SCREEN_WIDTH / state.routes.length;
+ 
+   return (
+-    <BlurView
+-      intensity={90}
+-      tint="light"
++    <View
+       style={[
+         styles.container,
+         {
+-          bottom: insets.bottom + 14,
++          paddingBottom: insets.bottom || 12,
++          backgroundColor: colors.surface,
++          borderTopColor: colors.line,
+         },
+       ]}
+     >
+@@ -63,34 +57,19 @@ export default function CustomTabBar({ state, navigation }: Props) {
+           }}
+         />
+       ))}
+-    </BlurView>
++    </View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+   container: {
+     position: "absolute",
+-    left: HORIZONTAL_MARGIN,
+-    right: HORIZONTAL_MARGIN,
+-    height: 78,
++    left: 0,
++    right: 0,
++    bottom: 0,
+     flexDirection: "row",
+-    alignItems: "center",
+-    borderRadius: 30,
+-    overflow: "hidden",
+-    borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-    opacity: 0.7,
+-    // iOS Shadow
+-    shadowColor: "#2F80ED",
+-    shadowOpacity: 0.62,
+-    shadowRadius: 45,
+-    shadowOffset: {
+-        width: 0,
+-        height: 22,
+-    },
+-
+-    // Android Shadow
+-    elevation: 22,
++    alignItems: "flex-start",
++    paddingTop: 10,
++    borderTopWidth: 1,
+   },
+ });
+diff --git a/mobile/src/components/navigation/TabBarButton.tsx b/mobile/src/components/navigation/TabBarButton.tsx
+index 6a5ffdf..42c0458 100644
+--- a/mobile/src/components/navigation/TabBarButton.tsx
++++ b/mobile/src/components/navigation/TabBarButton.tsx
+@@ -1,11 +1,6 @@
+ import React, { useEffect } from "react";
+-import {
+-  Pressable,
+-  StyleSheet,
+-} from "react-native";
+-
++import { Pressable, StyleSheet } from "react-native";
+ import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, {
+   interpolate,
+   useAnimatedStyle,
+@@ -14,6 +9,9 @@ import Animated, {
+ } from "react-native-reanimated";
+ 
+ import { TabItem } from "./TabConfig";
++import { useTheme } from "@/theme/ThemeContext";
++import { Txt } from "@/components/ui/Text";
++import { type } from "@/theme/tokens";
+ 
+ interface Props {
+   route: TabItem;
+@@ -21,109 +19,55 @@ interface Props {
+   onPress: () => void;
+ }
+ 
+-const AnimatedPressable =
+-  Animated.createAnimatedComponent(Pressable);
++const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+ 
+-export default function TabBarButton({
+-  route,
+-  focused,
+-  onPress,
+-}: Props) {
+-
+-  const progress = useSharedValue(
+-    focused ? 1 : 0
+-  );
++export default function TabBarButton({ route, focused, onPress }: Props) {
++  const { colors } = useTheme();
++  const progress = useSharedValue(focused ? 1 : 0);
+ 
+   useEffect(() => {
+-    progress.value = withSpring(
+-      focused ? 1 : 0,
+-      {
+-        damping: 16,
+-        stiffness: 180,
+-      }
+-    );
++    progress.value = withSpring(focused ? 1 : 0, {
++      damping: 16,
++      stiffness: 180,
++    });
+   }, [focused]);
+ 
+-  const iconStyle =
+-    useAnimatedStyle(() => ({
+-      transform: [
+-        {
+-          scale: interpolate(
+-            progress.value,
+-            [0, 1],
+-            [1, 1.15]
+-          ),
+-        },
+-      ],
+-    }));
++  const iconStyle = useAnimatedStyle(() => ({
++    transform: [{ scale: interpolate(progress.value, [0, 1], [1, 1.1]) }],
++  }));
+ 
+-  const labelStyle =
+-    useAnimatedStyle(() => ({
+-      opacity: interpolate(
+-        progress.value,
+-        [0, 1],
+-        [0, 1]
+-      ),
+-
+-      transform: [
+-        {
+-          translateY: interpolate(
+-            progress.value,
+-            [0, 1],
+-            [6, 0]
+-          ),
+-        },
+-      ],
+-    }));
++  const labelStyle = useAnimatedStyle(() => ({
++    opacity: interpolate(progress.value, [0, 1], [0, 1]),
++    transform: [{ translateY: interpolate(progress.value, [0, 1], [4, 0]) }],
++  }));
+ 
+   return (
+-    <AnimatedPressable
+-      style={styles.container}
+-      onPress={onPress}
+-    >
++    <AnimatedPressable style={styles.container} onPress={onPress}>
+       <Animated.View style={iconStyle}>
+         <Ionicons
+-          name={
+-            focused
+-              ? route.activeIcon
+-              : route.inactiveIcon
+-          }
+-          size={24}
+-          color={
+-            focused
+-              ? "#2F80ED"
+-              : "#94A3B8"
+-          }
++          name={focused ? route.activeIcon : route.inactiveIcon}
++          size={22}
++          color={focused ? colors.brass : colors.inkFaint}
+         />
+       </Animated.View>
+ 
+       {focused && (
+-        <Animated.Text
+-          style={[
+-            styles.label,
+-            labelStyle,
+-          ]}
+-        >
+-          {route.label}
+-        </Animated.Text>
++        <Animated.View style={labelStyle}>
++          <Txt tone="brass" style={{ ...type.eyebrow, fontSize: 9, marginTop: 4 }}>
++            {route.label}
++          </Txt>
++        </Animated.View>
+       )}
+     </AnimatedPressable>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-
+   container: {
+     flex: 1,
+-    justifyContent: "center",
++    justifyContent: "flex-start",
+     alignItems: "center",
++    paddingTop: 6,
+     zIndex: 10,
+   },
+-
+-  label: {
+-    marginTop: 4,
+-    fontSize: 11,
+-    fontWeight: "700",
+-    color: "#2F80ED",
+-  },
+-});
+\ No newline at end of file
++});
+diff --git a/mobile/src/components/onboarding/OnboardingSlide.tsx b/mobile/src/components/onboarding/OnboardingSlide.tsx
+index e84a495..02460d7 100644
+--- a/mobile/src/components/onboarding/OnboardingSlide.tsx
++++ b/mobile/src/components/onboarding/OnboardingSlide.tsx
+@@ -1,57 +1,51 @@
+ import React from "react";
+-import { StyleSheet, Text, View } from "react-native";
++import { View } from "react-native";
+ 
+ import HeroIllustration from "@/components/onboarding/HeroIllustration";
+ import { IllustrationType } from "@/types/onboarding";
++import { Eyebrow, Display, Body } from "@/components/ui/Text";
++import { spacing } from "@/theme/tokens";
+ 
+ interface Props {
+   illustration: IllustrationType;
+   title: string;
+   description: string;
++  eyebrow?: string;
+ }
+ 
+ export default function OnboardingSlide({
+   illustration,
+   title,
+   description,
++  eyebrow,
+ }: Props) {
+   return (
+-    <View style={styles.container}>
++    <View
++      style={{
++        flex: 1,
++        justifyContent: "center",
++        alignItems: "center",
++        paddingHorizontal: 28,
++        paddingBottom: 40,
++      }}
++    >
+       <HeroIllustration type={illustration} />
+ 
+-      <Text style={styles.title}>{title}</Text>
+-
+-      <Text style={styles.description}>{description}</Text>
++      {eyebrow ? (
++        <Eyebrow style={{ marginTop: spacing.lg }}>{eyebrow}</Eyebrow>
++      ) : null}
++
++      <Display center style={{ marginTop: spacing.sm }}>
++        {title}
++      </Display>
++
++      <Body
++        tone="soft"
++        center
++        style={{ marginTop: spacing.md, maxWidth: 320 }}
++      >
++        {description}
++      </Body>
+     </View>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-    justifyContent: "center",
+-    alignItems: "center",
+-    paddingHorizontal: 28,
+-    paddingBottom: 40,
+-  },
+-
+-  title: {
+-    marginTop: 24,
+-    fontSize: 36,
+-    fontWeight: "800",
+-    textAlign: "center",
+-    color: "#111827",
+-    lineHeight: 42,
+-    letterSpacing: -0.5,
+-  },
+-
+-  description: {
+-    marginTop: 16,
+-    paddingHorizontal: 16,
+-    fontSize: 17,
+-    lineHeight: 28,
+-    maxWidth: 300,
+-    textAlign: "center",
+-    color: "#6B7280",
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/components/onboarding/Pagination.tsx b/mobile/src/components/onboarding/Pagination.tsx
+index fd8783e..2faf908 100644
+--- a/mobile/src/components/onboarding/Pagination.tsx
++++ b/mobile/src/components/onboarding/Pagination.tsx
+@@ -7,6 +7,8 @@ import Animated, {
+   useAnimatedStyle,
+ } from "react-native-reanimated";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++
+ interface Props {
+   dataLength: number;
+   scrollX: SharedValue<number>;
+@@ -17,51 +19,41 @@ interface DotProps {
+   index: number;
+   scrollX: SharedValue<number>;
+   width: number;
++  active: string;
++  inactive: string;
+ }
+ 
+-function Dot({ index, scrollX, width }: DotProps) {
++function Dot({ index, scrollX, width, active, inactive }: DotProps) {
+   const animatedStyle = useAnimatedStyle(() => {
+-    const inputRange = [
+-      (index - 1) * width,
+-      index * width,
+-      (index + 1) * width,
+-    ];
+-
+-    const dotWidth = interpolate(
+-      scrollX.value,
+-      inputRange,
+-      [10, 32, 10],
+-      "clamp",
+-    );
+-
+-    const opacity = interpolate(
+-      scrollX.value,
+-      inputRange,
+-      [0.35, 1, 0.35],
+-      "clamp",
+-    );
++    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+ 
++    const barWidth = interpolate(scrollX.value, inputRange, [16, 40, 16], "clamp");
++    const opacity = interpolate(scrollX.value, inputRange, [0.5, 1, 0.5], "clamp");
+     const backgroundColor = interpolateColor(scrollX.value, inputRange, [
+-      "#CBD5E1",
+-      "#2F80ED",
+-      "#CBD5E1",
++      inactive,
++      active,
++      inactive,
+     ]);
+ 
+-    return {
+-      width: dotWidth,
+-      opacity,
+-      backgroundColor,
+-    };
++    return { width: barWidth, opacity, backgroundColor };
+   });
+ 
+-  return <Animated.View style={[styles.dot, animatedStyle]} />;
++  return <Animated.View style={[styles.bar, animatedStyle]} />;
+ }
+ 
+ export default function Pagination({ dataLength, scrollX, width }: Props) {
++  const { colors } = useTheme();
+   return (
+     <View style={styles.container}>
+       {Array.from({ length: dataLength }).map((_, index) => (
+-        <Dot key={index} index={index} scrollX={scrollX} width={width} />
++        <Dot
++          key={index}
++          index={index}
++          scrollX={scrollX}
++          width={width}
++          active={colors.brass}
++          inactive={colors.line}
++        />
+       ))}
+     </View>
+   );
+@@ -74,11 +66,9 @@ const styles = StyleSheet.create({
+     alignItems: "center",
+     marginVertical: 24,
+   },
+-
+-  dot: {
+-    height: 10,
+-    width: 10,
+-    borderRadius: 20,
+-    marginHorizontal: 5,
++  bar: {
++    height: 3,
++    borderRadius: 2,
++    marginHorizontal: 4,
+   },
+ });
+diff --git a/mobile/src/components/onboarding/PrimaryButton.tsx b/mobile/src/components/onboarding/PrimaryButton.tsx
+index 10f0948..47b7b35 100644
+--- a/mobile/src/components/onboarding/PrimaryButton.tsx
++++ b/mobile/src/components/onboarding/PrimaryButton.tsx
+@@ -2,19 +2,19 @@ import React from "react";
+ import {
+   ActivityIndicator,
+   Pressable,
+-  StyleSheet,
+-  Text,
++  StyleProp,
+   ViewStyle,
+-  StyleProp
+ } from "react-native";
+-
+ import Animated, {
+   useAnimatedStyle,
+   useSharedValue,
+   withSpring,
+ } from "react-native-reanimated";
++import * as Haptics from "expo-haptics";
+ 
+-import { LinearGradient } from "expo-linear-gradient";
++import { useTheme } from "@/theme/ThemeContext";
++import { Txt } from "@/components/ui/Text";
++import { radii, type } from "@/theme/tokens";
+ 
+ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+ 
+@@ -22,11 +22,11 @@ interface Props {
+   title: string;
+   onPress: () => void;
+   style?: StyleProp<ViewStyle>;
+-
+   loading?: boolean;
+   disabled?: boolean;
+ }
+ 
++/** Editorial solid button (ink fill, uppercase tracked label). Kept API-compatible. */
+ export default function PrimaryButton({
+   title,
+   onPress,
+@@ -34,78 +34,47 @@ export default function PrimaryButton({
+   loading = false,
+   disabled = false,
+ }: Props) {
++  const { colors } = useTheme();
+   const scale = useSharedValue(1);
++  const isOff = disabled || loading;
+ 
+   const animatedStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        scale: scale.value,
+-      },
+-    ],
++    transform: [{ scale: scale.value }],
+   }));
+ 
+-  const handlePressIn = () => {
+-    if (!disabled && !loading) {
+-      scale.value = withSpring(0.96);
+-    }
+-  };
+-
+-  const handlePressOut = () => {
+-    scale.value = withSpring(1);
+-  };
+-
+   return (
+     <AnimatedPressable
+-      style={[animatedStyle, style]}
+-      disabled={disabled || loading}
++      disabled={isOff}
+       onPress={onPress}
+-      onPressIn={handlePressIn}
+-      onPressOut={handlePressOut}
+-    >
+-      <LinearGradient
+-        colors={
+-          disabled || loading ? ["#94A3B8", "#94A3B8"] : ["#4F8EF7", "#2F80ED"]
++      onPressIn={() => {
++        if (!isOff) {
++          scale.value = withSpring(0.98);
++          Haptics.selectionAsync().catch(() => {});
+         }
+-        start={{ x: 0, y: 0 }}
+-        end={{ x: 1, y: 1 }}
+-        style={[styles.button, (disabled || loading) && styles.disabled]}
+-      >
+-        {loading ? (
+-          <ActivityIndicator size="small" color="#FFFFFF" />
+-        ) : (
+-          <Text style={styles.text}>{title}</Text>
+-        )}
+-      </LinearGradient>
++      }}
++      onPressOut={() => {
++        scale.value = withSpring(1);
++      }}
++      style={[
++        animatedStyle,
++        {
++          height: 54,
++          alignItems: "center",
++          justifyContent: "center",
++          backgroundColor: colors.ink,
++          borderRadius: radii.none,
++          opacity: isOff ? 0.5 : 1,
++        },
++        style,
++      ]}
++    >
++      {loading ? (
++        <ActivityIndicator size="small" color={colors.onInk} />
++      ) : (
++        <Txt tone="onInk" style={{ ...type.eyebrow, fontSize: 12.5 }}>
++          {title}
++        </Txt>
++      )}
+     </AnimatedPressable>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  button: {
+-    height: 58,
+-    borderRadius: 18,
+-
+-    justifyContent: "center",
+-    alignItems: "center",
+-
+-    shadowColor: "#2F80ED",
+-    shadowOffset: {
+-      width: 0,
+-      height: 14,
+-    },
+-    shadowOpacity: 0.35,
+-    shadowRadius: 20,
+-
+-    elevation: 10,
+-  },
+-
+-  disabled: {
+-    opacity: 0.8,
+-  },
+-
+-  text: {
+-    color: "#FFFFFF",
+-    fontSize: 18,
+-    fontWeight: "700",
+-  },
+-});
+diff --git a/mobile/src/components/product/ProductCard.tsx b/mobile/src/components/product/ProductCard.tsx
+index 54d44f4..a7362fa 100644
+--- a/mobile/src/components/product/ProductCard.tsx
++++ b/mobile/src/components/product/ProductCard.tsx
+@@ -4,13 +4,9 @@ import {
+   ImageSourcePropType,
+   Pressable,
+   StyleSheet,
+-  Text,
+   View,
+ } from "react-native";
+-
+-import { BlurView } from "expo-blur";
+ import { Ionicons } from "@expo/vector-icons";
+-
+ import Animated, {
+   useAnimatedStyle,
+   useSharedValue,
+@@ -18,12 +14,16 @@ import Animated, {
+ } from "react-native-reanimated";
+ import { router } from "expo-router";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { BodySm, Caption, Txt } from "@/components/ui/Text";
++import { radii, type } from "@/theme/tokens";
++
+ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+ 
+ export type ProductCardVariant = "grid" | "horizontal" | "compact";
+ 
+ interface Props {
+-  id: string,
++  id: string;
+   name: string;
+   category: string;
+   image: ImageSourcePropType;
+@@ -48,196 +48,104 @@ export default function ProductCard({
+   reviews,
+   discount,
+   favourite = false,
+-  variant = "grid",
+-  onPress,
+   onFavourite,
+   onAddToCart,
+ }: Props) {
++  const { colors } = useTheme();
+   const scale = useSharedValue(1);
+ 
+   const animatedStyle = useAnimatedStyle(() => ({
+-    transform: [
+-      {
+-        scale: scale.value,
+-      },
+-    ],
++    transform: [{ scale: scale.value }],
+   }));
+ 
+   return (
+     <AnimatedPressable
+       style={[styles.card, animatedStyle]}
+-      onPress={() => {
+-        router.push({
+-          pathname: "/(product)/[id]",
+-          params: {
+-            id
+-          }
+-        })
+-      }}
++      onPress={() =>
++        router.push({ pathname: "/(product)/[id]", params: { id } })
++      }
+       onPressIn={() => {
+-        scale.value = withSpring(0.97);
++        scale.value = withSpring(0.98);
+       }}
+       onPressOut={() => {
+         scale.value = withSpring(1);
+       }}
+     >
+-      <BlurView intensity={65} tint="light" style={styles.container}>
+-        {/* Header */}
+-
++      <View
++        style={[
++          styles.container,
++          { borderColor: colors.line, backgroundColor: colors.surface },
++        ]}
++      >
+         <View style={styles.header}>
+-          <Pressable onPress={onFavourite}>
++          <Pressable onPress={onFavourite} hitSlop={8}>
+             <Ionicons
+               name={favourite ? "heart" : "heart-outline"}
+-              size={22}
+-              color={favourite ? "#EF4444" : "#64748B"}
++              size={20}
++              color={favourite ? colors.danger : colors.inkFaint}
+             />
+           </Pressable>
+ 
+           {!!discount && (
+-            <View style={styles.badge}>
+-              <Text style={styles.badgeText}>-{discount}%</Text>
++            <View style={[styles.badge, { backgroundColor: colors.ink }]}>
++              <Txt tone="onInk" style={{ ...type.eyebrow, fontSize: 10 }}>
++                {`-${discount}%`}
++              </Txt>
+             </View>
+           )}
+         </View>
+ 
+-        {/* Image */}
+-
+         <Image source={image} resizeMode="contain" style={styles.image} />
+ 
+-        {/* Details */}
+-
+-        <Text numberOfLines={1} style={styles.name}>
++        <BodySm numberOfLines={1} style={{ fontFamily: type.h3.fontFamily }}>
+           {name}
+-        </Text>
+-
+-        <Text numberOfLines={1} style={styles.category}>
++        </BodySm>
++        <Caption numberOfLines={1} style={{ marginTop: 2 }}>
+           {category}
+-        </Text>
+-
+-        {/* Rating */}
++        </Caption>
+ 
+         <View style={styles.ratingRow}>
+-          <Ionicons name="star" size={14} color="#FBBF24" />
+-
+-          <Text style={styles.rating}>{rating}</Text>
+-
+-          <Text style={styles.reviews}>({reviews})</Text>
++          <Ionicons name="star" size={13} color={colors.brass} />
++          <Caption tone="soft" style={{ marginLeft: 4 }}>{`${rating}`}</Caption>
++          <Caption tone="faint" style={{ marginLeft: 4 }}>{`(${reviews})`}</Caption>
+         </View>
+ 
+-        {/* Footer */}
+-
+         <View style={styles.footer}>
+-          <Text style={styles.price}>₹{price.toLocaleString()}</Text>
+-
+-          <Pressable style={styles.cart} onPress={onAddToCart}>
+-            <Ionicons name="bag-add" size={18} color="#FFF" />
++          <Txt style={{ ...type.h3 }}>{`\u20B9${price.toLocaleString()}`}</Txt>
++          <Pressable
++            style={[styles.cart, { backgroundColor: colors.ink }]}
++            onPress={onAddToCart}
++          >
++            <Ionicons name="bag-add-outline" size={16} color={colors.onInk} />
+           </Pressable>
+         </View>
+-      </BlurView>
++      </View>
+     </AnimatedPressable>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+-  card: {
+-    width: 180,
+-    marginRight: 18,
+-  },
+-
+-  container: {
+-    borderRadius: 24,
+-    overflow: "hidden",
+-    padding: 16,
+-    borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-    backgroundColor: "rgba(255,255,255,0.18)",
+-
+-    shadowColor: "#5EA8FF",
+-    shadowOpacity: 0.12,
+-    shadowRadius: 20,
+-    shadowOffset: {
+-      width: 0,
+-      height: 10,
+-    },
+-
+-    elevation: 8,
+-  },
+-
++  card: { width: 180, marginRight: 16 },
++  container: { borderWidth: 1, borderRadius: radii.xs, padding: 16 },
+   header: {
+     flexDirection: "row",
+     justifyContent: "space-between",
+     alignItems: "center",
+   },
+-
+-  badge: {
+-    backgroundColor: "#EF4444",
+-    borderRadius: 10,
+-    paddingHorizontal: 8,
+-    paddingVertical: 4,
+-  },
+-
+-  badgeText: {
+-    color: "#FFF",
+-    fontSize: 12,
+-    fontWeight: "700",
+-  },
+-
+-  image: {
+-    width: "100%",
+-    height: 130,
+-    marginVertical: 12,
+-  },
+-
+-  name: {
+-    fontSize: 16,
+-    fontWeight: "700",
+-    color: "#0F172A",
+-  },
+-
+-  category: {
+-    marginTop: 4,
+-    fontSize: 13,
+-    color: "#64748B",
+-  },
+-
+-  ratingRow: {
+-    flexDirection: "row",
+-    alignItems: "center",
+-    marginTop: 10,
+-  },
+-
+-  rating: {
+-    marginLeft: 4,
+-    fontSize: 13,
+-    fontWeight: "600",
+-    color: "#334155",
+-  },
+-
+-  reviews: {
+-    marginLeft: 4,
+-    fontSize: 13,
+-    color: "#94A3B8",
+-  },
+-
++  badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radii.xs },
++  image: { width: "100%", height: 120, marginVertical: 12 },
++  ratingRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+   footer: {
+-    marginTop: 16,
++    marginTop: 14,
+     flexDirection: "row",
+     justifyContent: "space-between",
+     alignItems: "center",
+   },
+-
+-  price: {
+-    fontSize: 20,
+-    fontWeight: "800",
+-    color: "#2F80ED",
+-  },
+-
+   cart: {
+-    width: 40,
+-    height: 40,
+-    borderRadius: 20,
++    width: 38,
++    height: 38,
++    borderRadius: radii.xs,
+     justifyContent: "center",
+     alignItems: "center",
+-    backgroundColor: "#2F80ED",
+   },
+ });
+diff --git a/mobile/src/components/ui/Button.tsx b/mobile/src/components/ui/Button.tsx
+new file mode 100644
+index 0000000..68416ca
+--- /dev/null
++++ b/mobile/src/components/ui/Button.tsx
+@@ -0,0 +1,134 @@
++import React from "react";
++import {
++  ActivityIndicator,
++  Pressable,
++  PressableProps,
++  View,
++  ViewStyle,
++} from "react-native";
++import * as Haptics from "expo-haptics";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { Palette, radii, spacing, type } from "@/theme/tokens";
++import { Txt } from "./Text";
++
++type Variant = "solid" | "outline" | "ghost";
++
++interface Props extends Omit<PressableProps, "style"> {
++  label: string;
++  variant?: Variant;
++  loading?: boolean;
++  disabled?: boolean;
++  fullWidth?: boolean;
++  left?: React.ReactNode; // optional leading icon
++  right?: React.ReactNode;
++  style?: ViewStyle;
++  haptic?: boolean;
++}
++
++function containerStyle(
++  variant: Variant,
++  pressed: boolean,
++  disabled: boolean,
++  c: Palette
++): ViewStyle {
++  const base: ViewStyle = {
++    flexDirection: "row",
++    alignItems: "center",
++    justifyContent: "center",
++    gap: spacing.sm,
++    borderRadius: radii.none,
++    opacity: disabled ? 0.5 : 1,
++  };
++  if (variant === "solid") {
++    return {
++      ...base,
++      paddingVertical: 16,
++      paddingHorizontal: 32,
++      backgroundColor: pressed ? c.brass : c.ink,
++    };
++  }
++  if (variant === "outline") {
++    return {
++      ...base,
++      paddingVertical: 16,
++      paddingHorizontal: 32,
++      borderWidth: 1,
++      borderColor: pressed ? c.brass : c.ink,
++      backgroundColor: "transparent",
++    };
++  }
++  // ghost
++  return {
++    ...base,
++    paddingVertical: 8,
++    paddingHorizontal: 12,
++    backgroundColor: "transparent",
++  };
++}
++
++function labelTone(variant: Variant, pressed: boolean) {
++  if (variant === "solid") return pressed ? "onBrass" : "onInk";
++  if (variant === "outline") return pressed ? "brass" : "ink";
++  return pressed ? "brass" : "soft";
++}
++
++export function Button({
++  label,
++  variant = "solid",
++  loading = false,
++  disabled = false,
++  fullWidth = false,
++  left,
++  right,
++  style,
++  haptic = true,
++  onPress,
++  ...rest
++}: Props) {
++  const { colors } = useTheme();
++  const isDisabled = disabled || loading;
++
++  return (
++    <Pressable
++      accessibilityRole="button"
++      disabled={isDisabled}
++      onPress={(e) => {
++        if (haptic) Haptics.selectionAsync().catch(() => {});
++        onPress?.(e);
++      }}
++      style={({ pressed }) => [
++        containerStyle(variant, pressed, isDisabled, colors),
++        fullWidth && { alignSelf: "stretch" },
++        style,
++      ]}
++      {...rest}
++    >
++      {({ pressed }) => (
++        <>
++          {loading ? (
++            <ActivityIndicator
++              color={variant === "solid" ? colors.onInk : colors.ink}
++              size="small"
++            />
++          ) : (
++            <>
++              {left}
++              <Txt
++                tone={labelTone(variant, pressed) as any}
++                style={{
++                  ...type.eyebrow,
++                  // eyebrow already uppercases + tracks; nudge size up for buttons
++                  fontSize: 12.5,
++                }}
++              >
++                {label}
++              </Txt>
++              {right}
++            </>
++          )}
++        </>
++      )}
++    </Pressable>
++  );
++}
+diff --git a/mobile/src/components/ui/Card.tsx b/mobile/src/components/ui/Card.tsx
+new file mode 100644
+index 0000000..8a9cbb0
+--- /dev/null
++++ b/mobile/src/components/ui/Card.tsx
+@@ -0,0 +1,35 @@
++import React from "react";
++import { View, ViewProps, ViewStyle } from "react-native";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { luxeShadow, radii, spacing } from "@/theme/tokens";
++
++interface Props extends ViewProps {
++  padded?: boolean;
++  elevated?: boolean; // apply the soft luxe shadow
++  style?: ViewStyle | ViewStyle[];
++}
++
++/** Bordered, sharp-cornered surface (web .card-luxe). */
++export function Card({ padded = true, elevated = false, style, children, ...rest }: Props) {
++  const { colors } = useTheme();
++  return (
++    <View
++      {...rest}
++      style={[
++        {
++          backgroundColor: colors.surface,
++          borderWidth: 1,
++          borderColor: colors.line,
++          borderRadius: radii.xs,
++          overflow: "hidden",
++        },
++        padded && { padding: spacing.lg },
++        elevated && luxeShadow(colors),
++        style as ViewStyle,
++      ]}
++    >
++      {children}
++    </View>
++  );
++}
+diff --git a/mobile/src/components/ui/Field.tsx b/mobile/src/components/ui/Field.tsx
+new file mode 100644
+index 0000000..3fe2818
+--- /dev/null
++++ b/mobile/src/components/ui/Field.tsx
+@@ -0,0 +1,91 @@
++import React, { forwardRef, useState } from "react";
++import {
++  Pressable,
++  TextInput,
++  TextInputProps,
++  View,
++  ViewStyle,
++} from "react-native";
++import { Ionicons } from "@expo/vector-icons";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing, type } from "@/theme/tokens";
++import { Eyebrow, Caption } from "./Text";
++
++interface Props extends TextInputProps {
++  label?: string;
++  error?: string;
++  left?: keyof typeof Ionicons.glyphMap;
++  /** show a trailing eye toggle for passwords */
++  secure?: boolean;
++  containerStyle?: ViewStyle;
++}
++
++/**
++ * Underline-only editorial field. The bottom hairline turns brass on focus
++ * and danger on error — the web `.field-row` / `.field-luxe` behaviour.
++ */
++export const Field = forwardRef<TextInput, Props>(function Field(
++  { label, error, left, secure, containerStyle, onFocus, onBlur, ...rest },
++  ref
++) {
++  const { colors } = useTheme();
++  const [focused, setFocused] = useState(false);
++  const [hidden, setHidden] = useState(!!secure);
++
++  const borderColor = error ? colors.danger : focused ? colors.brass : colors.line;
++
++  return (
++    <View style={[{ width: "100%" }, containerStyle]}>
++      {label ? <Eyebrow style={{ marginBottom: spacing.sm }}>{label}</Eyebrow> : null}
++
++      <View
++        style={{
++          flexDirection: "row",
++          alignItems: "center",
++          gap: spacing.sm,
++          borderBottomWidth: 1,
++          borderBottomColor: borderColor,
++        }}
++      >
++        {left ? <Ionicons name={left} size={18} color={colors.inkFaint} /> : null}
++
++        <TextInput
++          ref={ref}
++          placeholderTextColor={colors.inkFaint}
++          secureTextEntry={hidden}
++          selectionColor={colors.brass}
++          onFocus={(e) => {
++            setFocused(true);
++            onFocus?.(e);
++          }}
++          onBlur={(e) => {
++            setFocused(false);
++            onBlur?.(e);
++          }}
++          style={[
++            type.body,
++            { flex: 1, color: colors.ink, paddingVertical: 12 },
++          ]}
++          {...rest}
++        />
++
++        {secure ? (
++          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10}>
++            <Ionicons
++              name={hidden ? "eye-outline" : "eye-off-outline"}
++              size={18}
++              color={colors.inkFaint}
++            />
++          </Pressable>
++        ) : null}
++      </View>
++
++      {error ? (
++        <Caption tone="danger" style={{ marginTop: spacing.xs }}>
++          {error}
++        </Caption>
++      ) : null}
++    </View>
++  );
++});
+diff --git a/mobile/src/components/ui/Rule.tsx b/mobile/src/components/ui/Rule.tsx
+new file mode 100644
+index 0000000..6d94cc3
+--- /dev/null
++++ b/mobile/src/components/ui/Rule.tsx
+@@ -0,0 +1,25 @@
++import React from "react";
++import { View, ViewStyle } from "react-native";
++
++import { useTheme } from "@/theme/ThemeContext";
++
++/** Thin hairline with a short brass tick on the left (web .rule-luxe). */
++export function Rule({ tick = true, style }: { tick?: boolean; style?: ViewStyle }) {
++  const { colors } = useTheme();
++  return (
++    <View style={[{ height: 1, width: "100%", backgroundColor: colors.line }, style]}>
++      {tick && (
++        <View
++          style={{
++            position: "absolute",
++            left: 0,
++            top: 0,
++            height: 1,
++            width: 64,
++            backgroundColor: colors.brass,
++          }}
++        />
++      )}
++    </View>
++  );
++}
+diff --git a/mobile/src/components/ui/Screen.tsx b/mobile/src/components/ui/Screen.tsx
+new file mode 100644
+index 0000000..41c665e
+--- /dev/null
++++ b/mobile/src/components/ui/Screen.tsx
+@@ -0,0 +1,52 @@
++import React from "react";
++import { ScrollView, View, ViewStyle, StyleProp } from "react-native";
++import { SafeAreaView, Edge } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing } from "@/theme/tokens";
++
++interface Props {
++  children: React.ReactNode;
++  scroll?: boolean;
++  padded?: boolean; // apply the editorial horizontal gutter
++  edges?: Edge[];
++  style?: StyleProp<ViewStyle>;
++  contentStyle?: StyleProp<ViewStyle>;
++}
++
++/** Page shell = web `.editorial-shell` on a canvas background. */
++export function Screen({
++  children,
++  scroll = false,
++  padded = true,
++  edges = ["top", "bottom"],
++  style,
++  contentStyle,
++}: Props) {
++  const { colors, isDark } = useTheme();
++
++  const gutter: ViewStyle = padded
++    ? { paddingHorizontal: spacing.lg }
++    : {};
++
++  return (
++    <SafeAreaView
++      edges={edges}
++      style={[{ flex: 1, backgroundColor: colors.canvas }, style]}
++    >
++      <StatusBar style={isDark ? "light" : "dark"} />
++      {scroll ? (
++        <ScrollView
++          contentContainerStyle={[{ flexGrow: 1, paddingVertical: spacing.lg }, gutter, contentStyle]}
++          keyboardShouldPersistTaps="handled"
++          showsVerticalScrollIndicator={false}
++        >
++          {children}
++        </ScrollView>
++      ) : (
++        <View style={[{ flex: 1 }, gutter, contentStyle]}>{children}</View>
++      )}
++    </SafeAreaView>
++  );
++}
+diff --git a/mobile/src/components/ui/Text.tsx b/mobile/src/components/ui/Text.tsx
+new file mode 100644
+index 0000000..8370d1b
+--- /dev/null
++++ b/mobile/src/components/ui/Text.tsx
+@@ -0,0 +1,65 @@
++import React from "react";
++import { Text as RNText, TextProps, TextStyle } from "react-native";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { type } from "@/theme/tokens";
++
++type Variant = keyof typeof type; // displayLg | display | h1 | h2 | h3 | body | bodySm | caption | eyebrow
++type Tone = "ink" | "soft" | "faint" | "brass" | "onInk" | "onBrass" | "danger" | "success";
++
++interface Props extends TextProps {
++  variant?: Variant;
++  tone?: Tone;
++  center?: boolean;
++  style?: TextStyle | TextStyle[];
++}
++
++function toneColor(tone: Tone, c: ReturnType<typeof useTheme>["colors"]) {
++  switch (tone) {
++    case "soft":
++      return c.inkSoft;
++    case "faint":
++      return c.inkFaint;
++    case "brass":
++      return c.brass;
++    case "onInk":
++      return c.onInk;
++    case "onBrass":
++      return c.onBrass;
++    case "danger":
++      return c.danger;
++    case "success":
++      return c.success;
++    case "ink":
++    default:
++      return c.ink;
++  }
++}
++
++/** Base themed text. Prefer the named helpers below. */
++export function Txt({ variant = "body", tone = "ink", center, style, ...rest }: Props) {
++  const { colors } = useTheme();
++  return (
++    <RNText
++      {...rest}
++      style={[
++        type[variant] as TextStyle,
++        { color: toneColor(tone, colors) },
++        center && { textAlign: "center" },
++        style as TextStyle,
++      ]}
++    />
++  );
++}
++
++export const DisplayLg = (p: Props) => <Txt variant="displayLg" {...p} />;
++export const Display = (p: Props) => <Txt variant="display" {...p} />;
++export const H1 = (p: Props) => <Txt variant="h1" {...p} />;
++export const H2 = (p: Props) => <Txt variant="h2" {...p} />;
++export const H3 = (p: Props) => <Txt variant="h3" {...p} />;
++export const Body = (p: Props) => <Txt variant="body" {...p} />;
++export const BodySm = (p: Props) => <Txt variant="bodySm" {...p} />;
++export const Caption = (p: Props) => <Txt variant="caption" tone="faint" {...p} />;
++
++/** Uppercase, wide-tracked, brass small-caps label (web .eyebrow). */
++export const Eyebrow = (p: Props) => <Txt variant="eyebrow" tone="brass" {...p} />;
+diff --git a/mobile/src/components/ui/index.ts b/mobile/src/components/ui/index.ts
+new file mode 100644
+index 0000000..f09451b
+--- /dev/null
++++ b/mobile/src/components/ui/index.ts
+@@ -0,0 +1,6 @@
++export * from "./Text";
++export * from "./Screen";
++export * from "./Rule";
++export * from "./Button";
++export * from "./Field";
++export * from "./Card";
+diff --git a/mobile/src/screens/Auth/CheckEmailScreen.tsx b/mobile/src/screens/Auth/CheckEmailScreen.tsx
+index 2a161ff..e3f588e 100644
+--- a/mobile/src/screens/Auth/CheckEmailScreen.tsx
++++ b/mobile/src/screens/Auth/CheckEmailScreen.tsx
+@@ -1,13 +1,8 @@
+ import React, { useEffect, useState } from "react";
+-import {
+-  Linking,
+-  Pressable,
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
++import { Linking, Pressable, StyleSheet, View } from "react-native";
+ 
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ import { router, useLocalSearchParams } from "expo-router";
+ import CheckEmailIllustration from "@/assets/illustrations/check-email.svg";
+ import Animated, {
+@@ -19,160 +14,133 @@ import Animated, {
+   withTiming,
+ } from "react-native-reanimated";
+ 
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+ import PrimaryButton from "@/components/onboarding/PrimaryButton";
+ import AuthFooter from "@/components/auth/AuthFooter";
++import { Eyebrow, Display, Body, Txt } from "@/components/ui/Text";
++import { Rule } from "@/components/ui/Rule";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing, type } from "@/theme/tokens";
+ 
+ export default function CheckEmailScreen() {
++  const { colors, isDark } = useTheme();
+ 
+   const RESEND_DELAY_SECONDS = 30;
+   const [countdown, setCountdown] = useState(RESEND_DELAY_SECONDS);
+ 
+-  const { email } =
+-    useLocalSearchParams<{
+-      email?: string;
+-    }>();
++  const { email } = useLocalSearchParams<{ email?: string }>();
+ 
+   const openMailApp = async () => {
+     await Linking.openURL("message://");
+   };
+ 
+-//   const resendEmail = () => {
+-//     router.replace({
+-//       pathname: "/forgot-password",
+-//       params: {
+-//         email,
+-//       },
+-//     });
+-//   };
+-
+   const translateY = useSharedValue(0);
+ 
+-    useEffect(() => {
+-        translateY.value = withRepeat(
+-            withSequence(
+-            withTiming(-8, {
+-                duration: 2200,
+-            }),
+-            withTiming(8, {
+-                duration: 2200,
+-            })
+-            ),
+-            -1,
+-            true
+-        );
+-    }, []);
+-
+-    useEffect(() => {
+-        if (countdown === 0) {
+-            return;
+-        }
+-
+-        const timer = setTimeout(() => {
+-            setCountdown((previous) => previous - 1);
+-        }, 1000);
+-
+-        return () => clearTimeout(timer);
+-    }, [countdown]);
+-
+-    const illustrationStyle = useAnimatedStyle(() => ({
+-        transform: [
+-            {
+-            translateY: translateY.value,
+-            },
+-        ],
+-    }));
+-
+-    const resendEmail = () => {
+-        console.log("Resend email");
+-
+-        setCountdown(RESEND_DELAY_SECONDS);
+-    };
++  useEffect(() => {
++    translateY.value = withRepeat(
++      withSequence(
++        withTiming(-8, { duration: 2200 }),
++        withTiming(8, { duration: 2200 })
++      ),
++      -1,
++      true
++    );
++  }, []);
++
++  useEffect(() => {
++    if (countdown === 0) {
++      return;
++    }
++    const timer = setTimeout(() => {
++      setCountdown((previous) => previous - 1);
++    }, 1000);
++    return () => clearTimeout(timer);
++  }, [countdown]);
++
++  const illustrationStyle = useAnimatedStyle(() => ({
++    transform: [{ translateY: translateY.value }],
++  }));
++
++  const resendEmail = () => {
++    setCountdown(RESEND_DELAY_SECONDS);
++  };
+ 
+   return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
++    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <View style={styles.content}>
+         <Animated.View
+           entering={FadeInDown.duration(700)}
++          style={[styles.illustrationContainer, illustrationStyle]}
+         >
+-          <Animated.View
+-            entering={FadeInDown.duration(700)}
+-            style={[
+-                styles.illustrationContainer,
+-                illustrationStyle
+-            ]}
+-          >
+-            <CheckEmailIllustration
+-                width={280}
+-                height={280}
+-            />
+-          </Animated.View>
++          <CheckEmailIllustration width={240} height={240} />
+         </Animated.View>
+ 
+-        <Animated.Text
+-          entering={FadeInDown.delay(150)}
+-          style={styles.title}
+-        >
+-          Check Your Email
+-        </Animated.Text>
++        <Animated.View entering={FadeInDown.delay(150)}>
++          <Eyebrow center style={{ marginTop: spacing.md }}>
++            Almost there
++          </Eyebrow>
++        </Animated.View>
+ 
+-        <Animated.Text
+-          entering={FadeInDown.delay(250)}
+-          style={styles.subtitle}
+-        >
+-          We've sent a password reset link to
+-        </Animated.Text>
++        <Animated.View entering={FadeInDown.delay(200)}>
++          <Display center style={{ marginTop: spacing.sm }}>
++            Check your email
++          </Display>
++        </Animated.View>
+ 
+-        <Animated.Text
+-          entering={FadeInDown.delay(350)}
+-          style={styles.email}
+-        >
+-          {email}
+-        </Animated.Text>
++        <Rule style={{ width: 80, marginTop: spacing.md, alignSelf: "center" }} />
+ 
+-        <Animated.Text
+-          entering={FadeInDown.delay(450)}
+-          style={styles.description}
+-        >
+-          Please check your inbox and follow the
+-          instructions to reset your password.
+-        </Animated.Text>
++        <Animated.View entering={FadeInDown.delay(300)}>
++          <Body tone="soft" center style={{ marginTop: spacing.lg }}>
++            We've sent a password reset link to
++          </Body>
++        </Animated.View>
+ 
+-        <View style={{ height: 40 }} />
++        {email ? (
++          <Animated.View entering={FadeInDown.delay(350)}>
++            <Txt tone="brass" center style={{ ...type.h3, marginTop: spacing.xs }}>
++              {email}
++            </Txt>
++          </Animated.View>
++        ) : null}
+ 
+-        <PrimaryButton
+-          title="Open Mail App"
+-          onPress={openMailApp}
+-        />
++        <Animated.View entering={FadeInDown.delay(450)}>
++          <Body
++            tone="soft"
++            center
++            style={{ marginTop: spacing.md, paddingHorizontal: spacing.md }}
++          >
++            Please check your inbox and follow the instructions to reset your
++            password.
++          </Body>
++        </Animated.View>
+ 
+-        <View style={styles.resendContainer}>
+-            <Text style={styles.resendText}>
+-                Didn't receive an email?
+-            </Text>
++        <View style={{ height: spacing.xl }} />
++
++        <PrimaryButton title="Open Mail App" onPress={openMailApp} />
+ 
+-            <Animated.View entering={FadeInDown.duration(300)}>
+-                {countdown > 0 ? (
+-                    <Text style={styles.countdown}>
+-                        Resend in {countdown}s
+-                    </Text>
+-                ) : (
+-                    <Pressable onPress={resendEmail}>
+-                        <Text style={styles.resendButton}>
+-                            Resend Email
+-                        </Text>
+-                    </Pressable>
+-                )}
+-            </Animated.View>
++        <View style={styles.resendContainer}>
++          <Body tone="soft">Didn't receive an email?</Body>
++          <Animated.View entering={FadeInDown.duration(300)}>
++            {countdown > 0 ? (
++              <Txt tone="faint" style={{ ...type.eyebrow, marginTop: spacing.sm }}>
++                {`Resend in ${countdown}s`}
++              </Txt>
++            ) : (
++              <Pressable onPress={resendEmail} hitSlop={8}>
++                <Txt tone="brass" style={{ ...type.eyebrow, marginTop: spacing.sm }}>
++                  Resend Email
++                </Txt>
++              </Pressable>
++            )}
++          </Animated.View>
+         </View>
+ 
+         <AuthFooter
+           text="Remember your password?"
+           actionText="Sign In"
+-          onPress={() =>
+-            router.replace("/login")
+-          }
++          onPress={() => router.replace("/login")}
+         />
+       </View>
+     </SafeAreaView>
+@@ -180,97 +148,19 @@ export default function CheckEmailScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-  },
+-
++  container: { flex: 1 },
+   content: {
+     flex: 1,
+     justifyContent: "center",
+-    paddingHorizontal: 30,
++    paddingHorizontal: 28,
+   },
+-
+   illustrationContainer: {
+     alignItems: "center",
+     justifyContent: "center",
+-    marginBottom: 24,
++    marginBottom: 8,
+   },
+-
+-  title: {
+-    marginTop: 28,
+-
+-    fontSize: 30,
+-    fontWeight: "800",
+-
+-    textAlign: "center",
+-
+-    color: "#0F172A",
+-  },
+-
+-  subtitle: {
+-    marginTop: 16,
+-
+-    fontSize: 16,
+-
+-    textAlign: "center",
+-
+-    color: "#64748B",
+-  },
+-
+-  email: {
+-    marginTop: 10,
+-
+-    textAlign: "center",
+-
+-    fontSize: 17,
+-    fontWeight: "700",
+-
+-    color: "#2F80ED",
+-  },
+-
+-  description: {
+-    marginTop: 16,
+-
+-    textAlign: "center",
+-
+-    fontSize: 15,
+-    lineHeight: 24,
+-
+-    color: "#64748B",
+-  },
+-
+-  resend: {
+-    marginTop: 28,
+-
+-    textAlign: "center",
+-
+-    fontSize: 16,
+-    fontWeight: "700",
+-
+-    color: "#2F80ED",
+-  },
+-
+   resendContainer: {
+     marginTop: 28,
+     alignItems: "center",
+   },
+-
+-  resendText: {
+-    fontSize: 15,
+-    color: "#64748B",
+-  },
+-
+-  countdown: {
+-    marginTop: 8,
+-    fontSize: 16,
+-    fontWeight: "700",
+-    color: "#94A3B8",
+-  },
+-
+-  resendButton: {
+-    marginTop: 8,
+-    fontSize: 16,
+-    fontWeight: "700",
+-    color: "#2F80ED",
+-  }
+-});
+\ No newline at end of file
++});
+diff --git a/mobile/src/screens/Auth/ForgotPasswordScreen.tsx b/mobile/src/screens/Auth/ForgotPasswordScreen.tsx
+index a24beec..bc95573 100644
+--- a/mobile/src/screens/Auth/ForgotPasswordScreen.tsx
++++ b/mobile/src/screens/Auth/ForgotPasswordScreen.tsx
+@@ -5,43 +5,41 @@ import {
+   Platform,
+   ScrollView,
+   StyleSheet,
+-  Text,
+ } from "react-native";
+ 
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ import { router } from "expo-router";
+ 
+ import { Controller, useForm } from "react-hook-form";
+ import { zodResolver } from "@hookform/resolvers/zod";
+-
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
+-import { Ionicons } from "@expo/vector-icons";
+-
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+ import AuthCard from "@/components/auth/AuthCard";
+ import AuthHeader from "@/components/auth/AuthHeader";
+ import AuthTextField from "@/components/auth/AuthTextField";
+-import PrimaryButton from "@/components/onboarding/PrimaryButton";
+ import AuthFooter from "@/components/auth/AuthFooter";
++import PrimaryButton from "@/components/onboarding/PrimaryButton";
++import { Txt } from "@/components/ui/Text";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing } from "@/theme/tokens";
+ import {
+   forgotPasswordSchema,
+   ForgotPasswordFormData,
+ } from "@/features/auth/validation/auth.schema";
+-
+ import { useForgotPassword } from "@/features/auth/hooks/useForgotPassword";
+ 
+ export default function ForgotPasswordScreen() {
++  const { colors, isDark } = useTheme();
++
+   const {
+     control,
+     handleSubmit,
+     formState: { errors },
+   } = useForm<ForgotPasswordFormData>({
+     resolver: zodResolver(forgotPasswordSchema),
+-    defaultValues: {
+-      email: "",
+-    },
++    defaultValues: { email: "" },
+   });
+ 
+   const forgotPasswordMutation = useForgotPassword();
+@@ -52,8 +50,8 @@ export default function ForgotPasswordScreen() {
+   };
+ 
+   return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
++    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <KeyboardAvoidingView
+         style={{ flex: 1 }}
+@@ -66,8 +64,8 @@ export default function ForgotPasswordScreen() {
+           scrollEnabled={!forgotPasswordMutation.isPending}
+         >
+           <AuthHeader
+-            title="Forgot Password?"
+-            subtitle="Enter your email address and we'll send you a password reset link."
++            title="Forgot password?"
++            subtitle="Enter your email and we'll send you a reset link."
+           />
+ 
+           <AuthCard>
+@@ -86,9 +84,7 @@ export default function ForgotPasswordScreen() {
+                   autoCapitalize="none"
+                   returnKeyType="done"
+                   onSubmitEditing={handleSubmit(onSubmit)}
+-                  leftIcon={
+-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
+-                  }
++                  icon="mail-outline"
+                 />
+               )}
+             />
+@@ -101,9 +97,9 @@ export default function ForgotPasswordScreen() {
+             />
+ 
+             {forgotPasswordMutation.isError && (
+-              <Text style={styles.error}>
++              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
+                 {forgotPasswordMutation.error.message}
+-              </Text>
++              </Txt>
+             )}
+           </AuthCard>
+ 
+@@ -122,21 +118,11 @@ export default function ForgotPasswordScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-  },
+-
++  container: { flex: 1 },
+   content: {
+     flexGrow: 1,
+     justifyContent: "center",
+-    paddingHorizontal: 28,
++    paddingHorizontal: 24,
+     paddingVertical: 24,
+   },
+-
+-  error: {
+-    marginTop: 12,
+-    textAlign: "center",
+-    color: "#EF4444",
+-    fontSize: 14,
+-  },
+ });
+diff --git a/mobile/src/screens/Auth/LoginScreen.tsx b/mobile/src/screens/Auth/LoginScreen.tsx
+index 7fa5b5a..484ee81 100644
+--- a/mobile/src/screens/Auth/LoginScreen.tsx
++++ b/mobile/src/screens/Auth/LoginScreen.tsx
+@@ -5,27 +5,29 @@ import {
+   Pressable,
+   ScrollView,
+   StyleSheet,
+-  Text,
+   View,
+ } from "react-native";
+ 
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ import { router } from "expo-router";
+-import GoogleButton from "@/components/auth/GoogleButton";
+-import AuthDivider from "@/components/auth/AuthDivider";
+ import Animated, { FadeInDown } from "react-native-reanimated";
+-import AuthCard from "@/components/auth/AuthCard";
+-import { Ionicons } from "@expo/vector-icons";
+ 
+ import { useForm, Controller } from "react-hook-form";
+ import { zodResolver } from "@hookform/resolvers/zod";
+ 
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+ import AuthHeader from "@/components/auth/AuthHeader";
++import AuthCard from "@/components/auth/AuthCard";
+ import AuthTextField from "@/components/auth/AuthTextField";
++import AuthDivider from "@/components/auth/AuthDivider";
++import AuthFooter from "@/components/auth/AuthFooter";
++import GoogleButton from "@/components/auth/GoogleButton";
+ import PrimaryButton from "@/components/onboarding/PrimaryButton";
++import { Txt } from "@/components/ui/Text";
++
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing, type } from "@/theme/tokens";
+ 
+-import AuthFooter from "@/components/auth/AuthFooter";
+ import { useLogin } from "@/features/auth/hooks/useLogin";
+ import {
+   loginSchema,
+@@ -33,6 +35,7 @@ import {
+ } from "@/features/auth/validation/auth.schema";
+ 
+ export default function LoginScreen() {
++  const { colors, isDark } = useTheme();
+   const loginMutation = useLogin();
+ 
+   const {
+@@ -41,10 +44,7 @@ export default function LoginScreen() {
+     formState: { errors },
+   } = useForm<LoginFormData>({
+     resolver: zodResolver(loginSchema),
+-    defaultValues: {
+-      email: "",
+-      password: "",
+-    },
++    defaultValues: { email: "", password: "" },
+   });
+ 
+   const onSubmit = (data: LoginFormData) => {
+@@ -52,8 +52,8 @@ export default function LoginScreen() {
+   };
+ 
+   return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
++    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <KeyboardAvoidingView
+         style={{ flex: 1 }}
+@@ -66,9 +66,10 @@ export default function LoginScreen() {
+           bounces={false}
+         >
+           <AuthHeader
+-            title="Welcome Back 👋"
+-            subtitle="Sign in to continue your shopping!"
++            title="Welcome back"
++            subtitle="Sign in to continue your shopping."
+           />
++
+           <AuthCard>
+             <Controller
+               control={control}
+@@ -83,9 +84,7 @@ export default function LoginScreen() {
+                   keyboardType="email-address"
+                   autoCapitalize="none"
+                   returnKeyType="next"
+-                  leftIcon={
+-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
+-                  }
++                  icon="mail-outline"
+                 />
+               )}
+             />
+@@ -103,13 +102,7 @@ export default function LoginScreen() {
+                   secureTextEntry
+                   returnKeyType="done"
+                   onSubmitEditing={handleSubmit(onSubmit)}
+-                  leftIcon={
+-                    <Ionicons
+-                      name="lock-closed-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
++                  icon="lock-closed-outline"
+                 />
+               )}
+             />
+@@ -118,12 +111,16 @@ export default function LoginScreen() {
+               <Pressable
+                 disabled={loginMutation.isPending}
+                 onPress={() => router.push("/forgot-password")}
++                hitSlop={8}
++                style={{ alignSelf: "flex-end" }}
+               >
+-                <Text style={styles.forgot}>Forgot Password?</Text>
++                <Txt tone="brass" style={{ ...type.eyebrow }}>
++                  Forgot Password
++                </Txt>
+               </Pressable>
+             </Animated.View>
+ 
+-            <View style={{ height: 16 }} />
++            <View style={{ height: spacing.lg }} />
+ 
+             <PrimaryButton
+               title="Sign In"
+@@ -133,16 +130,19 @@ export default function LoginScreen() {
+             />
+ 
+             {loginMutation.isError && (
+-              <Text style={styles.error}>{loginMutation.error.message}</Text>
++              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
++                {loginMutation.error.message}
++              </Txt>
+             )}
+ 
+             <AuthDivider />
+ 
+-          <GoogleButton
++            <GoogleButton
+               disabled={loginMutation.isPending}
+               onPress={() => {}}
+             />
+           </AuthCard>
++
+           <Animated.View entering={FadeInDown.delay(500)}>
+             <AuthFooter
+               text="Don't have an account?"
+@@ -158,39 +158,12 @@ export default function LoginScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-  },
+-
+-  mainContent: {
+-    flex: 1,
+-  },
+-
++  container: { flex: 1 },
+   content: {
+     flexGrow: 1,
+-    paddingHorizontal: 28,
++    paddingHorizontal: 24,
+     justifyContent: "center",
+     paddingTop: 24,
+     paddingBottom: 24,
+   },
+-
+-  forgot: {
+-    alignSelf: "flex-end",
+-    color: "#2F80ED",
+-    fontSize: 15,
+-    fontWeight: "600",
+-  },
+-
+-  footer: {
+-    paddingBottom: 24,
+-    paddingTop: 12,
+-    alignItems: "center",
+-  },
+-
+-  error: {
+-    marginTop: 12,
+-    textAlign: "center",
+-    color: "#EF4444",
+-    fontSize: 14,
+-  },
+ });
+diff --git a/mobile/src/screens/Auth/RegisterScreen.tsx b/mobile/src/screens/Auth/RegisterScreen.tsx
+index 3e5aca5..ea4be0e 100644
+--- a/mobile/src/screens/Auth/RegisterScreen.tsx
++++ b/mobile/src/screens/Auth/RegisterScreen.tsx
+@@ -8,14 +8,13 @@ import {
+ } from "react-native";
+ 
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ import { router } from "expo-router";
+-import { Ionicons } from "@expo/vector-icons";
+ import Animated, { FadeInDown } from "react-native-reanimated";
+ 
+ import { useForm, Controller } from "react-hook-form";
+ import { zodResolver } from "@hookform/resolvers/zod";
+-
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
++import { ImagePickerAsset } from "expo-image-picker";
+ 
+ import AuthHeader from "@/components/auth/AuthHeader";
+ import AuthCard from "@/components/auth/AuthCard";
+@@ -24,22 +23,25 @@ import AvatarPicker from "@/components/auth/AvatarPicker";
+ import AuthDivider from "@/components/auth/AuthDivider";
+ import GoogleButton from "@/components/auth/GoogleButton";
+ import AuthFooter from "@/components/auth/AuthFooter";
+-
+ import PrimaryButton from "@/components/onboarding/PrimaryButton";
+ 
++import { useTheme } from "@/theme/ThemeContext";
+ import {
+   registerSchema,
+   RegisterFormData,
+ } from "@/features/auth/validation/auth.schema";
+ import { useRegister } from "@/features/auth/hooks/useRegister";
+-import { ImagePickerAsset } from "expo-image-picker";
+ 
+ export default function RegisterScreen() {
++  const { colors, isDark } = useTheme();
+   const [avatar, setAvatar] = useState<ImagePickerAsset | null>(null);
+ 
+-  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
++  const {
++    control,
++    handleSubmit,
++    formState: { errors },
++  } = useForm<RegisterFormData>({
+     resolver: zodResolver(registerSchema),
+-
+     defaultValues: {
+       name: "",
+       email: "",
+@@ -52,22 +54,15 @@ export default function RegisterScreen() {
+ 
+   const onSubmit = (data: RegisterFormData) => {
+     if (!avatar) {
+-      Alert.alert(
+-        "Profile Picture Required",
+-        "Please select a profile picture."
+-      );
++      Alert.alert("Profile Picture Required", "Please select a profile picture.");
+       return;
+     }
+-
+-    registerMutation.mutate({
+-      ...data,
+-      avatar,
+-    });
++    registerMutation.mutate({ ...data, avatar });
+   };
+ 
+   return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
++    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <KeyboardAvoidingView
+         style={{ flex: 1 }}
+@@ -79,7 +74,7 @@ export default function RegisterScreen() {
+           showsVerticalScrollIndicator={false}
+         >
+           <AuthHeader
+-            title="Create Account"
++            title="Create account"
+             subtitle="Join us and start shopping smarter."
+           />
+ 
+@@ -97,9 +92,7 @@ export default function RegisterScreen() {
+                   onChangeText={field.onChange}
+                   error={errors.name?.message}
+                   autoCapitalize="words"
+-                  leftIcon={
+-                    <Ionicons name="person-outline" size={22} color="#64748B" />
+-                  }
++                  icon="person-outline"
+                 />
+               )}
+             />
+@@ -117,9 +110,7 @@ export default function RegisterScreen() {
+                   keyboardType="email-address"
+                   autoCapitalize="none"
+                   returnKeyType="next"
+-                  leftIcon={
+-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
+-                  }
++                  icon="mail-outline"
+                 />
+               )}
+             />
+@@ -136,13 +127,7 @@ export default function RegisterScreen() {
+                   error={errors.password?.message}
+                   secureTextEntry
+                   returnKeyType="next"
+-                  leftIcon={
+-                    <Ionicons
+-                      name="lock-closed-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
++                  icon="lock-closed-outline"
+                 />
+               )}
+             />
+@@ -158,15 +143,9 @@ export default function RegisterScreen() {
+                   onChangeText={field.onChange}
+                   error={errors.confirmPassword?.message}
+                   secureTextEntry
+-                  leftIcon={
+-                    <Ionicons
+-                      name="shield-checkmark-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
+                   returnKeyType="done"
+                   onSubmitEditing={handleSubmit(onSubmit)}
++                  icon="shield-checkmark-outline"
+                 />
+               )}
+             />
+@@ -201,14 +180,11 @@ export default function RegisterScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  container: {
+-    flex: 1,
+-  },
+-
++  container: { flex: 1 },
+   content: {
+     flexGrow: 1,
+     justifyContent: "center",
+-    paddingHorizontal: 28,
++    paddingHorizontal: 24,
+     paddingVertical: 24,
+   },
+ });
+diff --git a/mobile/src/screens/Auth/ResetPasswordScreen.tsx b/mobile/src/screens/Auth/ResetPasswordScreen.tsx
+index f2151f0..966522f 100644
+--- a/mobile/src/screens/Auth/ResetPasswordScreen.tsx
++++ b/mobile/src/screens/Auth/ResetPasswordScreen.tsx
+@@ -4,99 +4,75 @@ import {
+   Platform,
+   ScrollView,
+   StyleSheet,
+-  Text,
+ } from "react-native";
+ 
+ import { SafeAreaView } from "react-native-safe-area-context";
++import { StatusBar } from "expo-status-bar";
+ import { router, useLocalSearchParams } from "expo-router";
+-
+-import Animated, {
+-  FadeInDown,
+-} from "react-native-reanimated";
+-
+-import { Ionicons } from "@expo/vector-icons";
++import Animated, { FadeInDown } from "react-native-reanimated";
+ 
+ import { Controller, useForm } from "react-hook-form";
+ import { zodResolver } from "@hookform/resolvers/zod";
+ 
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+ import AuthHeader from "@/components/auth/AuthHeader";
+ import AuthCard from "@/components/auth/AuthCard";
+ import AuthTextField from "@/components/auth/AuthTextField";
+-import PrimaryButton from "@/components/onboarding/PrimaryButton";
+ import AuthFooter from "@/components/auth/AuthFooter";
++import PrimaryButton from "@/components/onboarding/PrimaryButton";
++import { Txt } from "@/components/ui/Text";
+ 
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing } from "@/theme/tokens";
+ import {
+   resetPasswordSchema,
+   ResetPasswordFormData,
+ } from "@/features/auth/validation/auth.schema";
+-
+ import { useResetPassword } from "@/features/auth/hooks/useResetPassword";
+ 
+ export default function ResetPasswordScreen() {
++  const { colors, isDark } = useTheme();
+   const params = useLocalSearchParams();
+ 
+-  const token =
+-    typeof params.token === "string"
+-      ? params.token
+-      : "";
++  const token = typeof params.token === "string" ? params.token : "";
+ 
+-  const resetPasswordMutation =
+-    useResetPassword();
++  const resetPasswordMutation = useResetPassword();
+ 
+   const {
+     control,
+     handleSubmit,
+     formState: { errors },
+   } = useForm<ResetPasswordFormData>({
+-    resolver: zodResolver(
+-      resetPasswordSchema
+-    ),
+-    defaultValues: {
+-      password: "",
+-      confirmPassword: "",
+-    },
++    resolver: zodResolver(resetPasswordSchema),
++    defaultValues: { password: "", confirmPassword: "" },
+   });
+ 
+-  const onSubmit = (
+-    data: ResetPasswordFormData
+-  ) => {
++  const onSubmit = (data: ResetPasswordFormData) => {
+     if (!token) {
+       return;
+     }
+-
+     resetPasswordMutation.mutate({
+       token,
+       password: data.password,
+-      confirmPassword:
+-        data.confirmPassword,
++      confirmPassword: data.confirmPassword,
+     });
+   };
+ 
+   return (
+-    <SafeAreaView style={styles.container}>
+-      <AnimatedBackground />
++    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <KeyboardAvoidingView
+         style={styles.flex}
+-        behavior={
+-          Platform.OS === "ios"
+-            ? "padding"
+-            : undefined
+-        }
++        behavior={Platform.OS === "ios" ? "padding" : undefined}
+       >
+         <ScrollView
+-          contentContainerStyle={
+-            styles.content
+-          }
++          contentContainerStyle={styles.content}
+           keyboardShouldPersistTaps="handled"
+-          showsVerticalScrollIndicator={
+-            false
+-          }
++          showsVerticalScrollIndicator={false}
+         >
+           <AuthHeader
+-            title="Create New Password"
+-            subtitle="Your new password must be different from the previous one."
++            title="New password"
++            subtitle="Your new password must differ from the previous one."
+           />
+ 
+           <AuthCard>
+@@ -108,22 +84,11 @@ export default function ResetPasswordScreen() {
+                   label="New Password"
+                   placeholder="Enter your new password"
+                   value={field.value}
+-                  onChangeText={
+-                    field.onChange
+-                  }
+-                  error={
+-                    errors.password
+-                      ?.message
+-                  }
++                  onChangeText={field.onChange}
++                  error={errors.password?.message}
+                   secureTextEntry
+                   returnKeyType="next"
+-                  leftIcon={
+-                    <Ionicons
+-                      name="lock-closed-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
++                  icon="lock-closed-outline"
+                 />
+               )}
+             />
+@@ -136,75 +101,42 @@ export default function ResetPasswordScreen() {
+                   label="Confirm Password"
+                   placeholder="Confirm your password"
+                   value={field.value}
+-                  onChangeText={
+-                    field.onChange
+-                  }
+-                  error={
+-                    errors
+-                      .confirmPassword
+-                      ?.message
+-                  }
++                  onChangeText={field.onChange}
++                  error={errors.confirmPassword?.message}
+                   secureTextEntry
+                   returnKeyType="done"
+-                  onSubmitEditing={handleSubmit(
+-                    onSubmit
+-                  )}
+-                  leftIcon={
+-                    <Ionicons
+-                      name="shield-checkmark-outline"
+-                      size={22}
+-                      color="#64748B"
+-                    />
+-                  }
++                  onSubmitEditing={handleSubmit(onSubmit)}
++                  icon="shield-checkmark-outline"
+                 />
+               )}
+             />
+ 
+             <PrimaryButton
+               title="Reset Password"
+-              loading={
+-                resetPasswordMutation.isPending
+-              }
+-              disabled={
+-                resetPasswordMutation.isPending ||
+-                !token
+-              }
+-              onPress={handleSubmit(
+-                onSubmit
+-              )}
++              loading={resetPasswordMutation.isPending}
++              disabled={resetPasswordMutation.isPending || !token}
++              onPress={handleSubmit(onSubmit)}
+             />
+ 
+             {resetPasswordMutation.isError && (
+-              <Text style={styles.error}>
+-                {
+-                  resetPasswordMutation
+-                    .error.message
+-                }
+-              </Text>
++              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
++                {resetPasswordMutation.error.message}
++              </Txt>
+             )}
+ 
+             {!token && (
+-              <Text style={styles.error}>
+-                Invalid or expired reset
+-                link.
+-              </Text>
++              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
++                Invalid or expired reset link.
++              </Txt>
+             )}
+           </AuthCard>
+ 
+-          <Animated.View
+-            entering={FadeInDown.delay(
+-              400
+-            )}
+-          >
++          <Animated.View entering={FadeInDown.delay(400)}>
+             <AuthFooter
+               text="Remember your password?"
+               actionText="Sign In"
+-              disabled={
+-                resetPasswordMutation.isPending
+-              }
+-              onPress={() =>
+-                router.replace("/login")
+-              }
++              disabled={resetPasswordMutation.isPending}
++              onPress={() => router.replace("/login")}
+             />
+           </Animated.View>
+         </ScrollView>
+@@ -214,25 +146,12 @@ export default function ResetPasswordScreen() {
+ }
+ 
+ const styles = StyleSheet.create({
+-  flex: {
+-    flex: 1,
+-  },
+-
+-  container: {
+-    flex: 1,
+-  },
+-
++  flex: { flex: 1 },
++  container: { flex: 1 },
+   content: {
+     flexGrow: 1,
+     justifyContent: "center",
+-    paddingHorizontal: 28,
++    paddingHorizontal: 24,
+     paddingVertical: 24,
+   },
+-
+-  error: {
+-    marginTop: 12,
+-    textAlign: "center",
+-    color: "#EF4444",
+-    fontSize: 14,
+-  },
+-});
+\ No newline at end of file
++});
+diff --git a/mobile/src/screens/Onboarding/OnboardingScreen.tsx b/mobile/src/screens/Onboarding/OnboardingScreen.tsx
+index 887a10f..89d888d 100644
+--- a/mobile/src/screens/Onboarding/OnboardingScreen.tsx
++++ b/mobile/src/screens/Onboarding/OnboardingScreen.tsx
+@@ -5,14 +5,13 @@ import {
+   ListRenderItem,
+   Pressable,
+   StyleSheet,
+-  Text,
+   View,
+ } from "react-native";
+ import {
+   SafeAreaView,
+   useSafeAreaInsets,
+ } from "react-native-safe-area-context";
+-import { BlurView } from "expo-blur";
++import { StatusBar } from "expo-status-bar";
+ import { router } from "expo-router";
+ 
+ import Animated, {
+@@ -21,63 +20,52 @@ import Animated, {
+   useSharedValue,
+ } from "react-native-reanimated";
+ 
+-import AnimatedBackground from "@/components/layout/AnimatedBackground";
+-
+ import { ONBOARDING_DATA } from "@/components/onboarding/constants/onboarding";
+ import { OnboardingItem } from "@/types/onboarding";
+ 
+ import Pagination from "@/components/onboarding/Pagination";
+-import PrimaryButton from "@/components/onboarding/PrimaryButton";
+ import OnboardingSlide from "@/components/onboarding/OnboardingSlide";
++import { Button } from "@/components/ui/Button";
++import { Eyebrow } from "@/components/ui/Text";
++import { useTheme } from "@/theme/ThemeContext";
+ 
+ const { width } = Dimensions.get("window");
+ 
+-const AnimatedFlatList =
+-  Animated.createAnimatedComponent(
+-    FlatList<OnboardingItem>
+-  );
++const AnimatedFlatList = Animated.createAnimatedComponent(
++  FlatList<OnboardingItem>
++);
+ 
+ export default function OnboardingScreen() {
++  const { colors, isDark } = useTheme();
+   const insets = useSafeAreaInsets();
+ 
+-  const flatListRef =
+-    useRef<FlatList<OnboardingItem>>(null);
+-
++  const flatListRef = useRef<FlatList<OnboardingItem>>(null);
+   const scrollX = useSharedValue(0);
++  const [currentIndex, setCurrentIndex] = useState(0);
+ 
+-  const [currentIndex, setCurrentIndex] =
+-    useState(0);
++  const scrollHandler = useAnimatedScrollHandler({
++    onScroll: (event) => {
++      scrollX.value = event.contentOffset.x;
++    },
++  });
+ 
+-  const scrollHandler =
+-    useAnimatedScrollHandler({
+-      onScroll: (event) => {
+-        scrollX.value = event.contentOffset.x;
+-      },
+-    });
+-
+-  const onViewableItemsChanged = useRef(
+-    ({ viewableItems }: any) => {
+-      if (viewableItems.length > 0) {
+-        setCurrentIndex(
+-          viewableItems[0].index ?? 0
+-        );
+-      }
++  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
++    if (viewableItems.length > 0) {
++      setCurrentIndex(viewableItems[0].index ?? 0);
+     }
+-  ).current;
++  }).current;
+ 
+   const viewabilityConfig = useRef({
+     itemVisiblePercentThreshold: 50,
+   }).current;
+ 
+-  const handleNext = () => {
+-    console.log("Current Index:", currentIndex);
++  const isLast = currentIndex === ONBOARDING_DATA.length - 1;
+ 
+-    if (currentIndex === ONBOARDING_DATA.length - 1) {
+-      console.log("Navigate to Login");
++  const handleNext = () => {
++    if (isLast) {
+       router.replace("/login");
+       return;
+     }
+-
+     flatListRef.current?.scrollToIndex({
+       index: currentIndex + 1,
+       animated: true,
+@@ -88,45 +76,31 @@ export default function OnboardingScreen() {
+     router.replace("/login");
+   };
+ 
+-  const renderItem: ListRenderItem<OnboardingItem> =
+-    ({ item }) => (
+-      <View style={{ width }}>
+-        <OnboardingSlide
+-          illustration={item.illustration}
+-          title={item.title}
+-          description={item.description}
+-        />
+-      </View>
+-    );
++  const renderItem: ListRenderItem<OnboardingItem> = ({ item, index }) => (
++    <View style={{ width }}>
++      <OnboardingSlide
++        eyebrow={`0${index + 1} \u2014 0${ONBOARDING_DATA.length}`}
++        illustration={item.illustration}
++        title={item.title}
++        description={item.description}
++      />
++    </View>
++  );
+ 
+   return (
+     <SafeAreaView
+-      style={styles.container}
++      style={[styles.container, { backgroundColor: colors.canvas }]}
+       edges={["top"]}
+     >
+-      <AnimatedBackground />
++      <StatusBar style={isDark ? "light" : "dark"} />
+ 
+       <Animated.View
+         entering={FadeInDown.duration(600)}
+-        style={[
+-          styles.header,
+-          {
+-            top: insets.top + 12,
+-          },
+-        ]}
++        style={[styles.header, { top: insets.top + 12 }]}
+       >
+-        {currentIndex !==
+-          ONBOARDING_DATA.length - 1 && (
+-          <Pressable onPress={handleSkip}>
+-            <BlurView
+-              intensity={70}
+-              tint="light"
+-              style={styles.skipButton}
+-            >
+-              <Text style={styles.skip}>
+-                Skip
+-              </Text>
+-            </BlurView>
++        {!isLast && (
++          <Pressable onPress={handleSkip} hitSlop={10}>
++            <Eyebrow tone="soft">Skip</Eyebrow>
+           </Pressable>
+         )}
+       </Animated.View>
+@@ -142,36 +116,24 @@ export default function OnboardingScreen() {
+         keyExtractor={(item) => item.id}
+         onScroll={scrollHandler}
+         scrollEventThrottle={16}
+-        onViewableItemsChanged={
+-          onViewableItemsChanged
+-        }
+-        viewabilityConfig={
+-          viewabilityConfig
+-        }
+-        contentContainerStyle={
+-          styles.listContent
+-        }
++        onViewableItemsChanged={onViewableItemsChanged}
++        viewabilityConfig={viewabilityConfig}
++        contentContainerStyle={styles.listContent}
+       />
+ 
+       <View style={styles.paginationContainer}>
+         <Pagination
+-          dataLength={
+-            ONBOARDING_DATA.length
+-          }
++          dataLength={ONBOARDING_DATA.length}
+           scrollX={scrollX}
+           width={width}
+         />
+       </View>
+ 
+       <View style={styles.footer}>
+-        <PrimaryButton
+-          title={
+-            currentIndex ===
+-            ONBOARDING_DATA.length - 1
+-              ? "Get Started"
+-              : "Next"
+-          }
++        <Button
++          label={isLast ? "Get Started" : "Next"}
+           onPress={handleNext}
++          fullWidth
+         />
+       </View>
+     </SafeAreaView>
+@@ -182,7 +144,6 @@ const styles = StyleSheet.create({
+   container: {
+     flex: 1,
+   },
+-
+   header: {
+     position: "absolute",
+     left: 24,
+@@ -190,42 +151,23 @@ const styles = StyleSheet.create({
+     zIndex: 100,
+     alignItems: "flex-end",
+   },
+-
+   listContent: {
+-    paddingTop: 80,
++    paddingTop: 60,
+     paddingBottom: 200,
+   },
+-
+   paginationContainer: {
+     position: "absolute",
+     left: 0,
+     right: 0,
+-    bottom: 110,
++    bottom: 120,
+     alignItems: "center",
+     zIndex: 50,
+   },
+-
+   footer: {
+     position: "absolute",
+     left: 24,
+     right: 24,
+-    bottom: 30,
++    bottom: 36,
+     zIndex: 50,
+   },
+-
+-  skipButton: {
+-    paddingHorizontal: 18,
+-    paddingVertical: 10,
+-    borderRadius: 28,
+-    overflow: "hidden",
+-    borderWidth: 1,
+-    borderColor: "rgba(255,255,255,0.45)",
+-    backgroundColor: "rgba(255,255,255,0.12)",
+-  },
+-
+-  skip: {
+-    fontSize: 16,
+-    fontWeight: "600",
+-    color: "#475569",
+-  },
+-});
+\ No newline at end of file
++});
+diff --git a/mobile/src/screens/Splash/SplashScreen.tsx b/mobile/src/screens/Splash/SplashScreen.tsx
+index 6454d24..3f99e4f 100644
+--- a/mobile/src/screens/Splash/SplashScreen.tsx
++++ b/mobile/src/screens/Splash/SplashScreen.tsx
+@@ -1,79 +1,53 @@
+ import { useEffect } from "react";
+-import {
+-  ActivityIndicator,
+-  StyleSheet,
+-  Text,
+-  View,
+-} from "react-native";
++import { ActivityIndicator, View } from "react-native";
+ import { router } from "expo-router";
+-import {
+-  AnimatedBackground,
+-  AppContainer,
+-  BrandLogo,
+-} from "@/components/layout";
+-import { Colors } from "@/theme";
+-import { SafeAreaView } from "react-native-safe-area-context";
++import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
++
++import { Screen } from "@/components/ui/Screen";
++import { Eyebrow, Display, Body } from "@/components/ui/Text";
++import { Rule } from "@/components/ui/Rule";
++import { useTheme } from "@/theme/ThemeContext";
++import { spacing } from "@/theme/tokens";
+ 
+ export default function SplashScreen() {
++  const { colors } = useTheme();
++
+   useEffect(() => {
+     const timer = setTimeout(() => {
+       router.replace("/onboarding");
+     }, 2500);
+-
+     return () => clearTimeout(timer);
+   }, []);
+ 
+   return (
+-    <AppContainer>
+-
+-        <AnimatedBackground />
+-
+-        <SafeAreaView 
+-            edges={["left", "right", "bottom"]}
+-            style={{ flex: 1 }}
++    <Screen padded>
++      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
++        <Animated.View
++          entering={FadeInDown.duration(700)}
++          style={{ alignItems: "center" }}
+         >
+-            <View style={styles.content}>
+-
+-                <BrandLogo size={140} />
+-
+-                <Text style={styles.title}>
+-                    Order Planning
+-                </Text>
+-
+-                <Text style={styles.subtitle}>
+-                    Discover Amazing Deals
+-                </Text>
+-
+-                <ActivityIndicator
+-                    size="large"
+-                    color="#2F80ED"
+-                    style={{ marginTop: 50 }}
+-                />
+-
+-            </View>
+-        </SafeAreaView>
+-
+-    </AppContainer>
++          <Eyebrow>Curated Commerce</Eyebrow>
++
++          <Display center style={{ marginTop: spacing.md }}>
++            Order Planning
++          </Display>
++
++          <Rule
++            style={{ width: 120, marginTop: spacing.lg, alignSelf: "center" }}
++          />
++
++          <Body tone="soft" center style={{ marginTop: spacing.lg }}>
++            Discover amazing deals
++          </Body>
++        </Animated.View>
++      </View>
++
++      <Animated.View
++        entering={FadeIn.delay(400).duration(700)}
++        style={{ alignItems: "center", paddingBottom: spacing.xl }}
++      >
++        <ActivityIndicator size="small" color={colors.brass} />
++      </Animated.View>
++    </Screen>
+   );
+ }
+-
+-const styles = StyleSheet.create({
+-  content: {
+-    flex: 1,
+-    justifyContent: "center",
+-    alignItems: "center",
+-  },
+-
+-  title: {
+-    marginTop: 25,
+-    fontSize: 34,
+-    fontWeight: "700",
+-    color: Colors.text,
+-  },
+-
+-  subtitle: {
+-    marginTop: 10,
+-    fontSize: 17,
+-    color: Colors.textSecondary,
+-  },
+-});
+\ No newline at end of file
+diff --git a/mobile/src/theme/ThemeContext.tsx b/mobile/src/theme/ThemeContext.tsx
+new file mode 100644
+index 0000000..9354a77
+--- /dev/null
++++ b/mobile/src/theme/ThemeContext.tsx
+@@ -0,0 +1,87 @@
++import React, {
++  createContext,
++  useCallback,
++  useContext,
++  useEffect,
++  useMemo,
++  useState,
++} from "react";
++import { useColorScheme } from "react-native";
++import * as SecureStore from "expo-secure-store";
++
++import { ColorScheme, Palette, palettes } from "./tokens";
++
++const STORAGE_KEY = "theme.override";
++
++type Override = ColorScheme | "system";
++
++interface ThemeContextValue {
++  scheme: ColorScheme; // the resolved scheme actually in use
++  colors: Palette; // resolved palette for `scheme`
++  isDark: boolean;
++  override: Override; // user preference: forced light/dark or follow system
++  setOverride: (o: Override) => void;
++  toggle: () => void; // flip between light/dark (sets an explicit override)
++}
++
++const ThemeContext = createContext<ThemeContextValue | null>(null);
++
++export function ThemeProvider({ children }: { children: React.ReactNode }) {
++  const system = useColorScheme() ?? "light";
++  const [override, setOverrideState] = useState<Override>("system");
++
++  // Restore persisted preference once on mount.
++  useEffect(() => {
++    let alive = true;
++    SecureStore.getItemAsync(STORAGE_KEY)
++      .then((v) => {
++        if (alive && (v === "light" || v === "dark" || v === "system")) {
++          setOverrideState(v);
++        }
++      })
++      .catch(() => {});
++    return () => {
++      alive = false;
++    };
++  }, []);
++
++  const persist = useCallback((o: Override) => {
++    SecureStore.setItemAsync(STORAGE_KEY, o).catch(() => {});
++  }, []);
++
++  const setOverride = useCallback(
++    (o: Override) => {
++      setOverrideState(o);
++      persist(o);
++    },
++    [persist]
++  );
++
++  const scheme: ColorScheme = override === "system" ? (system as ColorScheme) : override;
++
++  const toggle = useCallback(() => {
++    setOverride(scheme === "dark" ? "light" : "dark");
++  }, [scheme, setOverride]);
++
++  const value = useMemo<ThemeContextValue>(
++    () => ({
++      scheme,
++      colors: palettes[scheme],
++      isDark: scheme === "dark",
++      override,
++      setOverride,
++      toggle,
++    }),
++    [scheme, override, setOverride, toggle]
++  );
++
++  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
++}
++
++export function useTheme(): ThemeContextValue {
++  const ctx = useContext(ThemeContext);
++  if (!ctx) {
++    throw new Error("useTheme must be used within a <ThemeProvider>");
++  }
++  return ctx;
++}
+diff --git a/mobile/src/theme/fonts.ts b/mobile/src/theme/fonts.ts
+new file mode 100644
+index 0000000..ba06dbb
+--- /dev/null
++++ b/mobile/src/theme/fonts.ts
+@@ -0,0 +1,44 @@
++import {
++  CormorantGaramond_500Medium,
++  CormorantGaramond_600SemiBold,
++  CormorantGaramond_700Bold,
++} from "@expo-google-fonts/cormorant-garamond";
++import {
++  Jost_300Light,
++  Jost_400Regular,
++  Jost_500Medium,
++  Jost_600SemiBold,
++} from "@expo-google-fonts/jost";
++
++/**
++ * Family-name constants used throughout the theme. The string values must
++ * match the keys registered in `fontMap` below (which is what expo-font's
++ * useFonts() loads in app/_layout.tsx).
++ */
++export const fonts = {
++  // Editorial serif (web font-display: "Cormorant Garamond")
++  displayMedium: "CormorantGaramond_500Medium",
++  displaySemiBold: "CormorantGaramond_600SemiBold",
++  displayBold: "CormorantGaramond_700Bold",
++
++  // Body sans (web font-sans: "Jost")
++  sansLight: "Jost_300Light",
++  sans: "Jost_400Regular",
++  sansMedium: "Jost_500Medium",
++  sansSemiBold: "Jost_600SemiBold",
++} as const;
++
++/**
++ * Passed to useFonts(). @expo-google-fonts exports each weight as a module
++ * whose key becomes the fontFamily name — so the keys here line up with the
++ * `fonts` constants above.
++ */
++export const fontMap = {
++  CormorantGaramond_500Medium,
++  CormorantGaramond_600SemiBold,
++  CormorantGaramond_700Bold,
++  Jost_300Light,
++  Jost_400Regular,
++  Jost_500Medium,
++  Jost_600SemiBold,
++};
+diff --git a/mobile/src/theme/index.ts b/mobile/src/theme/index.ts
+index 35202f9..7baaf11 100644
+--- a/mobile/src/theme/index.ts
++++ b/mobile/src/theme/index.ts
+@@ -2,4 +2,9 @@ export * from "./colors";
+ export * from "./spacing";
+ export * from "./radius";
+ export * from "./typography";
+-export * from "./shadows";
+\ No newline at end of file
++export * from "./shadows";
++
++// Editorial design system (light/dark, fonts, primitives-facing tokens)
++export * from "./tokens";
++export * from "./fonts";
++export * from "./ThemeContext";
+\ No newline at end of file
+diff --git a/mobile/src/theme/tokens.ts b/mobile/src/theme/tokens.ts
+new file mode 100644
+index 0000000..5cb2dbf
+--- /dev/null
++++ b/mobile/src/theme/tokens.ts
+@@ -0,0 +1,158 @@
++import { TextStyle, ViewStyle } from "react-native";
++import { fonts } from "./fonts";
++
++/**
++ * LUXURY / EDITORIAL DESIGN TOKENS
++ * Ported 1:1 from the web app (frontend/src/styles/theme.css + tailwind.config.js)
++ * so the mobile app mirrors the same warm-ivory / charcoal-salon look.
++ */
++
++export type ColorScheme = "light" | "dark";
++
++export interface Palette {
++  canvas: string; // page background
++  surface: string; // cards / panels
++  surface2: string; // raised / hover
++  ink: string; // primary text
++  inkSoft: string; // secondary text
++  inkFaint: string; // captions / meta / placeholder
++  line: string; // borders / hairlines
++  brass: string; // accent (gold/brass)
++  brassSoft: string;
++  success: string;
++  danger: string;
++  onInk: string; // text/icon that sits on top of an ink-filled surface
++  onBrass: string; // text/icon on a brass-filled surface
++  shadow: string;
++}
++
++// Light — warm ivory gallery
++export const lightColors: Palette = {
++  canvas: "#F7F4EF",
++  surface: "#FFFDFA",
++  surface2: "#F0EBE3",
++  ink: "#1A1816",
++  inkSoft: "#4A453F",
++  inkFaint: "#8A8278",
++  line: "#E0D9CE",
++  brass: "#A07C4B",
++  brassSoft: "#C1A57A",
++  success: "#4F6E54",
++  danger: "#9C4237",
++  onInk: "#F7F4EF",
++  onBrass: "#FFFFFF",
++  shadow: "#28221A",
++};
++
++// Dark — deep charcoal salon
++export const darkColors: Palette = {
++  canvas: "#0F0E0D",
++  surface: "#191715",
++  surface2: "#24211E",
++  ink: "#F2EDE4",
++  inkSoft: "#BEB6AA",
++  inkFaint: "#8A8174",
++  line: "#36312C",
++  brass: "#C9A063",
++  brassSoft: "#A88658",
++  success: "#7A9C7E",
++  danger: "#C56A5E",
++  onInk: "#0F0E0D",
++  onBrass: "#FFFFFF",
++  shadow: "#000000",
++};
++
++export const palettes: Record<ColorScheme, Palette> = {
++  light: lightColors,
++  dark: darkColors,
++};
++
++/**
++ * Editorial type scale. Display roles use the Cormorant Garamond serif;
++ * everything else uses the Jost sans. Sizes are tuned for a ~380px phone
++ * (down from the web's clamp() hero sizes).
++ */
++export const type = {
++  displayLg: {
++    fontFamily: fonts.displaySemiBold,
++    fontSize: 46,
++    lineHeight: 48,
++    letterSpacing: -0.5,
++  },
++  display: {
++    fontFamily: fonts.displaySemiBold,
++    fontSize: 34,
++    lineHeight: 38,
++    letterSpacing: -0.3,
++  },
++  h1: {
++    fontFamily: fonts.displaySemiBold,
++    fontSize: 28,
++    lineHeight: 32,
++  },
++  h2: {
++    fontFamily: fonts.displayMedium,
++    fontSize: 22,
++    lineHeight: 28,
++  },
++  h3: {
++    fontFamily: fonts.sansSemiBold,
++    fontSize: 17,
++    lineHeight: 24,
++  },
++  body: {
++    fontFamily: fonts.sans,
++    fontSize: 16,
++    lineHeight: 24,
++  },
++  bodySm: {
++    fontFamily: fonts.sans,
++    fontSize: 14,
++    lineHeight: 21,
++  },
++  caption: {
++    fontFamily: fonts.sans,
++    fontSize: 13,
++    lineHeight: 18,
++  },
++  // Small-caps eyebrow: uppercase + wide tracking + brass (applied by <Eyebrow/>)
++  eyebrow: {
++    fontFamily: fonts.sansMedium,
++    fontSize: 11,
++    lineHeight: 14,
++    letterSpacing: 2, // ~0.18em at 11px (web tracking-luxe)
++    textTransform: "uppercase" as const,
++  },
++} satisfies Record<string, TextStyle>;
++
++// Web tracking-luxe (0.18em) / wide2 (0.28em) as absolute points helper.
++export const tracking = (fontSize: number, em = 0.18) => fontSize * em;
++
++// Editorial = sharp corners with the barest softening.
++export const radii = {
++  none: 0,
++  xs: 2,
++  sm: 4,
++  pill: 999,
++} as const;
++
++export const spacing = {
++  xs: 4,
++  sm: 8,
++  md: 16,
++  lg: 24,
++  xl: 32,
++  xxl: 48,
++  xxxl: 64,
++} as const;
++
++// Soft, long editorial shadow (web boxShadow.luxe / luxe-sm).
++export const luxeShadow = (p: Palette, strong = false): ViewStyle => ({
++  shadowColor: p.shadow,
++  shadowOpacity: strong ? 0.22 : 0.14,
++  shadowRadius: strong ? 30 : 18,
++  shadowOffset: { width: 0, height: strong ? 24 : 12 },
++  elevation: strong ? 12 : 6,
++});
++
++export const easeLuxe = "cubic-bezier(0.22, 1, 0.36, 1)"; // for reanimated Easing.bezier(0.22,1,0.36,1)

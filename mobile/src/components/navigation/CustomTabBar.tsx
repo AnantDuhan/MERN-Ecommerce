@@ -1,44 +1,38 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
-
-import { BlurView } from "expo-blur";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 
 import ActivePill from "./ActivePill";
 import TabBarButton from "./TabBarButton";
 import { TABS } from "./TabConfig";
-
-import * as Haptics from "expo-haptics";
+import { useTheme } from "@/theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-const HORIZONTAL_MARGIN = 20;
 
 interface Props {
   state: {
     index: number;
-    routes: {
-      key: string;
-      name: string;
-    }[];
+    routes: { key: string; name: string }[];
   };
-
   navigation: any;
 }
 
+/** Docked editorial tab bar: surface panel, hairline top edge, brass active tick. */
 export default function CustomTabBar({ state, navigation }: Props) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const tabWidth = (SCREEN_WIDTH - HORIZONTAL_MARGIN * 2) / state.routes.length;
+  const tabWidth = SCREEN_WIDTH / state.routes.length;
 
   return (
-    <BlurView
-      intensity={90}
-      tint="light"
+    <View
       style={[
         styles.container,
         {
-          bottom: insets.bottom + 14,
+          paddingBottom: insets.bottom || 12,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.line,
         },
       ]}
     >
@@ -63,34 +57,19 @@ export default function CustomTabBar({ state, navigation }: Props) {
           }}
         />
       ))}
-    </BlurView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    left: HORIZONTAL_MARGIN,
-    right: HORIZONTAL_MARGIN,
-    height: 78,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 30,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    opacity: 0.7,
-    // iOS Shadow
-    shadowColor: "#2F80ED",
-    shadowOpacity: 0.62,
-    shadowRadius: 45,
-    shadowOffset: {
-        width: 0,
-        height: 22,
-    },
-
-    // Android Shadow
-    elevation: 22,
+    alignItems: "flex-start",
+    paddingTop: 10,
+    borderTopWidth: 1,
   },
 });

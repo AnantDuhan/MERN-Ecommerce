@@ -5,14 +5,13 @@ import {
   ListRenderItem,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 
 import Animated, {
@@ -21,63 +20,52 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-import AnimatedBackground from "@/components/layout/AnimatedBackground";
-
 import { ONBOARDING_DATA } from "@/components/onboarding/constants/onboarding";
 import { OnboardingItem } from "@/types/onboarding";
 
 import Pagination from "@/components/onboarding/Pagination";
-import PrimaryButton from "@/components/onboarding/PrimaryButton";
 import OnboardingSlide from "@/components/onboarding/OnboardingSlide";
+import { Button } from "@/components/ui/Button";
+import { Eyebrow } from "@/components/ui/Text";
+import { useTheme } from "@/theme/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
-const AnimatedFlatList =
-  Animated.createAnimatedComponent(
-    FlatList<OnboardingItem>
-  );
+const AnimatedFlatList = Animated.createAnimatedComponent(
+  FlatList<OnboardingItem>
+);
 
 export default function OnboardingScreen() {
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const flatListRef =
-    useRef<FlatList<OnboardingItem>>(null);
-
+  const flatListRef = useRef<FlatList<OnboardingItem>>(null);
   const scrollX = useSharedValue(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [currentIndex, setCurrentIndex] =
-    useState(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
 
-  const scrollHandler =
-    useAnimatedScrollHandler({
-      onScroll: (event) => {
-        scrollX.value = event.contentOffset.x;
-      },
-    });
-
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: any) => {
-      if (viewableItems.length > 0) {
-        setCurrentIndex(
-          viewableItems[0].index ?? 0
-        );
-      }
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index ?? 0);
     }
-  ).current;
+  }).current;
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  const handleNext = () => {
-    console.log("Current Index:", currentIndex);
+  const isLast = currentIndex === ONBOARDING_DATA.length - 1;
 
-    if (currentIndex === ONBOARDING_DATA.length - 1) {
-      console.log("Navigate to Login");
+  const handleNext = () => {
+    if (isLast) {
       router.replace("/login");
       return;
     }
-
     flatListRef.current?.scrollToIndex({
       index: currentIndex + 1,
       animated: true,
@@ -88,45 +76,31 @@ export default function OnboardingScreen() {
     router.replace("/login");
   };
 
-  const renderItem: ListRenderItem<OnboardingItem> =
-    ({ item }) => (
-      <View style={{ width }}>
-        <OnboardingSlide
-          illustration={item.illustration}
-          title={item.title}
-          description={item.description}
-        />
-      </View>
-    );
+  const renderItem: ListRenderItem<OnboardingItem> = ({ item, index }) => (
+    <View style={{ width }}>
+      <OnboardingSlide
+        eyebrow={`0${index + 1} \u2014 0${ONBOARDING_DATA.length}`}
+        illustration={item.illustration}
+        title={item.title}
+        description={item.description}
+      />
+    </View>
+  );
 
   return (
     <SafeAreaView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.canvas }]}
       edges={["top"]}
     >
-      <AnimatedBackground />
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       <Animated.View
         entering={FadeInDown.duration(600)}
-        style={[
-          styles.header,
-          {
-            top: insets.top + 12,
-          },
-        ]}
+        style={[styles.header, { top: insets.top + 12 }]}
       >
-        {currentIndex !==
-          ONBOARDING_DATA.length - 1 && (
-          <Pressable onPress={handleSkip}>
-            <BlurView
-              intensity={70}
-              tint="light"
-              style={styles.skipButton}
-            >
-              <Text style={styles.skip}>
-                Skip
-              </Text>
-            </BlurView>
+        {!isLast && (
+          <Pressable onPress={handleSkip} hitSlop={10}>
+            <Eyebrow tone="soft">Skip</Eyebrow>
           </Pressable>
         )}
       </Animated.View>
@@ -142,36 +116,24 @@ export default function OnboardingScreen() {
         keyExtractor={(item) => item.id}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        onViewableItemsChanged={
-          onViewableItemsChanged
-        }
-        viewabilityConfig={
-          viewabilityConfig
-        }
-        contentContainerStyle={
-          styles.listContent
-        }
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        contentContainerStyle={styles.listContent}
       />
 
       <View style={styles.paginationContainer}>
         <Pagination
-          dataLength={
-            ONBOARDING_DATA.length
-          }
+          dataLength={ONBOARDING_DATA.length}
           scrollX={scrollX}
           width={width}
         />
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton
-          title={
-            currentIndex ===
-            ONBOARDING_DATA.length - 1
-              ? "Get Started"
-              : "Next"
-          }
+        <Button
+          label={isLast ? "Get Started" : "Next"}
           onPress={handleNext}
+          fullWidth
         />
       </View>
     </SafeAreaView>
@@ -182,7 +144,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
   header: {
     position: "absolute",
     left: 24,
@@ -190,42 +151,23 @@ const styles = StyleSheet.create({
     zIndex: 100,
     alignItems: "flex-end",
   },
-
   listContent: {
-    paddingTop: 80,
+    paddingTop: 60,
     paddingBottom: 200,
   },
-
   paginationContainer: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 110,
+    bottom: 120,
     alignItems: "center",
     zIndex: 50,
   },
-
   footer: {
     position: "absolute",
     left: 24,
     right: 24,
-    bottom: 30,
+    bottom: 36,
     zIndex: 50,
-  },
-
-  skipButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 28,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    backgroundColor: "rgba(255,255,255,0.12)",
-  },
-
-  skip: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#475569",
   },
 });

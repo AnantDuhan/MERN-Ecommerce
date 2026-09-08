@@ -1,57 +1,51 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 
 import HeroIllustration from "@/components/onboarding/HeroIllustration";
 import { IllustrationType } from "@/types/onboarding";
+import { Eyebrow, Display, Body } from "@/components/ui/Text";
+import { spacing } from "@/theme/tokens";
 
 interface Props {
   illustration: IllustrationType;
   title: string;
   description: string;
+  eyebrow?: string;
 }
 
 export default function OnboardingSlide({
   illustration,
   title,
   description,
+  eyebrow,
 }: Props) {
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 28,
+        paddingBottom: 40,
+      }}
+    >
       <HeroIllustration type={illustration} />
 
-      <Text style={styles.title}>{title}</Text>
+      {eyebrow ? (
+        <Eyebrow style={{ marginTop: spacing.lg }}>{eyebrow}</Eyebrow>
+      ) : null}
 
-      <Text style={styles.description}>{description}</Text>
+      <Display center style={{ marginTop: spacing.sm }}>
+        {title}
+      </Display>
+
+      <Body
+        tone="soft"
+        center
+        style={{ marginTop: spacing.md, maxWidth: 320 }}
+      >
+        {description}
+      </Body>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 28,
-    paddingBottom: 40,
-  },
-
-  title: {
-    marginTop: 24,
-    fontSize: 36,
-    fontWeight: "800",
-    textAlign: "center",
-    color: "#111827",
-    lineHeight: 42,
-    letterSpacing: -0.5,
-  },
-
-  description: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-    fontSize: 17,
-    lineHeight: 28,
-    maxWidth: 300,
-    textAlign: "center",
-    color: "#6B7280",
-  },
-});

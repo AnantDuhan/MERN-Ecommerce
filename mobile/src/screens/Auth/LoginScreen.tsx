@@ -5,27 +5,29 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import GoogleButton from "@/components/auth/GoogleButton";
-import AuthDivider from "@/components/auth/AuthDivider";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import AuthCard from "@/components/auth/AuthCard";
-import { Ionicons } from "@expo/vector-icons";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import AnimatedBackground from "@/components/layout/AnimatedBackground";
 import AuthHeader from "@/components/auth/AuthHeader";
+import AuthCard from "@/components/auth/AuthCard";
 import AuthTextField from "@/components/auth/AuthTextField";
-import PrimaryButton from "@/components/onboarding/PrimaryButton";
-
+import AuthDivider from "@/components/auth/AuthDivider";
 import AuthFooter from "@/components/auth/AuthFooter";
+import GoogleButton from "@/components/auth/GoogleButton";
+import PrimaryButton from "@/components/onboarding/PrimaryButton";
+import { Txt } from "@/components/ui/Text";
+
+import { useTheme } from "@/theme/ThemeContext";
+import { spacing, type } from "@/theme/tokens";
+
 import { useLogin } from "@/features/auth/hooks/useLogin";
 import {
   loginSchema,
@@ -33,6 +35,7 @@ import {
 } from "@/features/auth/validation/auth.schema";
 
 export default function LoginScreen() {
+  const { colors, isDark } = useTheme();
   const loginMutation = useLogin();
 
   const {
@@ -41,10 +44,7 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = (data: LoginFormData) => {
@@ -52,8 +52,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AnimatedBackground />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]}>
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -66,9 +66,10 @@ export default function LoginScreen() {
           bounces={false}
         >
           <AuthHeader
-            title="Welcome Back 👋"
-            subtitle="Sign in to continue your shopping!"
+            title="Welcome back"
+            subtitle="Sign in to continue your shopping."
           />
+
           <AuthCard>
             <Controller
               control={control}
@@ -83,9 +84,7 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   returnKeyType="next"
-                  leftIcon={
-                    <Ionicons name="mail-outline" size={22} color="#64748B" />
-                  }
+                  icon="mail-outline"
                 />
               )}
             />
@@ -103,13 +102,7 @@ export default function LoginScreen() {
                   secureTextEntry
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit(onSubmit)}
-                  leftIcon={
-                    <Ionicons
-                      name="lock-closed-outline"
-                      size={22}
-                      color="#64748B"
-                    />
-                  }
+                  icon="lock-closed-outline"
                 />
               )}
             />
@@ -118,12 +111,16 @@ export default function LoginScreen() {
               <Pressable
                 disabled={loginMutation.isPending}
                 onPress={() => router.push("/forgot-password")}
+                hitSlop={8}
+                style={{ alignSelf: "flex-end" }}
               >
-                <Text style={styles.forgot}>Forgot Password?</Text>
+                <Txt tone="brass" style={{ ...type.eyebrow }}>
+                  Forgot Password
+                </Txt>
               </Pressable>
             </Animated.View>
 
-            <View style={{ height: 16 }} />
+            <View style={{ height: spacing.lg }} />
 
             <PrimaryButton
               title="Sign In"
@@ -133,16 +130,19 @@ export default function LoginScreen() {
             />
 
             {loginMutation.isError && (
-              <Text style={styles.error}>{loginMutation.error.message}</Text>
+              <Txt tone="danger" center style={{ marginTop: spacing.md }}>
+                {loginMutation.error.message}
+              </Txt>
             )}
 
             <AuthDivider />
 
-          <GoogleButton
+            <GoogleButton
               disabled={loginMutation.isPending}
               onPress={() => {}}
             />
           </AuthCard>
+
           <Animated.View entering={FadeInDown.delay(500)}>
             <AuthFooter
               text="Don't have an account?"
@@ -158,39 +158,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  mainContent: {
-    flex: 1,
-  },
-
+  container: { flex: 1 },
   content: {
     flexGrow: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     justifyContent: "center",
     paddingTop: 24,
     paddingBottom: 24,
-  },
-
-  forgot: {
-    alignSelf: "flex-end",
-    color: "#2F80ED",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  footer: {
-    paddingBottom: 24,
-    paddingTop: 12,
-    alignItems: "center",
-  },
-
-  error: {
-    marginTop: 12,
-    textAlign: "center",
-    color: "#EF4444",
-    fontSize: 14,
   },
 });
