@@ -1,13 +1,14 @@
 // const { s3 } = require('../app');
 const User = require('../models/user');
 const sendEmail = require('../utils/sendEmail');
+const { sendEmailInBackground } = require('../utils/sendEmail');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const EmailService = require("../services/email.service");
 require('dotenv').config({ path: 'backend/config/config.env' });
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { fromEnv } = require('@aws-sdk/credential-provider-env');
-const Snowflake = require('@theinternetfolks/snowflake');
+const generateId = require('../utils/generateId');
 const { OAuth2Client } = require('google-auth-library');
 const validator = require('validator'); 
 const ejs = require('ejs');
@@ -47,25 +48,17 @@ exports.registerUser = async (req, res, next) => {
         await s3.send(uploadCommand);
 
         const cacheBuster = Date.now();
-        const avatarUrl = `https://${uploadParams.Bucket}.s3.${s3.region}.amazonaws.com/${uploadParams.Key}?cacheBuster=${cacheBuster}`;
+        const avatarUrl = `https://${uploadParams.Bucket}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${uploadParams.Key}?cacheBuster=${cacheBuster}`;
 
         console.log('✅ Image uploaded successfully:', avatarUrl);
 
-        // const customer = await stripe.customers.create({
-        //     email,
-        //     source: 'tok_visa'
-        // });
-
         const user = await User.create({
-            _id: Snowflake.Snowflake.generate({
-                timestamp: timestampInSeconds
-            }),
+            _id: generateId(),
             name,
             whatsappNumber,
             email,
             password,
-            avatar: avatarUrl,
-            // stripeCustomerId: customer.id
+            avatar: avatarUrl
         });
 
         let token = jwt.sign(
@@ -80,8 +73,8 @@ exports.registerUser = async (req, res, next) => {
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         };
 
         const finalToken = user.getJWTToken();
@@ -149,8 +142,8 @@ exports.loginUser = async (req, res, next) => {
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         };
 
         res.status(201).cookie('token', token, options).json({
@@ -170,7 +163,9 @@ exports.loginUser = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
     res.cookie('token', null, {
         expires: new Date(Date.now()),
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
     res.status(200).json({
@@ -181,27 +176,36 @@ exports.logout = async (req, res, next) => {
 
 // forgot password
 exports.forgotPassword = async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email });
-
-    if (!user) {
-        return res.status(404).json({
-            success: false,
-            message: 'User not found'
-        });
-    }
-
-    // get reset password token
-    const resetToken = user.getResetPasswordToken();
-    await user.save({ validateBeforeSave: false });
-
-    const resetPasswordURL = `${process.env.REACT_NATIVE_APP_URL}auth/reset-password/${resetToken}`;
-
     try {
-        await EmailService.sendForgotPasswordEmail(user,  resetPasswordURL);
+        const email = req.body.email?.trim().toLowerCase();
+        const user = await User.findOne({ email });
 
-        const message = `Your password reset token is:- \n\n ${resetPasswordURL} \n\n If you have not requested this email then, please ignore it.`;
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
 
-        console.log('message', message);
+        // get reset password token
+        const resetToken = user.getResetPasswordToken();
+
+        await user.save({ validateBeforeSave: false });
+
+        const resetPasswordURL = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+        const emailMessage = await ejs.renderFile(
+            path.join(__dirname, '../mails/forgot-password.ejs'),
+            {
+                name: user.name,
+                activationCode: resetPasswordURL
+            }
+        );
+
+        sendEmailInBackground({
+            email: user.email,
+            subject: `Password Recovery - Ecommerce`,
+            html: emailMessage
+        });
 
         res.status(200).json({
             success: true,
@@ -209,13 +213,6 @@ exports.forgotPassword = async (req, res, next) => {
             resetPasswordURL: resetPasswordURL
         });
     } catch (error) {
-        console.error("Forgot Password Error:", error);
-
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-
-        await user.save({ validateBeforeSave: false });
-
         return res.status(500).json({
             success: false,
             message: error.message,
@@ -269,7 +266,9 @@ exports.resetPassword = async (req, res, next) => {
 
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         };
 
         res.status(200).cookie('token', token, options).json({
@@ -293,6 +292,51 @@ exports.getUserDetails = async (req, res, next) => {
         success: true,
         user
     });
+};
+
+// update User profile
+exports.updateProfile = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        user.name = req.body.name;
+        user.email = req.body.email;
+
+        if (req.file) {
+            const s3 = new S3Client({
+                region: process.env.AWS_BUCKET_REGION,
+                credentials: fromEnv()
+            });
+            const uploadParams = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: req.file.originalname,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype
+            };
+
+            await s3.send(new PutObjectCommand(uploadParams));
+            user.avatar = `https://${uploadParams.Bucket}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${uploadParams.Key}?cacheBuster=${Date.now()}`;
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
 
 // update User password
@@ -334,7 +378,9 @@ exports.updatePassword = async (req, res, next) => {
 
         const options = {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-            httpOnly: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         };
 
         res.status(200).cookie('token', token, options).json({
@@ -426,7 +472,7 @@ exports.googleLogin = async (req, res, next) => {
 
         if (!user) {
             user = await User.create({
-                _id: Snowflake.Snowflake.generate({ timestamp: timestampInSeconds }),
+                _id: generateId(),
                 name,
                 email,
                 avatar: picture,
@@ -445,7 +491,7 @@ exports.googleLogin = async (req, res, next) => {
             expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true,
-            sameSite: 'lax'
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         };
 
         res.status(200).cookie('token', token, options).json({
@@ -459,5 +505,98 @@ exports.googleLogin = async (req, res, next) => {
             success: false,
             message: 'Invalid or expired Google Token'
         });
+    }
+};
+// ---------------------------------------------------------------------------
+// Address book — saved shipping addresses on the user profile.
+// Shape mirrors an order's shippingInfo so a saved address drops straight in.
+// ---------------------------------------------------------------------------
+
+// GET /api/v1/addresses
+exports.getAddresses = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.status(200).json({ success: true, addresses: user.addresses || [] });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch addresses', error: error.message });
+    }
+};
+
+// POST /api/v1/address/new
+exports.addAddress = async (req, res) => {
+    try {
+        const { label, address, city, state, country, pinCode, phoneNumber } = req.body;
+
+        if (!address || !city || !state || !country || !pinCode || !phoneNumber) {
+            return res.status(400).json({
+                success: false,
+                message: 'address, city, state, country, pinCode and phoneNumber are required'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const normalize = value => String(value ?? '').trim().toLowerCase();
+        const duplicate = (user.addresses || []).some(saved =>
+            normalize(saved.address) === normalize(address) &&
+            normalize(saved.city) === normalize(city) &&
+            normalize(saved.state) === normalize(state) &&
+            normalize(saved.country) === normalize(country) &&
+            normalize(saved.pinCode) === normalize(pinCode) &&
+            normalize(saved.phoneNumber) === normalize(phoneNumber)
+        );
+
+        if (duplicate) {
+            return res.status(409).json({
+                success: false,
+                message: 'This address is already saved'
+            });
+        }
+
+        user.addresses.push({
+            _id: generateId(),
+            label: label || '',
+            address,
+            city,
+            state,
+            country,
+            pinCode,
+            phoneNumber
+        });
+
+        await user.save({ validateBeforeSave: false });
+
+        res.status(201).json({ success: true, addresses: user.addresses });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to save address', error: error.message });
+    }
+};
+
+// DELETE /api/v1/address/:addressId
+exports.deleteAddress = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const before = user.addresses.length;
+        user.addresses = user.addresses.filter(a => String(a._id) !== String(req.params.addressId));
+
+        if (user.addresses.length === before) {
+            return res.status(404).json({ success: false, message: 'Address not found' });
+        }
+
+        await user.save({ validateBeforeSave: false });
+
+        res.status(200).json({ success: true, addresses: user.addresses });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete address', error: error.message });
     }
 };

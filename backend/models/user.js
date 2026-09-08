@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema({
                     }
                 ],
                 product: {
-                    type: Number,
+                    type: String,
                     ref: 'Product'
                 }
             }
@@ -90,10 +90,24 @@ const userSchema = new mongoose.Schema({
             default: false,
         }
     },
-    stripeCustomerId: String,
     role: {
         type: String,
         default: 'user'
+    },
+    addresses: {
+        type: [
+            {
+                _id: String,
+                label: { type: String, trim: true, default: '' },
+                address: { type: String, required: true },
+                city: { type: String, required: true },
+                state: { type: String, required: true },
+                country: { type: String, required: true },
+                pinCode: { type: Number, required: true },
+                phoneNumber: { type: Number, required: true }
+            }
+        ],
+        default: []
     },
     createdAt: {
         type: Date,
@@ -103,8 +117,8 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpire: Date
 });
 
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) {
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) {
         return;
     }
 

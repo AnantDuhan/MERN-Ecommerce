@@ -1,12 +1,16 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
 const sendEmail = require('../utils/sendEmail');
+const { sendEmailInBackground } = require('../utils/sendEmail');
 const User = require('../models/user');
 const Coupon = require('../models/coupon');
 const nodeCache = require('node-cache');
-const NodeCache = new nodeCache();
+const NodeCache = new nodeCache({ useClones: false });
 const Reorder = require('../models/reorder');
-const Snowflake = require('@theinternetfolks/snowflake');
+const generateId = require('../utils/generateId');
+const ejs = require('ejs');
+const path = require('path');
+const { getCashfreeOrder } = require('../utils/cashfree');
 
 const timestamp = Date.now();
 const timestampInSeconds = Math.floor(timestamp / 1000);
@@ -29,6 +33,26 @@ exports.newOrder = async (req, res, next) => {
 
         const coupon = await Coupon.findOne({ code: couponCode });
 
+        if (paymentInfo?.provider === 'cashfree') {
+            if (!paymentInfo.id || !paymentInfo.id.startsWith(`order_${req.user._id}_`)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'You cannot use this payment for the order',
+                });
+            }
+            const cashfreeOrder = await getCashfreeOrder(paymentInfo.id);
+            if (
+                cashfreeOrder.order_status !== 'PAID'
+            ) {
+                return res.status(402).json({
+                    success: false,
+                    message: 'Cashfree payment has not been completed',
+                });
+            }
+            paymentInfo.status = 'PAID';
+            paymentInfo.id = cashfreeOrder.cf_order_id || paymentInfo.id;
+        }
+
         let discountedTotalPrice = totalPrice;
         if (coupon) {
             if (
@@ -44,22 +68,24 @@ exports.newOrder = async (req, res, next) => {
         const orderItemsWithImages = await Promise.all(
             orderItems.map(async item => {
                 const product = await Product.findById(item.product);
-                if (product) {
-                    return {
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        images: product.images, // Include the images from the product
-                        product: item.product
-                    };
+                if (!product) {
+                    const error = new Error(`Product ${item.product} not found`);
+                    error.statusCode = 404;
+                    throw error;
                 }
+
+                return {
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    images: product.images,
+                    product: item.product
+                };
             })
         );
 
         const order = await Order.create({
-            _id: Snowflake.Snowflake.generate({
-                timestamp: timestampInSeconds
-            }),
+            _id: generateId(),
             shippingInfo,
             orderItems: orderItemsWithImages,
             paymentInfo,
@@ -81,20 +107,17 @@ exports.newOrder = async (req, res, next) => {
             currentDate.getDate() + randomDays
         ); // Add random days
 
-        const imageUrl = order.orderItems.image;
+        const emailMessage = await ejs.renderFile(
+            path.join(__dirname, '../mails/order-confirmation.ejs'),
+            {
+                order,
+                user,
+                status: 'placed',
+                estimatedDeliveryDate: estimatedDeliveryDate.toDateString()
+            }
+        );
 
-        const emailMessage = `<html>
-    <body>
-        <p>Hello ${user.name}!</p>
-        <p>Your order📦 has been placed successfully. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
-        <img src="${imageUrl}" alt="Ordered Items">
-        <p>Thank you for ordering. For more please visit our website <a href="http://www.orderplanning.com">www.orderplanning.com</a>.</p>
-        <p>Here's the image of your ordered items:</p>
-        <p>Happy Shopping.😊</p>
-    </body>
-    </html>`;
-
-        await sendEmail({
+        sendEmailInBackground({
             email: user.email,
             subject: `Your Order📦 has been placed successfully`,
             html: emailMessage
@@ -115,14 +138,16 @@ exports.newOrder = async (req, res, next) => {
 // get single order
 exports.getSingleOrder = async (req, res, next) => {
     let order;
-    if (NodeCache.has('order')) {
-        order = JSON.parse(JSON.stringify(NodeCache.get('order')));
+    const cacheKey = `order:${req.params.id}`;
+
+    if (NodeCache.has(cacheKey)) {
+        order = NodeCache.get(cacheKey);
     } else {
         order = await Order.findById(req.params.id).populate(
             'user',
             'name email'
-        );
-        NodeCache.set('order', JSON.stringify(order));
+        ).lean();
+        NodeCache.set(cacheKey, order);
     }
 
     if (!order) {
@@ -141,14 +166,15 @@ exports.getSingleOrder = async (req, res, next) => {
 // get logged in user order
 exports.myOrders = async (req, res, next) => {
     let orders;
+    const cacheKey = `orders:${req.user._id}`;
 
-    if (NodeCache.has('orders')) {
-        orders = JSON.parse(JSON.stringify(NodeCache.get('orders')));
+    if (NodeCache.has(cacheKey)) {
+        orders = NodeCache.get(cacheKey);
     } else {
         orders = await Order.find({
             user: req.user._id
-        });
-        NodeCache.set('orders', JSON.stringify(orders));
+        }).lean();
+        NodeCache.set(cacheKey, orders);
     }
 
     res.status(200).json({
@@ -164,15 +190,11 @@ exports.getAllOrders = async (req, res, next) => {
 
         // 1. Check if it's in the cache
         if (NodeCache.has('orders')) {
-            // Retrieve the array exactly as it was stored
-            // If you are using Redis instead of node-cache, change this line to: 
-            // orders = JSON.parse(NodeCache.get('orders'));
-            orders = NodeCache.get('orders'); 
+            orders = NodeCache.get('orders');
         } else {
             // 2. If not in cache, get from DB
-            orders = await Order.find();
+            orders = await Order.find().lean();
             
-            // Save the raw array to the cache
             NodeCache.set('orders', orders);
         }
 
@@ -202,7 +224,7 @@ exports.getAllOrders = async (req, res, next) => {
 exports.updateOrder = async (req, res, next) => {
     try {
         const orderId = req.params.id;
-        const order = await getOrderFromCache(orderId);
+        const order = await Order.findById(orderId);
 
         const user = await User.findById(req.user._id);
 
@@ -221,9 +243,9 @@ exports.updateOrder = async (req, res, next) => {
         }
 
         if (req.body.status === 'Shipped') {
-            order.orderItems.forEach(async o => {
-                await updateStock(o.product, o.quantity);
-            });
+            await Promise.all(
+                order.orderItems.map(item => updateStock(item.product, item.quantity))
+            );
         }
 
         order.orderStatus = req.body.status;
@@ -236,8 +258,20 @@ exports.updateOrder = async (req, res, next) => {
         // Save the updated order
         await order.save({ validateBeforeSave: false });
 
+        // Push the new status to anyone viewing this order in real time.
+        const io = req.app.get('socketio');
+        if (io) {
+            io.to(`order:${orderId}`).emit('orderStatusUpdate', {
+                orderId,
+                orderStatus: order.orderStatus
+            });
+        }
+
         // Clear the cache for the updated order
         NodeCache.del(orderId);
+        NodeCache.del(`order:${orderId}`);
+        NodeCache.del('orders');
+        NodeCache.del(`orders:${order.user}`);
 
         const randomDays = Math.floor(Math.random() * 8); // Generate random number between 0 and 7
         const currentDate = new Date();
@@ -247,21 +281,16 @@ exports.updateOrder = async (req, res, next) => {
             currentDate.getDate() + randomDays
         ); // Add random days
 
-        const imageUrl = order.orderItems.image;
-
-        const emailMessage = `<html>
-    <body>
-        <p>Hello ${user.name}!</p>
-        <p>Your order📦 ${order._id} has been ${
-            order.orderStatus
-        }. Your estimated Date of delivery is ${estimatedDeliveryDate.toDateString()}.</p>
-        <img src="${imageUrl}" alt="Ordered Items">
-        <p>Thank you for ordering. For more please visit our website <a href="http://www.orderplanning.com">www.orderplanning.com</a>.</p>
-        <p>Here's the image of your ordered items:</p>
-        <p>Happy Shopping.😊</p>
-    </body>
-    </html>`;
-        await sendEmail({
+        const emailMessage = await ejs.renderFile(
+            path.join(__dirname, '../mails/order-confirmation.ejs'),
+            {
+                order,
+                user,
+                status: order.orderStatus,
+                estimatedDeliveryDate: estimatedDeliveryDate.toDateString()
+            }
+        );
+        sendEmailInBackground({
             email: user.email,
             subject: `Your Order📦 Status Update: ${order.orderStatus}`,
             html: emailMessage
@@ -283,7 +312,8 @@ exports.updateOrder = async (req, res, next) => {
 
 async function getOrderFromCache(orderId) {
     // Check if order data is in the cache
-    let order = NodeCache.get(orderId);
+    const cacheKey = `order:${orderId}`;
+    let order = NodeCache.get(cacheKey);
 
     // If not in the cache, fetch from the database
     if (!order) {
@@ -291,7 +321,7 @@ async function getOrderFromCache(orderId) {
 
         // Cache the order data for future use
         if (order) {
-            NodeCache.set(orderId, order);
+            NodeCache.set(cacheKey, order);
         }
     }
 
@@ -300,6 +330,11 @@ async function getOrderFromCache(orderId) {
 
 async function updateStock(id, quantity) {
     const product = await Product.findById(id);
+    if (!product) {
+        const error = new Error(`Product ${id} not found for order stock update`);
+        error.statusCode = 404;
+        throw error;
+    }
     product.Stock -= quantity;
     await product.save({ validateBeforeSave: false });
 }
@@ -323,11 +358,13 @@ exports.deleteOrder = async (req, res, next) => {
     });
 };
 
+// Re-place a past order as a fresh order for the same user.
+// POST /api/v1/order/reorder/:orderId
 exports.reorder = async (req, res, next) => {
     try {
-        const { originalOrderId } = req.body;
+        const { orderId } = req.params;
 
-        const originalOrder = await Order.findById(originalOrderId);
+        const originalOrder = await Order.findById(orderId);
 
         if (!originalOrder) {
             return res.status(404).json({
@@ -336,36 +373,39 @@ exports.reorder = async (req, res, next) => {
             });
         }
 
-        const newOrder = new Order({
+        // A user may only reorder their own order.
+        if (String(originalOrder.user) !== String(req.user._id)) {
+            return res.status(403).json({
+                success: false,
+                message: 'You are not allowed to reorder this order'
+            });
+        }
+
+        // Clone the purchasable content into a brand-new order. `_id` is a
+        // required String across all models, so it must be generated
+        // explicitly. Status/refund/return flags reset to a fresh order.
+        const newOrder = await Order.create({
+            _id: generateId(),
             shippingInfo: originalOrder.shippingInfo,
             orderItems: originalOrder.orderItems,
+            user: req.user._id,
             paymentInfo: originalOrder.paymentInfo,
+            paidAt: Date.now(),
             itemsPrice: originalOrder.itemsPrice,
-            taxPrice: originalOrder.taxPrice,
             shippingPrice: originalOrder.shippingPrice,
-            totalPrice: originalOrder.totalPrice
+            totalPrice: originalOrder.totalPrice,
+            orderStatus: 'Processing'
         });
 
-        await newOrder.save();
-
-        const reorder = new Reorder({
-            originalOrder: originalOrder._id,
-            newOrderDetails: {
-                shippingInfo: newOrder.shippingInfo,
-                orderItems: newOrder.orderItems,
-                paymentInfo: newOrder.paymentInfo,
-                itemsPrice: newOrder.itemsPrice,
-                taxPrice: newOrder.taxPrice,
-                shippingPrice: newOrder.shippingPrice,
-                totalPrice: newOrder.totalPrice
-            }
+        // Audit trail linking the new order back to the one it was copied from.
+        await Reorder.create({
+            _id: generateId(),
+            originalOrder: originalOrder._id
         });
-
-        await reorder.save();
 
         res.status(200).json({
             success: true,
-            newOrder
+            order: newOrder
         });
     } catch (error) {
         console.error(error);

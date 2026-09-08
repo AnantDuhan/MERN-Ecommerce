@@ -52,7 +52,7 @@ export const login = (email, password) => async (dispatch) => {
         const { data } = await axios.post(
             `/api/v1/login`,
             { email, password },
-            { config }
+            config
         );
 
         dispatch({ type: LOGIN_SUCCESS, payload: data.user });
@@ -67,16 +67,14 @@ export const login = (email, password) => async (dispatch) => {
 };
 
 // Register
-export const register = (name, email, password, avatar) => async dispatch => {
+export const register = formData => async dispatch => {
     try {
         dispatch({ type: REGISTER_USER_REQUEST });
 
-        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-
         const { data } = await axios.post(
             `/api/v1/register`,
-            { name, email, password, avatar },
-            { config }
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
         );
 
         dispatch({ type: REGISTER_USER_SUCCESS, payload: data.user });
@@ -99,7 +97,7 @@ export const loadUser = () => async dispatch => {
     } catch (error) {
         dispatch({
             type: LOAD_USER_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
     }
 };
@@ -116,23 +114,17 @@ export const logout = () => async dispatch => {
 };
 
 // Update Profile
-export const updateProfile = (name, email, avatar) => async dispatch => {
+export const updateProfile = userData => async dispatch => {
     try {
         dispatch({ type: UPDATE_PROFILE_REQUEST });
 
-        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-
-        const { data } = await axios.put(
-            `/api/me/update`,
-            { name, email, avatar },
-            { config }
-        );
+        const { data } = await axios.put('/api/v1/me/update', userData);
 
         dispatch({ type: UPDATE_PROFILE_SUCCESS, payload: data.success });
     } catch (error) {
         dispatch({
             type: UPDATE_PROFILE_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
     }
 };
@@ -164,9 +156,7 @@ export const forgotPassword = email => async dispatch => {
 
         const config = { headers: { 'Content-Type': 'application/json' } };
 
-        const { data } = await axios.post(`/api/v1/password/forgot`, email, {
-            config
-        });
+        const { data } = await axios.post(`/api/v1/password/forgot`, email, config);
 
         dispatch({ type: FORGOT_PASSWORD_SUCCESS, payload: data.message });
     } catch (error) {
@@ -286,7 +276,7 @@ export const loginWithGoogle = (googleToken) => async (dispatch) => {
             config
         );
 
-        dispatch({ type: GOOGLE_LOGIN_SUCCESS, payload: data });
+        dispatch({ type: GOOGLE_LOGIN_SUCCESS, payload: data.user });
 
     } catch (error) {
         dispatch({
@@ -299,4 +289,20 @@ export const loginWithGoogle = (googleToken) => async (dispatch) => {
 // Clearing Errors
 export const clearErrors = () => async dispatch => {
     dispatch({ type: CLEAR_ERRORS });
+};
+
+// ---- Address book -------------------------------------------------------
+// The saved addresses live on the user document, so after a change we refresh
+// the profile via loadUser() rather than maintaining a separate reducer.
+export const addAddress = address => async dispatch => {
+    const config = { headers: { 'Content-Type': 'application/json' } };
+    const { data } = await axios.post('/api/v1/address/new', address, config);
+    dispatch(loadUser());
+    return data;
+};
+
+export const deleteAddress = addressId => async dispatch => {
+    const { data } = await axios.delete(`/api/v1/address/${addressId}`);
+    dispatch(loadUser());
+    return data;
 };

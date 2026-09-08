@@ -1,10 +1,13 @@
 const cookieParser = require("cookie-parser");
+const compression = require("compression");
 const express = require("express");
 const app = express();
+app.set("trust proxy", 1);
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const url = require("url");
+const path = require("path");
 const {
   S3Client,
   PutObjectCommand,
@@ -18,13 +21,23 @@ const { isAuthUser, authRoles } = require("./middleware/auth");
 const User = require("./models/user");
 const Product = require("./models/product");
 const jwt = require("jsonwebtoken");
-const Snowflake = require("@theinternetfolks/snowflake");
+const generateId = require('./utils/generateId');
 const { generateEmbedding } = require('./utils/generateEmbedding');
-// const redisClientPromise = require('./config/redisClientUpstash');
+const redisClientPromise = require('./config/redisClientUpstash');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 require("dotenv").config({ path: "./config/config.env" });
 
+// Gzip response bodies. Registered first so every downstream response
+// (API JSON, docs, health) is compressed before it leaves the server.
+app.use(compression());
 app.use(cookieParser());
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({
+  limit: "50mb",
+  verify: (req, res, buffer) => {
+    req.rawBody = buffer.toString('utf8');
+  },
+}));
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -32,6 +45,28 @@ app.use(
     parameterLimit: 50000,
   }),
 );
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://orderplanning.netlify.app",
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      /^https:\/\/[-a-z0-9]+--orderplanning\.netlify\.app$/i.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error("Origin is not allowed by CORS"));
+  },
+  optionsSuccessStatus: 204,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // s3.config.update({
 //     region: process.env.AWS_BUCKET_REGION,
@@ -52,7 +87,8 @@ const upload = multer({
     if (
       file.mimetype === "image/png" ||
       file.mimetype === "image/jpg" ||
-      file.mimetype === "image/jpeg"
+      file.mimetype === "image/jpeg" ||
+      file.mimetype === "image/webp"
     ) {
       cb(null, true);
     } else {
@@ -72,33 +108,42 @@ const productRoute = require("./routes/product");
 const userRoute = require("./routes/user");
 const orderRoute = require("./routes/order");
 const paymentRoute = require("./routes/payment");
+const subscriptionRoute = require("./routes/subscription");
 const couponRoute = require("./routes/coupon");
+const analyticsRoute = require("./routes/analytics");
+const jobsRoute = require("./routes/jobs");
+const { apiLimiter } = require("./middleware/rateLimiter");
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerSpec);
+});
+
+app.use("/api/v1", apiLimiter);
 app.use("/api/v1", productRoute);
 app.use("/api/v1", userRoute);
 app.use("/api/v1", orderRoute);
 app.use("/api/v1", paymentRoute);
+app.use("/api/v1", subscriptionRoute);
 app.use("/api/v1", couponRoute);
+app.use("/api/v1", analyticsRoute);
+app.use("/api/v1", jobsRoute);
 
-// CORS
-app.use(async (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept",
-  );
-  res.header("Access-Control-Allow-Credentials", true);
-  res.header("Access-Control-Allow-Methods", "*");
-  return next();
-});
+// --- Serve the built React app (same-origin deployment) ---------------------
+// In production the backend serves the compiled frontend, so the whole app is
+// one origin: no CORS, no cross-site cookies, relative /api/v1 calls just work.
+// Guarded by NODE_ENV so local dev (CRA dev server + proxy) is unaffected.
+if (process.env.NODE_ENV === "production") {
+  const buildPath = path.join(__dirname, "../frontend/build");
+  app.use(express.static(buildPath));
 
-const corsOptions = {
-  origin: ["http://localhost:3000", "https://orderplanning.netlify.app/"],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+  // SPA fallback: any non-API GET returns index.html so client-side routes
+  // (e.g. /product/:id, /account/addresses) resolve. Express 5 needs a RegExp
+  // here, and we exclude the API, docs, and socket.io paths.
+  app.get(/^\/(?!api\/|api-docs|socket\.io\/).*/, (req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+}
 
 process.noDeprecation = true;
 
@@ -151,9 +196,7 @@ app.post("/register", upload.single("image"), async (req, res) => {
     console.log("✅ Image uploaded successfully:", avatarUrl);
 
     const user = await User.create({
-      _id: Snowflake.Snowflake.generate({
-        timestamp: timestampInSeconds,
-      }),
+      _id: generateId(),
       name,
       whatsappNumber,
       email,
@@ -173,6 +216,8 @@ app.post("/register", upload.single("image"), async (req, res) => {
     const options = {
       expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
     res.status(201).cookie("token", token, options).json({
@@ -194,30 +239,30 @@ app.put("/me/update", isAuthUser, upload.single("image"), async (req, res) => {
     const { name, email } = req.body;
     const file = req.file;
 
-    // Upload the avatar image to AWS S3
-    const uploadParams = {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `${userId}-${file.originalname}`,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    };
+    const updateData = { name, email };
+    if (file) {
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: `${userId}-${file.originalname}`,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
 
-    const s3 = new S3Client({
-      region: process.env.AWS_BUCKET_REGION,
-      credentials: fromEnv(),
-    });
+      const s3 = new S3Client({
+        region: process.env.AWS_BUCKET_REGION,
+        credentials: fromEnv(),
+      });
 
-    // Upload the file to S3
-    const uploadCommand = new PutObjectCommand(uploadParams);
-    await s3.send(uploadCommand);
+      await s3.send(new PutObjectCommand(uploadParams));
 
-    const cacheBuster = Date.now();
-    const avatarUrl = `https://${uploadParams.Bucket}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${uploadParams.Key}?cacheBuster=${cacheBuster}`;
+      const cacheBuster = Date.now();
+      updateData.avatar = `https://${uploadParams.Bucket}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${uploadParams.Key}?cacheBuster=${cacheBuster}`;
+    }
 
     // Update the user profile in the database
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, email, avatar: avatarUrl },
+      updateData,
       { new: true },
     );
 
@@ -329,9 +374,7 @@ app.post(
 
       // Create a new product in the database
       const product = await Product.create({
-        _id: Snowflake.Snowflake.generate({
-          timestamp: timestampInSeconds,
-        }),
+        _id: generateId(),
         name,
         description,
         price,

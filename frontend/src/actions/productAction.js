@@ -56,13 +56,25 @@ export const getProduct = (
     try {
         dispatch({ type: ALL_PRODUCT_REQUEST });
 
-        let link = `/api/v1/products?keyword=${keyword}&page=${currentPage}&price[gte]=${price[0]}&price[lte]=${price[1]}&ratings[gte]=${ratings}`;
+        // Only send filters the user actually set. A "no-op" filter such as
+        // ratings[gte]=0 is NOT harmless: in MongoDB a range query does not
+        // match documents where the field is absent, so sending it would hide
+        // every product that has no ratings/price field stored.
+        const params = new URLSearchParams();
 
-        if (category) {
-            link = `/api/v1/products?keyword=${keyword}&page=${currentPage}&price[gte]=${price[0]}&price[lte]=${price[1]}&category=${category}&ratings[gte]=${ratings}`;
+        if (keyword) params.set('keyword', keyword);
+        params.set('page', currentPage);
+
+        const [minPrice, maxPrice] = price || [];
+        if (Number(minPrice) > 0) params.set('price[gte]', minPrice);
+        if (maxPrice !== undefined && maxPrice !== null && Number(maxPrice) < 400000) {
+            params.set('price[lte]', maxPrice);
         }
 
-        const { data } = await axios.get(link);
+        if (category) params.set('category', category);
+        if (Number(ratings) > 0) params.set('ratings[gte]', ratings);
+
+        const { data } = await axios.get(`/api/v1/products?${params.toString()}`);
 
         dispatch({
             type: ALL_PRODUCT_SUCCESS,
@@ -71,7 +83,7 @@ export const getProduct = (
     } catch (error) {
         dispatch({
             type: ALL_PRODUCT_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message || 'Could not load products'
         });
     }
 };
@@ -126,13 +138,7 @@ export const updateProduct = (id, productData) => async dispatch => {
     try {
         dispatch({ type: UPDATE_PRODUCT_REQUEST });
 
-        const config = {
-            headers: { 'Content-Type': 'application/json' }
-        };
-
-        const { data } = await axios.put(`/admin/product/${id}`, productData, {
-            config
-        });
+        const { data } = await axios.put(`/admin/product/${id}`, productData);
 
         dispatch({
             type: UPDATE_PRODUCT_SUCCESS,
@@ -269,7 +275,7 @@ export const fetchWishlist = () => async dispatch => {
     } catch (error) {
         dispatch({
             type: ALL_WISHLIST_PRODUCTS_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
     }
 };
@@ -288,7 +294,7 @@ export const addProductToWishlist = (id) => async dispatch => {
     } catch (error) {
         dispatch({
             type: ADD_PRODUCT_TO_WISHLIST_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
     }
 };

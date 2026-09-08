@@ -10,7 +10,9 @@ const {
    removeFromWishList,
    getAllWishlistProducts,
    summerizeProductReviews,
-   updateProduct
+   updateProduct,
+//    searchProducts,
+//    getAutocompleteSuggestions
 } = require('../controllers/product');
 
 const { isAuthUser, authRoles } = require('../middleware/auth');

@@ -52,6 +52,7 @@ export const createOrder = order => async dispatch => {
         });
 
         dispatch({ type: CREATE_ORDER_SUCCESS, payload: data });
+        return data;
     } catch (error) {
         dispatch({
             type: CREATE_ORDER_FAIL,
@@ -105,7 +106,7 @@ export const updateOrder = (id, status) => async dispatch => {
         const { data } = await axios.put(
             `/api/v1/admin/order/${id}`,
             { status },
-            { config }
+            config
         );
 
         dispatch({ type: UPDATE_ORDER_SUCCESS, payload: data.success });
@@ -162,7 +163,7 @@ export const returnRequest = (id, returnReason) => async dispatch => {
         const { data } = await axios.post(
             `/api/v1/order/${id}/return`,
             { returnReason },
-            { config }
+            config
         );
 
         dispatch({
@@ -172,8 +173,9 @@ export const returnRequest = (id, returnReason) => async dispatch => {
     } catch (error) {
         dispatch({
             type: REQUEST_RETURN_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
+        throw error;
     }
 };
 
@@ -187,8 +189,9 @@ export const initiateRefund = id => async dispatch => {
     } catch (error) {
         dispatch({
             type: INITIATE_REFUND_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
+        throw error;
     }
 };
 
@@ -200,19 +203,7 @@ export const updateRefundStatus = (
     try {
         dispatch({ type: REFUND_STATUS_UPDATE_REQUEST });
 
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        const body = JSON.stringify({ refundStatus });
-
-        await axios.patch(
-            `/api/v1/admin/order/${orderId}/refund/${refundId}/status`,
-            { body },
-            { config }
-        );
+        await axios.patch(`/api/v1/admin/order/${orderId}/refund/${refundId}/status`, { refundStatus });
 
         dispatch({
             type: REFUND_STATUS_UPDATE_SUCCESS,
@@ -222,8 +213,9 @@ export const updateRefundStatus = (
     } catch (error) {
         dispatch({
             type: REFUND_STATUS_UPDATE_FAIL,
-            payload: error.response.data.message
+            payload: error.response?.data?.message || error.message
         });
+        throw error;
     }
 };
 
@@ -257,7 +249,28 @@ export const allReturns = () => async dispatch => {
     }
 };
 
+export const updateReturnStatus = (id, status) => async dispatch => {
+    try {
+        await axios.patch(`/api/v1/admin/return/${id}/status`, { status });
+        dispatch(allReturns());
+    } catch (error) {
+        dispatch({
+            type: ALL_RETURNS_FAIL,
+            payload: error.response?.data?.message || error.message
+        });
+        throw error;
+    }
+};
+
 // Clearing Errors
 export const clearErrors = () => async dispatch => {
     dispatch({ type: CLEAR_ERRORS });
+};
+
+// Re-place a past order. Loading/toast/redirect are handled by the caller,
+// so this stays a thin thunk: it POSTs and returns the new order, letting any
+// error propagate to the component's catch.
+export const reorder = orderId => async () => {
+    const { data } = await axios.post(`/api/v1/order/reorder/${orderId}`);
+    return data;
 };

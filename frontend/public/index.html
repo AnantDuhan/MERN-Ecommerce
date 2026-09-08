@@ -12,8 +12,21 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
     <title>Order Planning</title>
+    <script>
+      // Apply saved theme before paint to avoid a flash of the wrong theme.
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (!t) {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          if (t === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

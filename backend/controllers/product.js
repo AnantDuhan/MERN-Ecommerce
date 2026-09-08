@@ -2,9 +2,9 @@ import Product from '../models/product.js';
 import User from '../models/user.js';
 import Review from '../models/review.js';
 import ApiFeatures from '../utils/apifeatures.js';
-import { Snowflake } from '@theinternetfolks/snowflake';
+import generateId from '../utils/generateId.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-// import redisClientPromise from '../config/redisClient.js';
+import redisClientPromise from '../config/redisClientUpstash.js';
 import dotenv from 'dotenv';
 import { generateEmbedding } from '../utils/generateEmbedding.js';
 
@@ -67,14 +67,18 @@ export const getProductDetails = async (req, res, next) => {
     // const cacheKey = `product:${productId}`;
 
     try {
-        // const cachedProduct = await redisClient.get(cacheKey);
-        // if (cachedProduct) {
-        //     const productData = JSON.parse(cachedProduct);
-        //     return res.status(200).json({
-        //         success: true,
-        //         product: productData
-        //     });
-        // }
+        try {
+            const cachedProduct = await redisClient.get(cacheKey);
+            if (cachedProduct) {
+                const productData = JSON.parse(cachedProduct);
+                return res.status(200).json({
+                    success: true,
+                    product: productData
+                });
+            }
+        } catch (cacheError) {
+            console.error('Redis cache read error:', cacheError.message);
+        }
 
         // --- 2. If Miss, Get from DB ---
         const product = await Product.findById(productId);
@@ -86,18 +90,23 @@ export const getProductDetails = async (req, res, next) => {
             });
         }
         // --- 3. Store in Cache ---
-        // await redisClient.set(cacheKey, JSON.stringify(product), {
-        //     EX: 3600
-        // });
+        try {
+            await redisClient.set(cacheKey, JSON.stringify(product), {
+                EX: 3600
+            });
+        } catch (cacheError) {
+            console.error('Redis cache write error:', cacheError.message);
+        }
 
         res.status(200).json({
             success: true,
             product
         });
     } catch (error) {
+        console.error('Get product details error:', error);
         res.status(500).json({
             success: false,
-            message: 'Internal Server Error'
+            message: error.message || 'Internal Server Error'
         });
     }
 };
@@ -216,7 +225,7 @@ export const createProductReview = async (req, res, next) => {
         });
     } else {
         newReview = {
-            _id: Snowflake.generate(),
+            _id: generateId(),
             user: req.user._id,
             name: req.user.name,
             rating: Number(rating),
@@ -259,10 +268,7 @@ export const createProductReview = async (req, res, next) => {
 
 export const getAllWishlistProducts = async (req, res) => {
     try {
-        // Find the current user
-        const user = await User.findById(req.user._id).populate(
-            'wishlist.product'
-        );
+        const user = await User.findById(req.user._id);
 
         if (!user) {
             return res.status(404).json({
@@ -271,7 +277,12 @@ export const getAllWishlistProducts = async (req, res) => {
             });
         }
 
-        const wishlistProducts = user.wishlist.map(item => item.product);
+        // Wishlist entries already contain the product snapshot needed by the UI.
+        // Expose the product id as _id so wishlist cards can use the same shape as products.
+        const wishlistProducts = user.wishlist.map(item => ({
+            ...item.toObject(),
+            _id: item.product
+        }));
 
         res.status(200).json({
             success: true,
@@ -312,7 +323,7 @@ export const addToWishList = async (req, res) => {
         }
 
         const wishlistItem = {
-            _id: Snowflake.generate(),
+            _id: generateId(),
             product: req.params.id,
             name: product.name,
             description: product.description,
@@ -328,10 +339,15 @@ export const addToWishList = async (req, res) => {
         const io = req.app.get('socketio');
         io.to(req.user._id.toString()).emit('wishlistUpdate', user.wishlist);
 
+        const wishlistProducts = user.wishlist.map(item => ({
+            ...item.toObject(),
+            _id: item.product
+        }));
+
         res.status(200).json({
             success: true,
             message: 'Product added to wishlist successfully',
-            wishlist: user.wishlist
+            wishlist: wishlistProducts
         });
     } catch (error) {
         console.error(error);

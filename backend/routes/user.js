@@ -6,6 +6,7 @@ const {
    forgotPassword,
    resetPassword,
    getUserDetails,
+    updateProfile,
    updatePassword,
    getAllUsers,
    getSingleUser,
@@ -17,13 +18,17 @@ const {
    verifyTwoFactorAuth,
    disableTwoFactorAuth,
    validateTfaToken,
+   getAddresses,
+   addAddress,
+   deleteAddress,
 } = require('../controllers/user');
 
 const { isAuthUser, authRoles } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 // const upload = require('../app');
 const multer = require('multer');
-// const { contactUs } = require('../controllers/contact');
-const { subscriber } = require('../controllers/subscribe');
+const { contactUs } = require('../controllers/contact');
+const { subscriber, unsubscribe } = require('../controllers/subscribe');
 
 // Configure Multer for file uploads
 const upload = multer({
@@ -32,7 +37,8 @@ const upload = multer({
         if (
             file.mimetype === 'image/png' ||
             file.mimetype === 'image/jpg' ||
-            file.mimetype === 'image/jpeg'
+            file.mimetype === 'image/jpeg' ||
+            file.mimetype === 'image/webp'
         ) {
             cb(null, true);
         } else {
@@ -43,19 +49,26 @@ const upload = multer({
 
 const router = express.Router();
 
-router.route('/auth/register').post(upload.single('image'), registerUser);
+router.route('/register').post(authLimiter, upload.single('image'), registerUser);
 
-router.route('/auth/login').post(loginUser);
+router.route('/login').post(authLimiter, loginUser);
 
-router.route('/auth/forgot-password').post(forgotPassword);
+router.route('/password/forgot').post(authLimiter, forgotPassword);
 
-router.route('/auth/reset-password/:token').put(resetPassword);
+router.route('/password/reset/:token').put(authLimiter, resetPassword);
 
 router.route('/auth/logout').post(logout);
 
 router.route('/auth/me').get(isAuthUser, getUserDetails);
 
-router.route('/auth/password/update').put(isAuthUser, updatePassword);
+// Address book
+router.route('/addresses').get(isAuthUser, getAddresses);
+router.route('/address/new').post(isAuthUser, addAddress);
+router.route('/address/:addressId').delete(isAuthUser, deleteAddress);
+
+router.route('/me/update').put(isAuthUser, upload.single('image'), updateProfile);
+
+router.route('/password/update').put(isAuthUser, updatePassword);
 
 router.route('/auth/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 
@@ -64,10 +77,11 @@ router
     .get(isAuthUser, authRoles('admin'), getSingleUser)
     .put(isAuthUser, authRoles('admin'), updateUserRole);
 
-// router.route('/contact-us').post(contactUs);
+router.route('/contact-us').post(contactUs);
 
-router.route('/auth/subscribe').post(subscriber);
+router.route('/subscribe').post(subscriber);
+router.route('/unsubscribe/:token').get(unsubscribe);
 
-router.route('/auth/google-login').post(googleLogin);
+router.route('/auth/google').post(authLimiter, googleLogin);
 
 module.exports = router;

@@ -1,24 +1,17 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-// import Loader from '../layout/Loader/Loader';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import LoadingBar from 'react-top-loading-bar';
 
 import MetaData from '../layout/MetaData';
 
-import './Profile.css';
-
 const Profile = () => {
-
     const navigate = useNavigate();
-
-    const { user, loading, isAuthenticated } = useSelector(
-        (state) => state.user
-    );
+    const { user, loading, isAuthenticated } = useSelector(state => state.user);
 
     const [progress, setProgress] = useState(0);
-
+    const [membership, setMembership] = useState(null);
     const onLoaderFinished = () => setProgress(0);
 
     useEffect(() => {
@@ -29,43 +22,116 @@ const Profile = () => {
         setTimeout(() => setProgress(0), 5000);
     }, [navigate, isAuthenticated]);
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            axios.get('/api/v1/membership/current')
+                .then(({ data }) => setMembership(data.membership))
+                .catch(() => {});
+        }
+    }, [isAuthenticated]);
+
+    const isMember = membership?.isActive && membership.status === 'ACTIVE';
+    const nextPaymentDate = membership?.nextPaymentDate
+        ? new Date(membership.nextPaymentDate).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        })
+        : 'Cashfree will confirm the next billing date';
+
     return (
         <Fragment>
+            <LoadingBar color='#A07C4B' progress={progress} onLoaderFinished={onLoaderFinished} />
             {loading ? (
-                <LoadingBar
-                    color='red'
-                    progress={progress}
-                    onLoaderFinished={onLoaderFinished}
-                />
+                <div className='editorial-shell py-32 text-center'>
+                    <p className='font-sans text-[0.72rem] uppercase tracking-luxe text-ink-faint'>
+                        Loading your profile…
+                    </p>
+                </div>
             ) : (
                 <Fragment>
-                    <MetaData title={`${user.name}'s Profile`} />
-                    {console.log("WHO IS THIS USER: " + user)};
-                    <div className='profileContainer'>
-                        <div>
-                            <h1>My Profile</h1>
-                            <img src={user.avatar} alt={user.name} />
-                            <Link to='/me/update'>Edit Profile</Link>
+                    <MetaData title={`${user?.name} · Maison`} />
+                    <div className='editorial-shell py-14'>
+                        <div className='mb-12 text-center'>
+                            <p className='eyebrow'>Your Account</p>
+                            <h1 className='heading-display mt-3 text-display'>My Profile</h1>
                         </div>
-                        <div>
-                            <div>
-                                <h4>Full Name</h4>
-                                <p>{user?.name}</p>
-                            </div>
-                            <div>
-                                <h4>Email</h4>
-                                <p>{user?.email}</p>
-                            </div>
-                            <div>
-                                <h4>Joined On</h4>
-                                <p>{String(user.createdAt).substring(0, 10)}</p>
+
+                        <div className='grid gap-14 lg:grid-cols-[320px_1fr]'>
+                            {/* Avatar column */}
+                            <div className='flex flex-col items-center'>
+                                <div className='overflow-hidden rounded-full border border-line'>
+                                    <img
+                                        src={user?.avatar?.url || user?.avatar || '/Profile.png'}
+                                        alt={user?.name}
+                                        className='h-56 w-56 object-cover'
+                                    />
+                                </div>
+                                <Link to='/me/update' className='btn-outline mt-8'>Edit Profile</Link>
                             </div>
 
-                            <div>
-                                <Link to='/orders'>My Orders</Link>
-                                <Link to='/password/update'>
-                                    Change Password
-                                </Link>
+                            {/* Details column */}
+                            <div className='flex flex-col justify-center'>
+                                <div className='space-y-8'>
+                                    <div>
+                                        <p className='eyebrow'>Full Name</p>
+                                        <p className='mt-2 font-display text-2xl text-ink'>{user?.name}</p>
+                                    </div>
+                                    <div className='rule-luxe' />
+                                    <div>
+                                        <p className='eyebrow'>Email</p>
+                                        <p className='mt-2 font-display text-2xl text-ink'>{user?.email}</p>
+                                    </div>
+                                    <div className='rule-luxe' />
+                                    <div>
+                                        <p className='eyebrow'>Joined On</p>
+                                        <p className='mt-2 font-display text-2xl text-ink'>
+                                            {String(user?.createdAt).substring(0, 10)}
+                                        </p>
+                                    </div>
+                                    <div className='rule-luxe' />
+                                    <div className='border border-brass/40 bg-surface p-5'>
+                                        <p className='eyebrow'>{isMember ? 'Maison Member' : 'Membership'}</p>
+                                        {isMember ? (
+                                            <Fragment>
+                                                <p className='mt-2 font-display text-2xl text-ink'>You are a member</p>
+                                                <p className='mt-2 font-sans text-sm text-ink-soft'>{membership.name}</p>
+                                                <p className='mt-2 font-sans text-sm text-ink-soft'>
+                                                    Next payment date: <strong className='text-ink'>{nextPaymentDate}</strong>
+                                                </p>
+                                            </Fragment>
+                                        ) : (
+                                            <Fragment>
+                                                <p className='mt-2 font-display text-2xl text-ink'>Not a member yet</p>
+                                                <p className='mt-2 font-sans text-sm text-ink-soft'>Explore monthly and yearly membership plans.</p>
+                                            </Fragment>
+                                        )}
+                                        <Link to='/membership' className='btn-outline mt-5 inline-flex'>
+                                            {isMember ? 'Manage Membership' : 'View Membership'}
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                <div className='mt-12 flex flex-wrap gap-4'>
+                                    <Link to='/orders' className='btn-solid'>My Orders</Link>
+                                    <Link to='/account/addresses' className='btn-outline'>Address Book</Link>
+                                    <Link to='/password/update' className='btn-outline'>Change Password</Link>
+                                </div>
+
+                                {user?.role === 'admin' && (
+                                    <div className='mt-10 border border-brass/50 bg-surface p-6'>
+                                        <p className='eyebrow'>Administrator</p>
+                                        <p className='mt-2 font-sans text-sm text-ink-soft'>
+                                            You have admin access to this store.
+                                        </p>
+                                        <Link
+                                            to='/admin/dashboard'
+                                            className='btn-luxe mt-5 inline-flex bg-brass px-8 py-4 text-white hover:bg-brass-soft'
+                                        >
+                                            Open Admin Dashboard
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

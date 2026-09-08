@@ -1,464 +1,230 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/bfa19719-6a66-4a86-b462-22666ef3e580/deploy-status?branch=main)](https://app.netlify.com/projects/orderplanning/deploys)
 
-# MERN Ecommerce Platform
+# Maison — MERN E‑Commerce Platform
 
-A full-stack e-commerce application built with the MERN stack (MongoDB, Express.js, React.js, Node.js) that provides a comprehensive online shopping experience. This platform offers advanced features for both customers and administrators, including secure payments, inventory management, user reviews, and more.
+A full‑stack e‑commerce application built with MongoDB, Express, React, and Node.js, with a luxury / editorial storefront (Tailwind CSS, light & dark themes). It covers the complete commerce lifecycle — browse → cart → checkout → payment → order pipeline (place → ship → deliver → return → refund) — plus real‑time order updates, an admin workspace, transactional and scheduled email, Redis caching, and AI‑assisted product features.
 
 ## 🚀 Features
 
-### 🛒 Customer Features
-- **User Authentication & Security**
-  - Secure registration and login with JWT tokens
-  - Google OAuth integration
-  - Two-factor authentication (2FA) support
-  - Password reset functionality
-  - Role-based access (User/Admin)
+### 🛒 Customer
+- **Authentication & security** — JWT (httpOnly cookie) sessions, Google OAuth sign‑in, two‑factor auth (TOTP), password reset by email
+- **Product discovery** — catalogue with search, filters, and pagination; rich product pages with an image gallery / lightbox
+- **Reviews & ratings** — customer reviews plus **AI‑generated review summaries** (Google Gemini)
+- **Wishlist** — save items for later, with **daily wishlist‑reminder emails**
+- **Cart & checkout** — multi‑step checkout with a saved **address book** (pick a saved shipping address at checkout)
+- **Orders** — order history, one‑click **reorder**, and **real‑time order status** (Processing → Shipped → Delivered) over Socket.io
+- **Returns & refunds** — request returns and track refund status
+- **Plus membership** — subscription tier (Cashfree)
+- **Newsletter** — subscribe / unsubscribe with a weekly digest email
 
-- **Product Discovery**
-  - Browse products by categories
-  - Advanced search and filtering (price, rating, category)
-  - Product reviews and ratings
-  - AI-powered product summaries
-  - Image galleries for products
+### 👨‍💼 Admin
+- Dashboard with date‑range **analytics** (revenue, orders, products, returns, refunds, coupons) and lightweight count stats
+- **Products** — create, update, delete; image uploads (PNG/JPEG/WebP) to AWS S3
+- **Orders** — view and advance status (emits real‑time updates), handle returns and refunds
+- **Users** — management and roles
+- **Coupons** — create codes with a discount and optional expiry
+- Admin routes are guarded so only authenticated admins can reach them
 
-- **Shopping Experience**
-  - Add products to wishlist
-  - Shopping cart management
-  - Secure checkout with Stripe payment integration
-  - Coupon code discounts
-  - Order tracking and history
+### 🔧 Platform & performance
+- Short, URL‑friendly 8‑character document IDs (`nanoid`)
+- MongoDB indexes for hot query paths (catalogue filter/sort, order history, product text search)
+- Gzip response compression
+- Redis (Upstash) caching for product and order data
+- **Rate limiting** — a general API limiter plus a strict limiter on auth endpoints (`express-rate-limit`)
+- Pooled SMTP transport (Nodemailer) so transactional email doesn’t block responses
+- Socket.io for real‑time product and order events
+- Swagger API docs at `/api-docs`
+- Route‑level frontend code splitting (React lazy loading)
 
-- **Customer Support**
-  - Contact form for inquiries
-  - Return and refund request system
-  - Order status updates via email
-
-- **Personalization**
-  - User profiles with avatar upload
-  - Wishlist management
-  - Order history and reordering
-  - Personalized recommendations (AI-powered embeddings)
-
-### 👨‍💼 Admin Features
-- **Dashboard Management**
-  - Comprehensive admin dashboard
-  - User management and analytics
-  - Order management and fulfillment
-  - Product inventory control
-
-- **Product Management**
-  - Create, update, and delete products
-  - Category management
-  - Stock level monitoring
-  - Image upload to AWS S3
-
-- **Order Processing**
-  - View and update order status
-  - Handle returns and refunds
-  - Payment tracking
-
-- **Marketing Tools**
-  - Coupon code creation and management
-  - Email campaigns and notifications
-
-### 🔧 Technical Features
-- **Performance Optimization**
-  - Redis caching for 85% performance improvement
-  - Image optimization and CDN integration
-  - Database query optimization
-
-- **Security**
-  - Input validation and sanitization
-  - Secure payment processing
-  - CORS configuration
-  - Rate limiting
-
-- **Communication**
-  - Email notifications via Amazon SES
-  - Automated order confirmations
-  - Password reset emails
-
-- **Testing & Quality**
-  - Unit tests with Mocha and Chai
-  - Code quality assurance
-  - Error handling and logging
-
-### 🌟 Premium Features
-- **Plus Membership**
-  - Subscription-based premium features
-  - Enhanced shopping experience
-  - Exclusive discounts
-
-- **Newsletter Subscription**
-  - Email marketing integration
-  - User engagement tools
+### 📨 Email (EJS templates)
+Account activation, order confirmation, password reset, contact, **weekly newsletter**, and **wishlist reminder**.
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - ODM for MongoDB
-- **Redis** - Caching layer
-- **JWT** - Authentication
-- **Stripe** - Payment processing
-- **AWS S3** - File storage
-- **Amazon SES** - Email service
+**Backend:** Node.js, Express, MongoDB + Mongoose, Socket.io, JWT, `speakeasy` (2FA), Nodemailer (pooled SMTP) + EJS, Cashfree (payments), Google Generative AI (Gemini), Upstash Redis, `express-rate-limit`, AWS S3, Swagger.
 
-### Frontend
-- **React.js** - UI library
-- **Redux** - State management
-- **Redux Thunk** - Async actions
-- **React Router** - Client-side routing
-- **Axios** - HTTP client
-- **CSS/Bootstrap** - Styling
+**Frontend:** React, Redux + redux‑thunk, React Router, Tailwind CSS, MUI, Axios, Socket.io‑client, Chart.js / Recharts, React‑Toastify.
 
-### DevOps & Tools
-- **Docker** - Containerization
-- **Git** - Version control
-- **NPM** - Package management
-- **VS Code** - Development environment
+> Payments are integrated via **Cashfree** (order checkout and membership). Stripe client libraries also remain in the frontend from an earlier integration.
 
 ## 📋 Prerequisites
-
-- Node.js (v14 or higher)
-- MongoDB
-- Redis (optional, for caching)
-- AWS account (for S3 and SES)
-- Stripe account (for payments)
+- Node.js 18+ (developed on Node 22)
+- MongoDB (local or Atlas)
+- Optional: Upstash Redis (caching), AWS S3 (image storage), SMTP credentials (email), Cashfree, Google OAuth, Gemini API key
 
 ## 🚀 Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/AnantDuhan/MERN-Ecommerce.git
-   cd MERN-Ecommerce
-   ```
-
-2. **Install dependencies**
-   ```bash
-   # Root directory
-   npm install
-
-   # Backend dependencies
-   npm install
-
-   # Frontend dependencies
-   cd frontend
-   npm install
-   cd ..
-   ```
-
-3. **Environment Setup**
-   Create `backend/config/config.env` with the following variables:
-   ```env
-   # Database
-   DB_URI=mongodb://localhost:27017/mern-ecommerce
-
-   # JWT
-   JWT_SECRET_KEY=your_jwt_secret
-   JWT_EXPIRES_IN=7d
-
-   # Server
-   PORT=4000
-   FRONTEND_URL=http://localhost:3000
-   RESULT_PER_PAGE=10
-
-   # Stripe Payment
-   STRIPE_PUBLISHABLE_KEY=pk_test_...
-   STRIPE_SECRET_KEY=sk_test_...
-
-   # Cookies
-   COOKIE_EXPIRES=7
-
-   # Email (Amazon SES)
-   SMTP_HOST=email-smtp.us-east-1.amazonaws.com
-   SMTP_PORT=587
-   SMTP_SERVICE=SES
-   SMTP_MAIL=your-email@example.com
-   SMTP_PASSWORD=your-smtp-password
-
-   # AWS S3
-   AWS_ACCESS_KEY_ID=your_access_key
-   AWS_SECRET_ACCESS_KEY=your_secret_key
-   AWS_BUCKET_NAME=your_bucket_name
-   AWS_BUCKET_REGION=us-east-1
-   ```
-
-## 🏃‍♂️ Running the Application
-
-### Development Mode
 ```bash
-# Start backend server
-npm run dev
+git clone https://github.com/AnantDuhan/MERN-Ecommerce.git
+cd MERN-Ecommerce
 
-# Start frontend (in another terminal)
-cd frontend
+# backend dependencies (root package.json)
+npm install
+
+# frontend dependencies
+cd frontend && npm install && cd ..
+```
+
+### Environment setup
+Create `backend/config/config.env` locally. Never commit real secrets.
+
+```env
+# Core
+PORT=4000
+NODE_ENV=development                               # 'production' makes the backend serve the built frontend
+FRONTEND_URL=http://localhost:3000
+DB_URI=mongodb://localhost:27017/e-commerce      # or DB_HOSTED_URI for Atlas
+JWT_SECRET_KEY=your_jwt_secret
+JWT_EXPIRES_IN=5d
+COOKIE_EXPIRES=5
+RESULT_PER_PAGE=8
+CRON_SECRET=<random secret>                      # required to trigger the /jobs endpoints
+ENABLE_IN_PROCESS_CRON=false                     # true only for a single always-on instance
+
+# Email (pooled SMTP)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_MAIL=your-email@example.com
+SMTP_PASSWORD=your-smtp-password
+NEWSLETTER_UNSUBSCRIBE_URL=                       # optional; defaults to FRONTEND_URL/api/v1/unsubscribe
+
+# Integrations (optional)
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GEMINI_API_KEY=your_gemini_key
+UPSTASH_REDIS_REST_URL=https://<instance>.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
+REDIS_URL=                                         # or REDIS_HOSTED_URL for a local/remote Redis
+CASHFREE_APP_ID=...
+CASHFREE_SECRET_KEY=...
+CASHFREE_ENVIRONMENT=SANDBOX
+CASHFREE_RETURN_URL=...
+CASHFREE_WEBHOOK_URL=...
+CASHFREE_MONTHLY_AMOUNT=...
+CASHFREE_YEARLY_AMOUNT=...
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_BUCKET_NAME=your_bucket_name
+AWS_BUCKET_REGION=us-east-1
+```
+
+Frontend (`frontend/.env`, optional):
+```env
+REACT_APP_SOCKET_URL=http://localhost:4000        # must match the backend port for real-time features
+```
+> The frontend dev server proxies API requests to `http://localhost:4000`, so run the backend on `PORT=4000` in development. Socket.io defaults to the same URL.
+
+## 🏃 Running the app
+
+```bash
+# Terminal 1 — backend (repo root)
+npm run dev            # nodemon, or: npm start
+
+# Terminal 2 — frontend
+cd frontend && npm start
+```
+Client: `http://localhost:3000` · API: `http://localhost:4000` · health check: `GET /api/v1/health`.
+
+### Production build
+```bash
+cd frontend && npm run build && cd ..
 npm start
 ```
 
-### Production Build
-```bash
-# Build frontend
-cd frontend
-npm run build
-cd ..
+## ⏱️ Background jobs
+Two email jobs — **weekly newsletter** (`backend/newsletterJob.js`) and **wishlist reminders** (`backend/wishlistJob.js`, emails users with saved items).
 
-# Start production server
-npm run production
+They can run two ways:
+- **Externally triggered (default, recommended for hosts that sleep idle instances).** Secret‑protected endpoints run each job on demand:
+  - `POST /api/v1/jobs/newsletter` and `POST /api/v1/jobs/wishlist`, both requiring an `x-cron-secret: <CRON_SECRET>` header.
+  - `.github/workflows/cron.yml` calls these on a schedule (daily wishlist, weekly newsletter). Set repo secrets `BACKEND_URL` and `CRON_SECRET`. The request wakes a sleeping instance and the endpoint returns `202` immediately, running the batch in the background.
+- **In‑process timers.** Set `ENABLE_IN_PROCESS_CRON=true` to run both on a daily `setInterval` inside the web process — only suitable for a single always‑on instance (multiple instances would send duplicates, and a sleeping instance never fires).
+
+> Use one mechanism or the other, not both, to avoid duplicate sends.
+
+## 🗃️ Maintenance scripts
+Run from the repo root with a valid `DB_URI` (back up the database before any `--apply`):
+```bash
+node backend/scripts/createIndexes.js             # create the MongoDB indexes the app queries on
+node backend/scripts/migrateIds.js                # dry run: preview re-keying documents to short IDs
+node backend/scripts/migrateIds.js --apply        # perform the ID migration
+node backend/scripts/repairOrderProductRefs.js    # repair order → product references
+node backend/scripts/fixRefTypes.js               # (legacy) numeric→string ref type fixes; --apply to write
 ```
+`migrateIds.js` is a dry run by default and is re‑runnable (already‑migrated documents are skipped).
 
-## 🐳 Docker Deployment
+## 📡 API overview
+Base path: `/api/v1`.
 
-The project includes Docker support for easy deployment.
+**Auth**
+- `POST /register` (multipart, image field `image`) · `POST /login` · `GET /logout`
+- `POST /password/forgot` · `PUT /password/reset/:token` · `GET /me`
+- `POST /auth/google`
+- *(auth endpoints are rate‑limited)*
 
+**Address book**
+- `GET /addresses` · `POST /address/new` · `DELETE /address/:addressId`
+
+**Products & reviews**
+- `GET /products` · `GET /product/:id`
+- `PUT /admin/update/product/:id` (admin) · `GET /admin/products` (admin)
+- `POST /review` · `GET /reviews` · `DELETE /review/:reviewId`
+- `POST /:id/summerize-reviews` (admin — AI review summary)
+
+**Wishlist**
+- `GET /wishlist` · `POST /wishlist/:id` · `DELETE /wishlist/:id`
+
+**Orders**
+- `POST /order/new` · `GET /orders/me` · `GET /order/:id`
+- `POST /order/:id/return` · `POST /order/reorder/:orderId`
+- `GET /admin/orders` · `GET /admin/returns` · `GET /admin/refunds` (admin)
+
+**Payments, coupons & membership**
+- `POST /payment`
+- `POST /coupon` (admin) · `GET /coupons/all`
+- Cashfree order & membership endpoints (see `routes/payment.js`, `routes/subscription.js`)
+
+**Admin analytics**
+- `GET /admin/analytics?range=7d|30d|90d|12m|all` · `GET /admin/stats`
+
+**Scheduled jobs** (require `x-cron-secret` header)
+- `POST /jobs/newsletter` · `POST /jobs/wishlist`
+
+**Docs & health**
+- `GET /api/v1/health` · `GET /api-docs` (Swagger UI) · `GET /api-docs.json`
+
+## 🖼️ Uploads & real‑time
+Uploads use Multer memory storage before writing to AWS S3 (PNG/JPEG/WebP). Product pages and order pages open a Socket.io connection to the backend; product/review/summary events and order‑status changes update the UI in real time. Set `REACT_APP_SOCKET_URL` to the backend origin for any non‑default setup.
+
+## 🐳 Docker
 ```bash
-# Build and run with Docker Compose
 docker-compose up --build
 ```
+Starts the app, MongoDB, and Redis. The app is exposed on host port `4001` (container `4000`).
 
-## 📡 API Endpoints
+## 🚀 Deployment (same‑origin)
+The backend serves the compiled React app, so the whole thing deploys as **one service** — no separate frontend host, no CORS/cross‑site‑cookie setup.
 
-### Authentication
-- `POST /api/v1/user/register` - User registration
-- `POST /api/v1/user/login` - User login
-- `POST /api/v1/user/logout` - User logout
-- `POST /api/v1/user/forgot-password` - Password reset request
+**Render (Docker):**
+- The `Dockerfile` installs backend deps, builds the frontend, and runs `node backend/server.js` with `NODE_ENV=production` (which turns on static serving of `frontend/build`).
+- Set the environment variables above (`DB_URI`, `JWT_SECRET_KEY`, `FRONTEND_URL`, SMTP, Cashfree, AWS, Upstash, `CRON_SECRET`, …).
+- Any `REACT_APP_*` the client needs are inlined at **build time** — pass them as Docker **build args** (see the `ARG`s in the `Dockerfile`). Same‑origin means `REACT_APP_SOCKET_URL` can be left unset (the client defaults to the current origin in production).
 
-### Products
-- `GET /api/v1/products` - Get all products
-- `POST /api/v1/product/new` - Create product (Admin)
-- `GET /api/v1/product/:id` - Get product details
-- `PUT /api/v1/product/:id` - Update product (Admin)
-- `DELETE /api/v1/product/:id` - Delete product (Admin)
+**Scheduled jobs:** add repo secrets `BACKEND_URL` and `CRON_SECRET` so `.github/workflows/cron.yml` can trigger the email jobs (see Background jobs). On a free tier that sleeps, this is what keeps them running.
 
-### Orders
-- `POST /api/v1/order/new` - Create new order
-- `GET /api/v1/orders/me` - Get user's orders
-- `GET /api/v1/order/:id` - Get order details
-- `PUT /api/v1/order/:id` - Update order status (Admin)
-
-### Payments
-- `POST /api/v1/payment/process` - Process payment
-- `GET /api/v1/stripeapikey` - Get Stripe API key
-
-### Coupons
-- `POST /api/v1/coupon/new` - Create coupon (Admin)
-- `GET /api/v1/coupons` - Get all coupons (Admin)
-- `DELETE /api/v1/coupon/:id` - Delete coupon (Admin)
-
-## 🚀 Deployment
-
-### Backend on Render
-
-1. **Connect Repository**
-   - Go to [Render](https://render.com) and sign up/login
-   - Click "New" → "Blueprint" or "Web Service"
-   - Connect your GitHub repository
-
-2. **Configure Service**
-   - **Name**: MERN-Ecommerce-Backend
-   - **Environment**: Docker
-   - **Region**: Oregon (or your preferred region)
-   - **Branch**: main
-   - **Build Command**: `npm install` (handled by Dockerfile)
-   - **Start Command**: `node backend/server.js` (handled by Dockerfile)
-
-3. **Environment Variables**
-   Set the following in Render's Environment section:
-   ```env
-   DB_URI=your_mongodb_atlas_uri
-   JWT_SECRET_KEY=your_jwt_secret
-   JWT_EXPIRES_IN=7d
-   PORT=4000
-   FRONTEND_URL=https://your-vercel-frontend-url.vercel.app
-   RESULT_PER_PAGE=10
-   STRIPE_PUBLISHABLE_KEY=pk_live_...
-   STRIPE_SECRET_KEY=sk_live_...
-   COOKIE_EXPIRES=7
-   SMTP_HOST=email-smtp.us-east-1.amazonaws.com
-   SMTP_PORT=587
-   SMTP_SERVICE=SES
-   SMTP_MAIL=your-email@example.com
-   SMTP_PASSWORD=your-smtp-password
-   AWS_ACCESS_KEY_ID=your_access_key
-   AWS_SECRET_ACCESS_KEY=your_secret_key
-   AWS_BUCKET_NAME=your_bucket_name
-   AWS_BUCKET_REGION=us-east-1
-   ```
-
-4. **Deploy**
-   - Click "Create Web Service"
-   - Render will build and deploy your backend
-   - Note the service URL (e.g., `https://mern-ecommerce-backend.onrender.com`)
-
-### Frontend on Vercel
-
-1. **Connect Repository**
-   - Go to [Vercel](https://vercel.com) and sign up/login
-   - Click "New Project"
-   - Import your GitHub repository
-
-2. **Configure Project**
-   - **Project Name**: MERN-Ecommerce-Frontend
-   - **Framework Preset**: Create React App
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `build`
-   - **Install Command**: `npm install`
-
-3. **Environment Variables**
-   Set in Vercel's Environment Variables section:
-   ```env
-   REACT_APP_API_URL=https://your-render-backend-url.onrender.com
-   ```
-
-4. **Deploy**
-   - Click "Deploy"
-   - Vercel will build and deploy your frontend
-   - Get the deployment URL (e.g., `https://mern-ecommerce-frontend.vercel.app`)
-
-### Alternative: Heroku (Legacy)
-
-1. Create a `Procfile` in the root directory:
-   ```
-   web: npm run start:production
-   ```
-
-2. Set environment variables in Heroku dashboard
-
-3. Deploy:
-   ```bash
-   git push heroku main
-   ```
-
-### Other Platforms
-
-The application can be deployed on any platform supporting Node.js:
-- **AWS EC2/ECS**: Use Docker or direct Node.js deployment
-- **DigitalOcean App Platform**: Connect repo and configure
-- **Railway**: Automatic deployment from GitHub
-- **Fly.io**: Docker-based deployment
+Any Node‑friendly host works (Render, Railway, Fly.io, a VPS). On free tiers the instance may cold‑start after idle; the client’s `BackendWaker` masks the first‑request delay.
 
 ## 🤝 Contributing
-
-1. Fork the repository
+1. Fork the repo
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+3. Commit (`git commit -m 'Add AmazingFeature'`)
+4. Push (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 Upcoming Features
-
-- [ ] Advanced filtering functionalities
-- [ ] Multilingual support
-- [ ] AI-powered recommendation system
-- [ ] Mobile app development
-- [ ] Advanced analytics dashboard
-- [ ] Social media integration
-
 ## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## 👨‍💻 Author
-
-**Anant Duhan**
-- GitHub: [@AnantDuhan](https://github.com/AnantDuhan)
-- LinkedIn: [@AnantDuhan](https://linkedin.com/in/AnantDuhan)
-
-## 🙏 Acknowledgments
-
-- Thanks to the MERN stack community
-- Stripe for payment processing
-- AWS for cloud services
-- All contributors and users
+**Anant Duhan** — GitHub [@AnantDuhan](https://github.com/AnantDuhan) · LinkedIn [@AnantDuhan](https://linkedin.com/in/AnantDuhan)
 
 ---
-
 ⭐ If you found this project helpful, please give it a star!
-
-## Install
-
-Some basic git commands are:
-
-```git
-$ git clone https://github.com/AnantDuhan/MERN-Ecommerce.git
-$ cd MERN-Ecommerce
-$ npm install
-```
-
-**For Backend** - `npm install`
-**For Frontend** - `cd frontend` `npm install`
-
-## Env Variables
-
-Make Sure to Create a config.env file in backend/config directory that include:
-
-- DB_URI & JWT_SECRET_KEY & JWT_EXPIRES_IN
-- PORT, FRONTEND_URL & RESULT_PER_PAGE
-- STRIPE_PUBLISHABLE_KEY & STRIPE_SECRET_KEY
-- COOKIE_EXPIRES
-- SMTP_HOST, SMTP_PORT & SMTP_SERVICE
-- SMTP_MAIL & SMTP_PASSWORD
-- AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME & AWS_BUCKET_REGION
-
-## Heroku Deployment
-
-```
-> Create a Procfile in the root directory of your application with the following command **web: npm run start:production**
-```
-
-## Simple build for production
-
-```
-$ npm run production
-```
-
-## Run the application for development
-
-**for frontend**
-
-```
-$ npm start
-```
-
-**for backend**
-
-```
-$ npm run dev
-```
-
-## Run the application for production
-
-```
-$ npm run start:production
-```
-
-## Languages & tools
-
-- [Mongoose](https://mongoosejs.com/)
-- [Express](https://expressjs.com/)
-- [React](https://reactjs.org/)
-- [Node](https://nodejs.org/en/)
-- [AWS-S3](https://aws.amazon.com/s3/)
-- [Stripe](https://dashboard.stripe.com/dashboard)
-
-## Code Formatter
-
-- Add a `.vscode` directory
-- Create a file `settings.json` inside `.vscode`
-- Install Prettier - Code formatter in VSCode
-- Add the following snippet:
-
-```json
-{
-    "editor.formatOnSave": true,
-    "prettier.singleQuote": true,
-    "prettier.arrowParens": "avoid",
-    "prettier.jsxSingleQuote": true,
-    "prettier.trailingComma": "none",
-    "javascript.preferences.quoteStyle": "single"
-}
-```
