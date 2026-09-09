@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "expo-router/js-tabs";
 
 import { Eyebrow, Display, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
@@ -103,6 +104,7 @@ function CartRow({ item }: { item: CartItem }) {
 
 export default function CartScreen() {
   const { colors, isDark } = useTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore(selectCartSubtotal);
 
@@ -158,7 +160,11 @@ export default function CartScreen() {
       <View
         style={[
           styles.footer,
-          { backgroundColor: colors.surface, borderTopColor: colors.line },
+          {
+            bottom: tabBarHeight,
+            backgroundColor: colors.surface,
+            borderTopColor: colors.line,
+          },
         ]}
       >
         <View style={styles.summaryRow}>
@@ -178,7 +184,7 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16 },
-  list: { paddingHorizontal: 24, paddingBottom: 200 },
+  list: { paddingHorizontal: 24, paddingBottom: 260 },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -191,10 +197,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
     paddingHorizontal: 24,
     paddingTop: 18,
-    paddingBottom: 40,
+    paddingBottom: 20,
     borderTopWidth: 1,
   },
   summaryRow: {

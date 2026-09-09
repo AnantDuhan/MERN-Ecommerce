@@ -130,6 +130,11 @@ export default function ProfileScreen() {
                 onPress={() => router.push("/orders")}
               />
               <Row
+                icon="ribbon-outline"
+                label="Membership"
+                onPress={() => router.push("/membership")}
+              />
+              <Row
                 icon="heart-outline"
                 label="Wishlist"
                 onPress={() => router.push("/(tabs)/wishlist")}

@@ -39,6 +39,7 @@ export interface ApiOrder {
   totalPrice: number;
   paymentInfo?: { id: string; status: string };
   shippingInfo?: ShippingInfoPayload;
+  user?: { name: string; email: string };
   orderItems: {
     name: string;
     price: number;
@@ -75,6 +76,9 @@ export interface OrderVM {
   shippingPrice: number;
   totalPrice: number;
   itemCount: number;
+  customerName?: string;
+  isPaid: boolean;
+  paymentStatus?: string;
   shippingInfo?: ShippingInfoPayload;
   items: {
     name: string;

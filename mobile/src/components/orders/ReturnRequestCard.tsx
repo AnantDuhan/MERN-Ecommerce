@@ -1,12 +1,32 @@
 import React, { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Card } from "@/components/ui/Card";
-import { H3, Body, Txt } from "@/components/ui/Text";
+import { H3, Body, BodySm, Txt } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/theme/ThemeContext";
-import { spacing, type } from "@/theme/tokens";
+import { radii, spacing } from "@/theme/tokens";
 import { useRequestReturn } from "@/features/orders/hooks/useRequestReturn";
+
+// Kept in sync with the web app's return dialog.
+const RETURN_REASONS = [
+  "Defective Product",
+  "Wrong Product Shipped",
+  "Received Incomplete Order",
+  "Product Doesn't Match Description",
+  "Size Does Not Fit",
+  "Color Doesn't Match",
+  "Changed My Mind",
+  "Item Arrived Late",
+  "Ordered by Mistake",
+  "Unsatisfactory Quality",
+  "Received Damaged Product",
+  "Ordered Duplicate Product",
+  "Product Expired/Short Expiry Date",
+  "Not Satisfied with Performance",
+  "Item Doesn't Meet Expectations",
+];
 
 interface Props {
   orderId: string;
@@ -18,9 +38,11 @@ export default function ReturnRequestCard({ orderId, status, isReturned }: Props
   const { colors } = useTheme();
   const requestReturn = useRequestReturn();
   const [showForm, setShowForm] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState(RETURN_REASONS[0]);
 
-  if (status.toLowerCase() !== "delivered") return null;
+  // Matches the web app: disabled while Processing/Shipped or already returned.
+  const disallowed = ["processing", "shipped"].includes(status.toLowerCase());
+  if (disallowed && !isReturned) return null;
 
   if (isReturned || requestReturn.isSuccess) {
     return (
@@ -38,25 +60,30 @@ export default function ReturnRequestCard({ orderId, status, isReturned }: Props
 
       {showForm ? (
         <View style={{ marginTop: spacing.md }}>
-          <TextInput
-            placeholder="Tell us why you'd like to return this order"
-            placeholderTextColor={colors.inkFaint}
-            value={reason}
-            onChangeText={setReason}
-            multiline
-            numberOfLines={3}
-            style={[
-              type.body,
-              {
-                color: colors.ink,
-                borderWidth: 1,
-                borderColor: colors.line,
-                padding: spacing.md,
-                minHeight: 80,
-                textAlignVertical: "top",
-              },
-            ]}
-          />
+          <BodySm tone="faint" style={{ marginBottom: spacing.sm }}>
+            Reason for return
+          </BodySm>
+          <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
+            {RETURN_REASONS.map((option) => {
+              const selected = option === reason;
+              return (
+                <Pressable
+                  key={option}
+                  onPress={() => setReason(option)}
+                  style={[
+                    styles.reasonRow,
+                    { borderColor: colors.line, backgroundColor: selected ? colors.surface2 : "transparent" },
+                  ]}
+                >
+                  <Body tone={selected ? "ink" : "soft"} style={{ flex: 1 }}>
+                    {option}
+                  </Body>
+                  {selected && <Ionicons name="checkmark" size={18} color={colors.brass} />}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
           {requestReturn.isError && (
             <Txt tone="danger" center style={{ marginTop: spacing.sm }}>
               Couldn't submit your request.
@@ -65,7 +92,6 @@ export default function ReturnRequestCard({ orderId, status, isReturned }: Props
           <Button
             label={requestReturn.isPending ? "Submitting…" : "Submit Return Request"}
             loading={requestReturn.isPending}
-            disabled={reason.trim().length === 0}
             onPress={() => requestReturn.mutate({ orderId, returnReason: reason })}
             style={{ marginTop: spacing.md }}
           />
@@ -81,3 +107,16 @@ export default function ReturnRequestCard({ orderId, status, isReturned }: Props
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  reasonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderRadius: radii.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+});

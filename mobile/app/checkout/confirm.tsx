@@ -38,14 +38,14 @@ export default function ConfirmScreen() {
   const [codeInput, setCodeInput] = useState(couponCode ?? "");
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  if (!shipping) return <Redirect href="/checkout/shipping" />;
-
-  const { itemsPrice, shippingPrice, totalPrice } = computePricing(subtotal);
-
   const appliedCoupon = useMemo(
     () => coupons.find((c) => c.code.toLowerCase() === (couponCode ?? "").toLowerCase()) ?? null,
     [coupons, couponCode]
   );
+
+  if (!shipping) return <Redirect href="/checkout/shipping" />;
+
+  const { itemsPrice, shippingPrice, totalPrice } = computePricing(subtotal);
   const preview = estimateCouponDiscount(totalPrice, appliedCoupon);
 
   const applyCoupon = () => {

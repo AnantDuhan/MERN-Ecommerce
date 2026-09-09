@@ -14,12 +14,14 @@ import ProductCard from "@/components/product/ProductCard";
 import { Body } from "@/components/ui/Text";
 import { useTheme } from "@/theme/ThemeContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
+import { useBanners } from "@/features/banners/hooks/useBanners";
 import { useRecentlyViewedStore } from "@/store/recentlyViewed.store";
 
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { data, isLoading, isError } = useProducts();
   const products = data?.products ?? [];
+  const { data: banners = [] } = useBanners();
   const recentlyViewed = useRecentlyViewedStore((s) => s.items);
 
   const goToSearch = (q?: string) =>
@@ -43,18 +45,21 @@ export default function HomeScreen() {
 
         <SearchBar
           onPress={() => goToSearch()}
-          onVoicePress={() => goToSearch()}
-          onCameraPress={() => goToSearch()}
+          onVoicePress={() =>
+            router.push({ pathname: "/(tabs)/search", params: { voice: "1" } })
+          }
         />
 
-        <PromoCard
-          title="Summer Sale"
-          subtitle="Up to 50% Off"
-          description="Discover the latest arrivals."
-          button="Shop Now"
-          image={require("@/assets/banners/shoe.png")}
-          onPress={() => goToSearch()}
-        />
+        {banners.length > 0 && (
+          <PromoCard
+            title={banners[0].title}
+            subtitle={banners[0].subtitle}
+            description={banners[0].description}
+            button={banners[0].buttonText}
+            image={banners[0].imageUrl ? { uri: banners[0].imageUrl } : undefined}
+            onPress={() => goToSearch()}
+          />
+        )}
 
         {recentlyViewed.length > 0 && (
           <>

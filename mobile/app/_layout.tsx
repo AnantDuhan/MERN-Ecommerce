@@ -9,6 +9,7 @@ import AuthProvider from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/theme/ThemeContext";
 import { fontMap } from "@/theme/fonts";
 import { usePushRegistration } from "@/features/notifications/hooks/usePushRegistration";
+import { useCartSync } from "@/features/cart/hooks/useCartSync";
 import OfflineBanner from "@/components/common/OfflineBanner";
 
 // Keep the native splash up until the editorial fonts are ready.
@@ -16,6 +17,7 @@ SplashScreen.preventAutoHideAsync();
 
 function AppShell() {
   usePushRegistration();
+  useCartSync();
   return (
     <>
       <OfflineBanner />

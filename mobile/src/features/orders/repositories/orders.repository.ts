@@ -29,4 +29,11 @@ export class OrdersRepository {
     );
     return toOrder(data.order);
   }
+
+  static async reorder(id: string): Promise<OrderVM> {
+    const { data } = await api.post<CreateOrderResponse>(
+      API_ENDPOINTS.ORDERS.REORDER(id)
+    );
+    return toOrder(data.order);
+  }
 }

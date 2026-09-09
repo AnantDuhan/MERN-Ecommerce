@@ -20,6 +20,9 @@ export function toOrder(api: ApiOrder): OrderVM {
     shippingPrice: api.shippingPrice ?? 0,
     totalPrice: api.totalPrice ?? 0,
     itemCount: items.reduce((n, i) => n + i.quantity, 0),
+    customerName: api.user?.name,
+    isPaid: api.paymentInfo?.status === "succeeded" || api.paymentInfo?.status === "PAID",
+    paymentStatus: api.paymentInfo?.status,
     shippingInfo: api.shippingInfo,
     items,
   };

@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { AuthRepository } from "../repositories/auth.repository";
 import { SecureStorageService } from "@/services/secure-storage.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useCartStore } from "@/store/cart.store";
 
 export function useLogout() {
   const logout = useAuthStore(
@@ -16,6 +17,9 @@ export function useLogout() {
       await SecureStorageService.removeToken();
 
       logout();
+      // Prevents this cart from leaking into a different account that
+      // logs in on the same device afterwards.
+      useCartStore.getState().clear();
 
       router.replace("/login");
     },

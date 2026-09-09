@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams } from "expo-router";
 
-import { Eyebrow, Display, Body } from "@/components/ui/Text";
+import { Eyebrow, Display, Body, Caption } from "@/components/ui/Text";
 import { Field } from "@/components/ui/Field";
 import ProductCard from "@/components/product/ProductCard";
 import { useTheme } from "@/theme/ThemeContext";
@@ -13,7 +13,8 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 
 export default function SearchScreen() {
   const { colors, isDark } = useTheme();
-  const params = useLocalSearchParams<{ q?: string }>();
+  const params = useLocalSearchParams<{ q?: string; voice?: string }>();
+  const cameFromVoice = params.voice === "1";
 
   const [text, setText] = useState(params.q ?? "");
   const [keyword, setKeyword] = useState(params.q ?? "");
@@ -46,8 +47,14 @@ export default function SearchScreen() {
           value={text}
           onChangeText={setText}
           autoCorrect={false}
+          autoFocus={cameFromVoice}
           returnKeyType="search"
         />
+        {cameFromVoice && (
+          <Caption tone="faint" style={{ marginTop: spacing.sm }}>
+            Tap the mic on your keyboard to search by voice.
+          </Caption>
+        )}
       </View>
 
       {isLoading ? (

@@ -50,6 +50,23 @@ export const API_ENDPOINTS = {
     CASHFREE_VERIFY: (orderId: string) => `/cashfree/order/${orderId}/verify`,
   },
 
+  MEMBERSHIP: {
+    PLANS: "/membership/plans",
+    CURRENT: "/membership/current",
+    CREATE: "/membership",
+    STATUS: (subscriptionId: string) => `/membership/${subscriptionId}`,
+    CANCEL: (subscriptionId: string) => `/membership/${subscriptionId}/cancel`,
+  },
+
+  BANNERS: {
+    LIST: "/banners",
+  },
+
+  CART: {
+    GET: "/cart",
+    SYNC: "/cart",
+  },
+
   CONTACT: {
     SEND: "/contact-us",
   },
