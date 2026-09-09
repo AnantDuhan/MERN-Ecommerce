@@ -125,7 +125,7 @@ exports.newOrder = async (req, res, next) => {
                 user,
                 status: 'placed',
                 estimatedDeliveryDate: estimatedDeliveryDate.toDateString(),
-                orderLink: `${process.env.BACKEND_URL}/go/order/${order._id}`
+                orderLink: `${process.env.BACKEND_URL}/order/${order._id}`
             }
         );
 
