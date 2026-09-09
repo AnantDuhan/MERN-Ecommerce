@@ -20,14 +20,18 @@ export interface CreateOrderRequest {
   orderItems: OrderItemPayload[];
   paymentInfo: { id: string; status: string };
   itemsPrice: number;
+  taxPrice?: number;
   shippingPrice: number;
   totalPrice: number;
+  couponCode?: string;
 }
 
 export interface ApiOrder {
   _id: string;
   orderStatus: string;
   createdAt: string;
+  isReturned?: boolean;
+  returnRequestedAt?: string;
   paidAt?: string;
   itemsPrice: number;
   shippingPrice: number;
@@ -63,6 +67,8 @@ export interface OrderVM {
   id: string;
   status: string;
   createdAt: string;
+  isReturned: boolean;
+  returnRequestedAt?: string;
   itemsPrice: number;
   shippingPrice: number;
   totalPrice: number;

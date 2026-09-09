@@ -6,6 +6,7 @@ import { useLocalSearchParams } from "expo-router";
 
 import TopBar from "@/components/common/TopBar";
 import StatusPill from "@/components/orders/StatusPill";
+import ReturnRequestCard from "@/components/orders/ReturnRequestCard";
 import { Card } from "@/components/ui/Card";
 import { Rule } from "@/components/ui/Rule";
 import { Display, Eyebrow, H3, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
@@ -70,6 +71,9 @@ export default function OrderDetailScreen() {
         <Rule style={{ marginVertical: spacing.md }} />
         <View style={styles.priceRow}><Eyebrow>Total</Eyebrow><Txt style={{ ...type.h3 }}>{`\u20B9${order.totalPrice.toLocaleString()}`}</Txt></View>
       </Card>
+
+      <ReturnRequestCard orderId={order.id} status={order.status} isReturned={order.isReturned} />
+
       <View style={{ height: 40 }} />
     </ScrollView>
   );

@@ -13,7 +13,7 @@ interface Review {
   user: string;
   rating: number;
   comment: string;
-  date: string;
+  date?: string;
 }
 
 interface Props {
@@ -89,7 +89,7 @@ export default function ReviewsPreview({
                 </View>
               </View>
 
-              <Caption tone="faint">{review.date}</Caption>
+              {review.date ? <Caption tone="faint">{review.date}</Caption> : null}
             </View>
 
             <Body tone="soft" style={{ marginTop: 12 }}>

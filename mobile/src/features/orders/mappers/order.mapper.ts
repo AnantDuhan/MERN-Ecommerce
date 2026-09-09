@@ -13,6 +13,8 @@ export function toOrder(api: ApiOrder): OrderVM {
     id: api._id,
     status: api.orderStatus,
     createdAt: api.createdAt,
+    isReturned: !!api.isReturned,
+    returnRequestedAt: api.returnRequestedAt,
     itemsPrice: api.itemsPrice ?? 0,
     shippingPrice: api.shippingPrice ?? 0,
     totalPrice: api.totalPrice ?? 0,

@@ -1,5 +1,5 @@
-import React from "react";
-import { Image, ScrollView, StyleSheet, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Image, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { router, Redirect } from "expo-router";
@@ -14,7 +14,8 @@ import { useTheme } from "@/theme/ThemeContext";
 import { spacing, type } from "@/theme/tokens";
 import { useCartStore, selectCartSubtotal } from "@/store/cart.store";
 import { useCheckoutStore } from "@/store/checkout.store";
-import { computePricing } from "@/features/orders/pricing";
+import { computePricing, estimateCouponDiscount } from "@/features/orders/pricing";
+import { useCoupons } from "@/features/coupons/hooks/useCoupons";
 
 function PriceRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
@@ -30,10 +31,43 @@ export default function ConfirmScreen() {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore(selectCartSubtotal);
   const shipping = useCheckoutStore((s) => s.shipping);
+  const couponCode = useCheckoutStore((s) => s.couponCode);
+  const setCoupon = useCheckoutStore((s) => s.setCoupon);
+  const { data: coupons = [] } = useCoupons();
+
+  const [codeInput, setCodeInput] = useState(couponCode ?? "");
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   if (!shipping) return <Redirect href="/checkout/shipping" />;
 
   const { itemsPrice, shippingPrice, totalPrice } = computePricing(subtotal);
+
+  const appliedCoupon = useMemo(
+    () => coupons.find((c) => c.code.toLowerCase() === (couponCode ?? "").toLowerCase()) ?? null,
+    [coupons, couponCode]
+  );
+  const preview = estimateCouponDiscount(totalPrice, appliedCoupon);
+
+  const applyCoupon = () => {
+    const match = coupons.find((c) => c.code.toLowerCase() === codeInput.trim().toLowerCase());
+    if (!match) {
+      setCouponError("Invalid coupon code");
+      return;
+    }
+    const check = estimateCouponDiscount(totalPrice, match);
+    if (!check.eligible) {
+      setCouponError("This coupon isn't valid for your order total");
+      return;
+    }
+    setCouponError(null);
+    setCoupon(match.code);
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCodeInput("");
+    setCouponError(null);
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]} edges={["top"]}>
@@ -74,11 +108,58 @@ export default function ConfirmScreen() {
           ))}
         </Card>
 
+        <Card style={{ marginBottom: spacing.lg }}>
+          <H3 style={{ marginBottom: spacing.sm }}>Coupon Code</H3>
+          {appliedCoupon ? (
+            <View style={styles.couponRow}>
+              <Body tone="soft">{`"${appliedCoupon.code}" applied — ${appliedCoupon.discountPercent}% off`}</Body>
+              <Pressable onPress={removeCoupon} hitSlop={8}>
+                <Txt tone="danger" style={{ ...type.eyebrow }}>Remove</Txt>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.couponRow}>
+              <TextInput
+                placeholder="Enter coupon code"
+                placeholderTextColor={colors.inkFaint}
+                value={codeInput}
+                onChangeText={(t) => setCodeInput(t.toUpperCase())}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                style={[
+                  type.body,
+                  {
+                    flex: 1,
+                    color: colors.ink,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.line,
+                    paddingVertical: 8,
+                    marginRight: spacing.md,
+                  },
+                ]}
+              />
+              <Pressable onPress={applyCoupon} hitSlop={8} disabled={!codeInput.trim()}>
+                <Txt tone={codeInput.trim() ? "brass" : "faint"} style={{ ...type.eyebrow }}>Apply</Txt>
+              </Pressable>
+            </View>
+          )}
+          {couponError ? (
+            <Txt tone="danger" style={{ marginTop: spacing.xs, ...type.caption }}>{couponError}</Txt>
+          ) : null}
+        </Card>
+
         <Card>
           <PriceRow label="Items" value={`\u20B9${itemsPrice.toLocaleString()}`} />
           <PriceRow label="Shipping" value={shippingPrice === 0 ? "Free" : `\u20B9${shippingPrice}`} />
+          {appliedCoupon && preview.eligible ? (
+            <PriceRow label="Coupon Savings" value={`- \u20B9${preview.savings.toLocaleString()}`} />
+          ) : null}
           <Rule style={{ marginVertical: spacing.md }} />
-          <PriceRow label="Total" value={`\u20B9${totalPrice.toLocaleString()}`} strong />
+          <PriceRow
+            label="Estimated Total"
+            value={`\u20B9${(appliedCoupon && preview.eligible ? preview.discountedTotal : totalPrice).toLocaleString()}`}
+            strong
+          />
         </Card>
 
         <Button label="Continue to Payment" onPress={() => router.push("/checkout/payment")} style={{ marginTop: spacing.lg }} />
@@ -95,4 +176,5 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: "row", alignItems: "center", paddingVertical: 12 },
   thumb: { width: 52, height: 52 },
   priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 6 },
+  couponRow: { flexDirection: "row", alignItems: "center" },
 });

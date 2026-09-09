@@ -8,3 +8,30 @@ export function computePricing(itemsPrice: number) {
       : FLAT_SHIPPING;
   return { itemsPrice, shippingPrice, totalPrice: itemsPrice + shippingPrice };
 }
+
+/**
+ * Client-side ESTIMATE of a coupon's effect, for display only.
+ * The backend recalculates and applies the authoritative discount at order
+ * creation using the ORIGINAL (pre-discount) totalPrice + couponCode — so
+ * callers must keep sending the undiscounted total to the order endpoint,
+ * never this estimated result, or the discount would be applied twice.
+ */
+export function estimateCouponDiscount(
+  totalPrice: number,
+  coupon: { discountPercent: number; minOrderAmount: number; maxOrderAmount: number } | null
+) {
+  if (
+    !coupon ||
+    totalPrice < coupon.minOrderAmount ||
+    totalPrice > coupon.maxOrderAmount
+  ) {
+    return { eligible: false, discountedTotal: totalPrice, savings: 0 };
+  }
+  const discountedTotal =
+    totalPrice - (totalPrice * coupon.discountPercent) / 100;
+  return {
+    eligible: true,
+    discountedTotal: Math.round(discountedTotal),
+    savings: Math.round(totalPrice - discountedTotal),
+  };
+}

@@ -88,4 +88,41 @@ export class AuthRepository {
 
     return response.data;
   }
+
+  static async updateProfile(payload: {
+    name: string;
+    email: string;
+    avatar?: { uri: string; fileName?: string; mimeType?: string } | null;
+  }): Promise<MeResponse> {
+    const formData = new FormData();
+    formData.append("name", payload.name);
+    formData.append("email", payload.email);
+
+    if (payload.avatar) {
+      formData.append("image", {
+        uri: payload.avatar.uri,
+        name: payload.avatar.fileName ?? "avatar.jpg",
+        type: payload.avatar.mimeType ?? "image/jpeg",
+      } as any);
+    }
+
+    const { data } = await api.put<MeResponse>(
+      API_ENDPOINTS.AUTH.UPDATE_PROFILE,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return data;
+  }
+
+  static async updatePassword(payload: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<{ success: boolean; user?: User; message?: string }> {
+    const { data } = await api.put(
+      API_ENDPOINTS.AUTH.UPDATE_PASSWORD,
+      payload
+    );
+    return data;
+  }
 }

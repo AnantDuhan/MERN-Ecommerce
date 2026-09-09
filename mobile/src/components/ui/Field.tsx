@@ -26,7 +26,7 @@ interface Props extends TextInputProps {
  * and danger on error — the web `.field-row` / `.field-luxe` behaviour.
  */
 export const Field = forwardRef<TextInput, Props>(function Field(
-  { label, error, left, secure, containerStyle, onFocus, onBlur, ...rest },
+  { label, error, left, secure, containerStyle, onFocus, onBlur, style, ...rest },
   ref
 ) {
   const { colors } = useTheme();
@@ -66,6 +66,7 @@ export const Field = forwardRef<TextInput, Props>(function Field(
           style={[
             type.body,
             { flex: 1, color: colors.ink, paddingVertical: 12 },
+            style,
           ]}
           {...rest}
         />

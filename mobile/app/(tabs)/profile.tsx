@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -20,6 +21,7 @@ import { radii, spacing, type } from "@/theme/tokens";
 import { useAuthStore } from "@/store/auth.store";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useSubscribe } from "@/features/newsletter/hooks/useSubscribe";
 
 interface RowProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -56,6 +58,7 @@ export default function ProfileScreen() {
   const { data, isLoading } = useCurrentUser(useAuthStore((s) => s.isAuthenticated));
   const storeUser = useAuthStore((s) => s.user);
   const logout = useLogout();
+  const subscribe = useSubscribe();
 
   const user = data?.user ?? storeUser;
 
@@ -134,7 +137,7 @@ export default function ProfileScreen() {
               <Row
                 icon="location-outline"
                 label="Addresses"
-                onPress={() => {}}
+                onPress={() => router.push("/account/addresses")}
                 last
               />
             </View>
@@ -143,12 +146,12 @@ export default function ProfileScreen() {
               <Row
                 icon="person-outline"
                 label="Edit Profile"
-                onPress={() => {}}
+                onPress={() => router.push("/account/edit-profile")}
               />
               <Row
                 icon="lock-closed-outline"
                 label="Change Password"
-                onPress={() => {}}
+                onPress={() => router.push("/account/change-password")}
               />
               <Row
                 icon="contrast-outline"
@@ -156,6 +159,33 @@ export default function ProfileScreen() {
                 hint={themeLabel}
                 right={<Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />}
                 onPress={cycleTheme}
+                last
+              />
+            </View>
+
+            <View style={[styles.group, { borderColor: colors.line }]}>
+              <Row
+                icon="mail-open-outline"
+                label="Subscribe to Newsletter"
+                onPress={() => {
+                  if (!user?.email) return;
+                  subscribe.mutate(user.email, {
+                    onSuccess: () =>
+                      Alert.alert("Subscribed", "You're on the newsletter list."),
+                    onError: () =>
+                      Alert.alert("Couldn't subscribe", "Please try again later."),
+                  });
+                }}
+              />
+              <Row
+                icon="chatbox-ellipses-outline"
+                label="Contact Us"
+                onPress={() => router.push("/contact")}
+              />
+              <Row
+                icon="information-circle-outline"
+                label="About"
+                onPress={() => router.push("/about")}
                 last
               />
             </View>

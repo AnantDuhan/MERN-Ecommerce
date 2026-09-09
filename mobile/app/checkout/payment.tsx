@@ -2,38 +2,53 @@ import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { Redirect } from "expo-router";
+import { router, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import TopBar from "@/components/common/TopBar";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import { Card } from "@/components/ui/Card";
 import { Rule } from "@/components/ui/Rule";
-import { Display, Eyebrow, H3, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
+import { Display, Eyebrow, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/theme/ThemeContext";
 import { spacing, radii, type } from "@/theme/tokens";
 import { useCartStore, selectCartSubtotal } from "@/store/cart.store";
 import { useCheckoutStore } from "@/store/checkout.store";
-import { computePricing } from "@/features/orders/pricing";
+import { computePricing, estimateCouponDiscount } from "@/features/orders/pricing";
+import { useCoupons } from "@/features/coupons/hooks/useCoupons";
 import { useCreateOrder } from "@/features/orders/hooks/useCreateOrder";
+import { useCreateCashfreeOrder } from "@/features/payment/hooks/useCreateCashfreeOrder";
 import { CreateOrderRequest } from "@/features/orders/types/order";
 
-type Method = "cod" | "card";
+type Method = "cashfree" | "cod";
 
 export default function PaymentScreen() {
   const { colors, isDark } = useTheme();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore(selectCartSubtotal);
   const shipping = useCheckoutStore((s) => s.shipping);
+  const couponCode = useCheckoutStore((s) => s.couponCode);
+  const { data: coupons = [] } = useCoupons();
   const createOrder = useCreateOrder();
-  const [method, setMethod] = useState<Method>("cod");
+  const createCashfreeOrder = useCreateCashfreeOrder();
+  const [method, setMethod] = useState<Method>("cashfree");
 
   if (!shipping) return <Redirect href="/checkout/shipping" />;
 
   const { itemsPrice, shippingPrice, totalPrice } = computePricing(subtotal);
+  const isBusy = createOrder.isPending || createCashfreeOrder.isPending;
 
-  const placeOrder = () => {
+  // The backend applies the coupon's discount itself when we send the
+  // ORIGINAL total + couponCode to /order/new — so `totalPrice` below stays
+  // undiscounted for that call. This estimate is only for what we charge
+  // via Cashfree, which must reflect what the customer actually pays now.
+  const appliedCoupon = couponCode
+    ? coupons.find((c) => c.code.toLowerCase() === couponCode.toLowerCase()) ?? null
+    : null;
+  const { discountedTotal: payableTotal } = estimateCouponDiscount(totalPrice, appliedCoupon);
+
+  const placeCodOrder = () => {
     const payload: CreateOrderRequest = {
       shippingInfo: {
         address: shipping.address,
@@ -57,22 +72,40 @@ export default function PaymentScreen() {
       itemsPrice,
       shippingPrice,
       totalPrice,
+      couponCode: couponCode ?? undefined,
     };
     createOrder.mutate(payload);
   };
 
-  const Option = ({ id, icon, title, subtitle, disabled }: {
-    id: Method; icon: keyof typeof Ionicons.glyphMap; title: string; subtitle: string; disabled?: boolean;
+  const startCashfree = () => {
+    createCashfreeOrder.mutate(
+      { amount: payableTotal, phoneNumber: shipping.phoneNumber },
+      {
+        onSuccess: (res) => {
+          router.push({
+            pathname: "/checkout/cashfree",
+            params: { orderId: res.orderId, paymentSessionId: res.paymentSessionId },
+          });
+        },
+      }
+    );
+  };
+
+  const placeOrder = () => {
+    if (method === "cod") placeCodOrder();
+    else startCashfree();
+  };
+
+  const Option = ({ id, icon, title, subtitle }: {
+    id: Method; icon: keyof typeof Ionicons.glyphMap; title: string; subtitle: string;
   }) => {
     const selected = method === id;
     return (
       <Pressable
-        disabled={disabled}
         onPress={() => setMethod(id)}
         style={[styles.option, {
           borderColor: selected ? colors.ink : colors.line,
           backgroundColor: colors.surface,
-          opacity: disabled ? 0.5 : 1,
         }]}
       >
         <Ionicons name={icon} size={22} color={colors.ink} />
@@ -99,8 +132,8 @@ export default function PaymentScreen() {
         <Eyebrow tone="soft">Almost done</Eyebrow>
         <Display style={{ marginTop: spacing.xs, marginBottom: spacing.lg }}>Payment</Display>
 
+        <Option id="cashfree" icon="card-outline" title="Pay Securely" subtitle="Cards, UPI, netbanking & more via Cashfree" />
         <Option id="cod" icon="cash-outline" title="Pay on Delivery" subtitle="Pay with cash or UPI when it arrives" />
-        <Option id="card" icon="card-outline" title="Card (Stripe)" subtitle="Coming soon" disabled />
 
         <Card style={{ marginTop: spacing.lg }}>
           <View style={styles.priceRow}><Body tone="soft">Items</Body>
@@ -108,19 +141,29 @@ export default function PaymentScreen() {
           <View style={styles.priceRow}><Body tone="soft">Shipping</Body>
             <Txt style={{ ...type.body }}>{shippingPrice === 0 ? "Free" : `\u20B9${shippingPrice}`}</Txt></View>
           <Rule style={{ marginVertical: spacing.md }} />
+          {appliedCoupon && payableTotal !== totalPrice ? (
+            <View style={styles.priceRow}><Body tone="soft">{`Coupon (${appliedCoupon.code})`}</Body>
+              <Txt tone="success" style={{ ...type.body }}>{`- \u20B9${(totalPrice - payableTotal).toLocaleString()}`}</Txt></View>
+          ) : null}
           <View style={styles.priceRow}><Eyebrow>Total</Eyebrow>
-            <Txt style={{ ...type.h3 }}>{`\u20B9${totalPrice.toLocaleString()}`}</Txt></View>
+            <Txt style={{ ...type.h3 }}>{`\u20B9${payableTotal.toLocaleString()}`}</Txt></View>
         </Card>
 
-        {createOrder.isError && (
+        {(createOrder.isError || createCashfreeOrder.isError) && (
           <Txt tone="danger" center style={{ marginTop: spacing.md }}>
-            Couldn't place order. Please try again.
+            Something went wrong. Please try again.
           </Txt>
         )}
 
         <Button
-          label={createOrder.isPending ? "Placing Order…" : "Place Order"}
-          loading={createOrder.isPending}
+          label={
+            isBusy
+              ? "Please wait…"
+              : method === "cashfree"
+              ? "Proceed to Pay"
+              : "Place Order"
+          }
+          loading={isBusy}
           onPress={placeOrder}
           style={{ marginTop: spacing.lg }}
         />

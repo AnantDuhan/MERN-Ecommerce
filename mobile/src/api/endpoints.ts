@@ -1,19 +1,31 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
+    LOGIN: "/login",
+    REGISTER: "/register",
     LOGOUT: "/auth/logout",
-    FORGOT_PASSWORD: "/auth/forgot-password",
-    RESET_PASSWORD: "/auth/reset-password",
+    FORGOT_PASSWORD: "/password/forgot",
+    RESET_PASSWORD: "/password/reset",
     ME: "/auth/me",
-    UPDATE_PASSWORD: "/auth/password/update",
-    GOOGLE_LOGIN: "/auth/google-login",
+    UPDATE_PASSWORD: "/password/update",
+    UPDATE_PROFILE: "/me/update",
+    GOOGLE_LOGIN: "/auth/google",
+  },
+
+  ADDRESSES: {
+    LIST: "/addresses",
+    CREATE: "/address/new",
+    DELETE: (id: string) => `/address/${id}`,
   },
 
   PRODUCTS: {
     LIST: "/products",
     DETAIL: (id: string) => `/product/${id}`,
-    REVIEWS: "/reviews",
+  },
+
+  REVIEWS: {
+    LIST: "/reviews", // ?id=productId
+    CREATE: "/review",
+    DELETE: (reviewId: string) => `/review/${reviewId}`, // ?id=productId
   },
 
   WISHLIST: {
@@ -26,10 +38,24 @@ export const API_ENDPOINTS = {
     MINE: "/orders/me",
     DETAIL: (id: string) => `/order/${id}`,
     RETURN: (id: string) => `/order/${id}/return`,
+    REORDER: (id: string) => `/order/reorder/${id}`,
+  },
+
+  COUPONS: {
+    LIST: "/coupons/all",
   },
 
   PAYMENT: {
-    PROCESS: "/payment",
-    STRIPE_KEY: "/stripeapikey",
+    CASHFREE_CREATE_ORDER: "/cashfree/order",
+    CASHFREE_VERIFY: (orderId: string) => `/cashfree/order/${orderId}/verify`,
+  },
+
+  CONTACT: {
+    SEND: "/contact-us",
+  },
+
+  NEWSLETTER: {
+    SUBSCRIBE: "/subscribe",
+    UNSUBSCRIBE: (token: string) => `/unsubscribe/${token}`,
   },
 } as const;

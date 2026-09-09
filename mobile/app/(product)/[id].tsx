@@ -11,6 +11,7 @@ import QuantitySelector from "@/components/product/QuantitySelector";
 import DescriptionCard from "@/components/product/DescriptionCard";
 import SpecificationCard from "@/components/product/SpecificationCard";
 import ReviewsPreview from "@/components/product/ReviewsPreview";
+import WriteReviewCard from "@/components/product/WriteReviewCard";
 import SimilarProducts from "@/components/product/SimilarProducts";
 import StickyBottomBar from "@/components/product/StickyBottomBar";
 import { Body } from "@/components/ui/Text";
@@ -20,7 +21,9 @@ import { useProduct } from "@/features/products/hooks/useProduct";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useToggleWishlist } from "@/features/wishlist/hooks/useToggleWishlist";
+import { useProductReviews } from "@/features/reviews/hooks/useProductReviews";
 import { useCartStore } from "@/store/cart.store";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function ProductDetailsScreen() {
   const { colors, isDark } = useTheme();
@@ -31,6 +34,8 @@ export default function ProductDetailsScreen() {
   const { data: allProducts } = useProducts();
   const { data: wishlist } = useWishlist();
   const toggleWishlist = useToggleWishlist();
+  const { data: reviews = [] } = useProductReviews(id);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const addToCart = useCartStore((s) => s.add);
 
   const [size, setSize] = useState<string | undefined>();
@@ -101,9 +106,16 @@ export default function ProductDetailsScreen() {
         <ReviewsPreview
           rating={product.rating}
           reviewsCount={product.reviews}
-          reviews={[]}
+          reviews={reviews.map((r) => ({
+            id: r._id,
+            user: r.name,
+            rating: r.rating,
+            comment: r.comment,
+          }))}
           onSeeAll={() => {}}
         />
+
+        {isAuthenticated && <WriteReviewCard productId={product.id} />}
 
         {similar.length > 0 && (
           <SimilarProducts products={similar} onSeeAll={() => {}} />

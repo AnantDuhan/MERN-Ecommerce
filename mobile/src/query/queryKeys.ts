@@ -34,6 +34,18 @@ export const QUERY_KEYS = {
     DETAIL: (id: string) => ["orders", id] as const,
   },
 
+  REVIEWS: {
+    LIST: (productId: string) => ["reviews", productId] as const,
+  },
+
+  ADDRESSES: {
+    ALL: ["addresses"] as const,
+  },
+
+  COUPONS: {
+    ALL: ["coupons"] as const,
+  },
+
   PROFILE: {
     DETAILS: ["profile"] as const,
   },
