@@ -25,7 +25,20 @@
     "plugins": [
       "expo-secure-store",
       "expo-status-bar",
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Order Planning to use your location to show accurate delivery estimates and nearby availability."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#A07C4B"
+        }
+      ]
     ]
   }
 }

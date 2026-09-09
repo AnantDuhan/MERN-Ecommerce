@@ -14,11 +14,13 @@ import ProductCard from "@/components/product/ProductCard";
 import { Body } from "@/components/ui/Text";
 import { useTheme } from "@/theme/ThemeContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
+import { useRecentlyViewedStore } from "@/store/recentlyViewed.store";
 
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { data, isLoading, isError } = useProducts();
   const products = data?.products ?? [];
+  const recentlyViewed = useRecentlyViewedStore((s) => s.items);
 
   const goToSearch = (q?: string) =>
     router.push({ pathname: "/(tabs)/search", params: q ? { q } : {} });
@@ -36,8 +38,7 @@ export default function HomeScreen() {
       >
         <HomeHeader
           userName="Anant"
-          location="Coimbatore, Tamil Nadu"
-          onNotificationPress={() => {}}
+          onNotificationPress={() => router.push("/notifications")}
         />
 
         <SearchBar
@@ -54,6 +55,30 @@ export default function HomeScreen() {
           image={require("@/assets/banners/shoe.png")}
           onPress={() => goToSearch()}
         />
+
+        {recentlyViewed.length > 0 && (
+          <>
+            <SectionHeader title="Recently Viewed" onPress={() => {}} />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+            >
+              {recentlyViewed.map((item) => (
+                <ProductCard
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  category={item.category}
+                  image={item.image}
+                  price={item.price}
+                  rating={item.rating}
+                  reviews={item.reviews}
+                />
+              ))}
+            </ScrollView>
+          </>
+        )}
 
         <SectionHeader title="Categories" onPress={() => goToSearch()} />
         <CategoryList

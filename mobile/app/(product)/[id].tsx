@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Share, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { router, useLocalSearchParams } from "expo-router";
@@ -24,6 +24,7 @@ import { useToggleWishlist } from "@/features/wishlist/hooks/useToggleWishlist";
 import { useProductReviews } from "@/features/reviews/hooks/useProductReviews";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
+import { useRecentlyViewedStore } from "@/store/recentlyViewed.store";
 
 export default function ProductDetailsScreen() {
   const { colors, isDark } = useTheme();
@@ -42,6 +43,23 @@ export default function ProductDetailsScreen() {
   const [quantity, setQuantity] = useState(1);
 
   const inWishlist = !!wishlist?.some((p) => p.id === id);
+
+  // Record this view for the Home "Recently Viewed" rail. Placed before
+  // the loading/not-found returns below so this hook always runs (React
+  // requires hooks to run unconditionally on every render); it no-ops
+  // internally until a product has actually loaded.
+  React.useEffect(() => {
+    if (!product) return;
+    useRecentlyViewedStore.getState().record({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      image: product.images[0],
+      price: product.price,
+      rating: product.rating,
+      reviews: product.reviews,
+    });
+  }, [product?.id]);
 
   const stateShell = (children: React.ReactNode) => (
     <SafeAreaView
@@ -71,6 +89,12 @@ export default function ProductDetailsScreen() {
     );
   };
 
+  const handleShare = () => {
+    Share.share({
+      message: `Check out ${product.name} on Order Planning — ₹${product.price.toLocaleString()}\nhttps://orderplanning.netlify.app/product/${product.id}`,
+    }).catch(() => {});
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.canvas }]}
@@ -85,6 +109,7 @@ export default function ProductDetailsScreen() {
           onFavourite={() =>
             toggleWishlist.mutate({ id: product.id, inWishlist })
           }
+          onShare={handleShare}
         />
 
         <ProductInfo product={product} />

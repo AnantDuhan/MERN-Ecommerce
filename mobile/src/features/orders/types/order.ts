@@ -32,6 +32,7 @@ export interface ApiOrder {
   createdAt: string;
   isReturned?: boolean;
   returnRequestedAt?: string;
+  estimatedDeliveryDate?: string;
   paidAt?: string;
   itemsPrice: number;
   shippingPrice: number;
@@ -69,6 +70,7 @@ export interface OrderVM {
   createdAt: string;
   isReturned: boolean;
   returnRequestedAt?: string;
+  estimatedDeliveryDate?: string;
   itemsPrice: number;
   shippingPrice: number;
   totalPrice: number;

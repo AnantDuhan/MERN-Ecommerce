@@ -1,24 +1,27 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { useTheme } from "@/theme/ThemeContext";
 import { Eyebrow, Display, BodySm } from "@/components/ui/Text";
 import { spacing } from "@/theme/tokens";
+import { useLocationLabel } from "@/features/location/hooks/useLocationLabel";
 
 interface Props {
   userName: string;
+  /** Overrides the auto-detected location label, if provided. */
   location?: string;
   onNotificationPress?: () => void;
 }
 
 export default function HomeHeader({
   userName,
-  location = "Coimbatore, Tamil Nadu",
+  location,
   onNotificationPress,
 }: Props) {
   const { colors } = useTheme();
+  const { label, status } = useLocationLabel();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -27,6 +30,9 @@ export default function HomeHeader({
     if (hour >= 17 && hour < 21) return "Good Evening";
     return "Good Night";
   };
+
+  const displayLabel = location ?? label;
+  const isDenied = status === "denied" && !displayLabel;
 
   return (
     <Animated.View entering={FadeInDown.duration(700)} style={styles.container}>
@@ -44,15 +50,21 @@ export default function HomeHeader({
         </Pressable>
       </View>
 
-      <View style={styles.deliveryRow}>
+      <Pressable
+        style={styles.deliveryRow}
+        disabled={!isDenied}
+        onPress={() => Linking.openSettings()}
+      >
         <Ionicons name="location-outline" size={15} color={colors.brass} />
         <Eyebrow tone="faint" style={{ marginLeft: 6 }}>
           Deliver to
         </Eyebrow>
-        <BodySm tone="soft" style={{ marginLeft: 8 }}>
-          {location}
+        <BodySm tone="soft" style={{ marginLeft: 8 }} numberOfLines={1}>
+          {isDenied
+            ? "Enable location access"
+            : displayLabel ?? "Detecting location…"}
         </BodySm>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }

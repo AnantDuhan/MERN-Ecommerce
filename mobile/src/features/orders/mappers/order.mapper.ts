@@ -15,6 +15,7 @@ export function toOrder(api: ApiOrder): OrderVM {
     createdAt: api.createdAt,
     isReturned: !!api.isReturned,
     returnRequestedAt: api.returnRequestedAt,
+    estimatedDeliveryDate: api.estimatedDeliveryDate,
     itemsPrice: api.itemsPrice ?? 0,
     shippingPrice: api.shippingPrice ?? 0,
     totalPrice: api.totalPrice ?? 0,

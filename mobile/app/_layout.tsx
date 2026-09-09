@@ -8,9 +8,26 @@ import { queryClient } from "@/query/queryClient";
 import AuthProvider from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/theme/ThemeContext";
 import { fontMap } from "@/theme/fonts";
+import { usePushRegistration } from "@/features/notifications/hooks/usePushRegistration";
+import OfflineBanner from "@/components/common/OfflineBanner";
 
 // Keep the native splash up until the editorial fonts are ready.
 SplashScreen.preventAutoHideAsync();
+
+function AppShell() {
+  usePushRegistration();
+  return (
+    <>
+      <OfflineBanner />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      />
+    </>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontMap);
@@ -31,12 +48,7 @@ export default function RootLayout() {
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: "fade",
-              }}
-            />
+            <AppShell />
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>

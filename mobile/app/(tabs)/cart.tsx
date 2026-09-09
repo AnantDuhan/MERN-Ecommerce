@@ -144,13 +144,14 @@ export default function CartScreen() {
   }
 
   return shell(
-    <>
+    <View style={{ flex: 1 }}>
       {Header}
       <FlatList
         data={items}
         keyExtractor={(item) => `${item.id}-${item.size ?? ""}`}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
         renderItem={({ item }) => <CartRow item={item} />}
       />
 
@@ -170,14 +171,14 @@ export default function CartScreen() {
           onPress={() => router.push("/checkout/shipping")}
         />
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16 },
-  list: { paddingHorizontal: 24, paddingBottom: 24 },
+  list: { paddingHorizontal: 24, paddingBottom: 200 },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -187,9 +188,13 @@ const styles = StyleSheet.create({
   thumb: { width: 72, height: 72 },
   qtyRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
   footer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: 24,
     paddingTop: 18,
-    paddingBottom: 28,
+    paddingBottom: 40,
     borderTopWidth: 1,
   },
   summaryRow: {

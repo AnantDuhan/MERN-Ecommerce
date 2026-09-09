@@ -21,9 +21,10 @@ interface Props {
   product: Product;
   onBack?: () => void;
   onFavourite?: () => void;
+  onShare?: () => void;
 }
 
-export default function ProductGallery({ product, onBack, onFavourite }: Props) {
+export default function ProductGallery({ product, onBack, onFavourite, onShare }: Props) {
   const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList<ImageSourcePropType>>(null);
@@ -45,13 +46,20 @@ export default function ProductGallery({ product, onBack, onFavourite }: Props) 
           <Ionicons name="arrow-back" size={20} color={colors.ink} />
         </Pressable>
 
-        <Pressable onPress={onFavourite} style={iconBtn}>
-          <Ionicons
-            name={product.favourite ? "heart" : "heart-outline"}
-            size={20}
-            color={product.favourite ? colors.danger : colors.ink}
-          />
-        </Pressable>
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          {onShare && (
+            <Pressable onPress={onShare} style={iconBtn}>
+              <Ionicons name="share-outline" size={20} color={colors.ink} />
+            </Pressable>
+          )}
+          <Pressable onPress={onFavourite} style={iconBtn}>
+            <Ionicons
+              name={product.favourite ? "heart" : "heart-outline"}
+              size={20}
+              color={product.favourite ? colors.danger : colors.ink}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <FlatList

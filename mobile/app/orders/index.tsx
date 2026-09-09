@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -56,7 +56,37 @@ export default function MyOrdersScreen() {
               <StatusPill status={item.status} />
               <Caption tone="faint">{new Date(item.createdAt).toLocaleDateString()}</Caption>
             </View>
-            <BodySm tone="faint" style={{ marginTop: 12 }}>{`Order #${item.id.slice(-10)}`}</BodySm>
+
+            <View style={styles.thumbRow}>
+              {item.items.slice(0, 3).map((line, index) =>
+                line.image ? (
+                  <Image
+                    key={index}
+                    source={line.image}
+                    resizeMode="contain"
+                    style={[
+                      styles.thumb,
+                      { borderColor: colors.line, marginLeft: index === 0 ? 0 : -14, zIndex: 3 - index },
+                    ]}
+                  />
+                ) : (
+                  <View
+                    key={index}
+                    style={[
+                      styles.thumb,
+                      { borderColor: colors.line, backgroundColor: colors.surface2, marginLeft: index === 0 ? 0 : -14, zIndex: 3 - index },
+                    ]}
+                  />
+                )
+              )}
+              {item.itemCount > 3 && (
+                <View style={[styles.thumb, styles.moreThumb, { borderColor: colors.line, backgroundColor: colors.surface2 }]}>
+                  <Caption tone="soft">{`+${item.itemCount - 3}`}</Caption>
+                </View>
+              )}
+              <BodySm tone="faint" style={{ marginLeft: spacing.md }}>{`Order #${item.id.slice(-10)}`}</BodySm>
+            </View>
+
             <View style={styles.rowBottom}>
               <Caption tone="soft">{`${item.itemCount} item${item.itemCount === 1 ? "" : "s"}`}</Caption>
               <Txt style={{ ...type.h3 }}>{`\u20B9${item.totalPrice.toLocaleString()}`}</Txt>
@@ -73,6 +103,9 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 24, paddingBottom: 16 },
   list: { paddingHorizontal: 24, paddingBottom: 40 },
   rowTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  rowBottom: { marginTop: 6, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  thumbRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
+  thumb: { width: 44, height: 44, borderRadius: 4, borderWidth: 1 },
+  moreThumb: { marginLeft: -14, justifyContent: "center", alignItems: "center" },
+  rowBottom: { marginTop: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   stateBox: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
 });

@@ -7,6 +7,8 @@ import { useLocalSearchParams } from "expo-router";
 import TopBar from "@/components/common/TopBar";
 import StatusPill from "@/components/orders/StatusPill";
 import ReturnRequestCard from "@/components/orders/ReturnRequestCard";
+import DeliveryCountdownCard from "@/components/orders/DeliveryCountdownCard";
+import { useDeliveryReviewPrompt } from "@/features/reviews/hooks/useDeliveryReviewPrompt";
 import { Card } from "@/components/ui/Card";
 import { Rule } from "@/components/ui/Rule";
 import { Display, Eyebrow, H3, Body, BodySm, Caption, Txt } from "@/components/ui/Text";
@@ -19,6 +21,7 @@ export default function OrderDetailScreen() {
   const params = useLocalSearchParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { data: order, isLoading, isError } = useOrder(id);
+  useDeliveryReviewPrompt(id ?? "", order?.status ?? "");
 
   const shell = (children: React.ReactNode, center?: boolean) => (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.canvas }]} edges={["top"]}>
@@ -71,6 +74,13 @@ export default function OrderDetailScreen() {
         <Rule style={{ marginVertical: spacing.md }} />
         <View style={styles.priceRow}><Eyebrow>Total</Eyebrow><Txt style={{ ...type.h3 }}>{`\u20B9${order.totalPrice.toLocaleString()}`}</Txt></View>
       </Card>
+
+      {order.estimatedDeliveryDate && (
+        <DeliveryCountdownCard
+          estimatedDeliveryDate={order.estimatedDeliveryDate}
+          status={order.status}
+        />
+      )}
 
       <ReturnRequestCard orderId={order.id} status={order.status} isReturned={order.isReturned} />
 
