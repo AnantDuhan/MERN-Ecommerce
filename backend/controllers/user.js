@@ -4,6 +4,7 @@ const sendEmail = require('../utils/sendEmail');
 const { sendEmailInBackground } = require('../utils/sendEmail');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const EmailService = require("../services/email.service");
 require('dotenv').config({ path: 'backend/config/config.env' });
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { fromEnv } = require('@aws-sdk/credential-provider-env');
@@ -147,6 +148,7 @@ exports.loginUser = async (req, res, next) => {
 
         res.status(201).cookie('token', token, options).json({
             success: true,
+            token,
             user
         });
     } catch (err) {
@@ -207,12 +209,13 @@ exports.forgotPassword = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: `Email sent to ${user.email} successfully.`
+            message: `Email sent to ${user.email} successfully.`,
+            resetPasswordURL: resetPasswordURL
         });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };

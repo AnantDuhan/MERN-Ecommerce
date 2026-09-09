@@ -58,9 +58,9 @@ router.route('/password/forgot').post(authLimiter, forgotPassword);
 
 router.route('/password/reset/:token').put(authLimiter, resetPassword);
 
-router.route('/logout').get(logout);
+router.route('/auth/logout').post(logout);
 
-router.route('/me').get(isAuthUser, getUserDetails);
+router.route('/auth/me').get(isAuthUser, getUserDetails);
 
 // Address book
 router.route('/addresses').get(isAuthUser, getAddresses);
@@ -72,10 +72,10 @@ router.route('/me/push-token').put(isAuthUser, registerPushToken);
 
 router.route('/password/update').put(isAuthUser, updatePassword);
 
-router.route('/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
+router.route('/auth/admin/users').get(isAuthUser, authRoles('admin'), getAllUsers);
 
 router
-    .route('/admin/user/:id')
+    .route('/auth/admin/user/:id')
     .get(isAuthUser, authRoles('admin'), getSingleUser)
     .put(isAuthUser, authRoles('admin'), updateUserRole);
 

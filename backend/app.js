@@ -5,7 +5,6 @@ const app = express();
 app.set("trust proxy", 1);
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const errorMiddleware = require("./middleware/error");
 const multer = require("multer");
 const url = require("url");
 const path = require("path");
@@ -153,9 +152,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 process.noDeprecation = true;
-
-// middleware for error
-app.use(errorMiddleware);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -501,21 +497,21 @@ app.put(
       //   console.error("Redis cache sync error:", cacheError);
       // }
 
-      try {
-        const cacheKey = `product:${productId}`;
+      // try {
+      //   const cacheKey = `product:${productId}`;
 
-        await redisClient.del(cacheKey);
+      //   await redisClient.del(cacheKey);
 
-        await redisClient.set(
-            cacheKey,
-            JSON.stringify(updatedProduct),
-            {
-                ex: 3600
-            }
-        );
-      } catch (cacheError) {
-          console.error("⚠️ Redis cache sync error:", cacheError);
-      }
+      //   await redisClient.set(
+      //       cacheKey,
+      //       JSON.stringify(updatedProduct),
+      //       {
+      //           ex: 3600
+      //       }
+      //   );
+      // } catch (cacheError) {
+      //     console.error("⚠️ Redis cache sync error:", cacheError);
+      // }
 
       res.status(200).json({
         success: true,

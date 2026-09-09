@@ -8,6 +8,7 @@ const redisClient = require('./config/redisClientUpstash');
 const { warmUpEmailTransport } = require('./utils/sendEmail');
 const runWeeklyNewsletter = require('./newsletterJob');
 const runWishlistReminders = require('./wishlistJob');
+const { transporter } = require('./utils/transporter');
 
 // Handling Uncaught Exceptions
 // process.on('uncaughtException', (err) => {
@@ -15,6 +16,14 @@ const runWishlistReminders = require('./wishlistJob');
 //     console.log(`Shutting down the server due to Uncaught Exceptions`);
 //     process.exit(1);
 // })
+
+transporter.verify()
+    .then(() => {
+        console.log("📧 SMTP Connected");
+    })
+    .catch((err) => {
+        console.error("SMTP Error:", err);
+    });
 
 // config
 dotenv.config({ path: './backend/config/config.env' });
@@ -38,7 +47,7 @@ io.on('connection', socket => {
 });
 
 app.set('socketio', io);
-app.set('redisClient', redisClient);
+// app.set('redisClient', redisClient);
 
 //connecting to database
 connectDB();
