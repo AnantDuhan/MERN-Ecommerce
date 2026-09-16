@@ -50,6 +50,33 @@ export const API_ENDPOINTS = {
     CASHFREE_VERIFY: (orderId: string) => `/cashfree/order/${orderId}/verify`,
   },
 
+  ADMIN: {
+    STATS: "/admin/stats",
+    ANALYTICS: "/admin/analytics",
+
+    PRODUCTS: "/admin/products",
+    PRODUCT_CREATE: "/admin/product/new",
+    PRODUCT_UPDATE: (id: string) => `/admin/update/product/${id}`,
+    PRODUCT_DELETE: (id: string) => `/admin/product/${id}`,
+
+    ORDERS: "/admin/orders",
+    ORDER_UPDATE: (id: string) => `/admin/order/${id}`,
+    ORDER_DELETE: (id: string) => `/admin/order/${id}`,
+    ORDER_REFUND: (id: string) => `/admin/order/${id}/refund`,
+    REFUND_STATUS: (orderId: string, refundId: string) =>
+      `/admin/order/${orderId}/refund/${refundId}/status`,
+
+    RETURNS: "/admin/returns",
+    RETURN_STATUS: (id: string) => `/admin/return/${id}/status`,
+
+    REFUNDS: "/admin/refunds",
+
+    USERS: "/auth/admin/users",
+    USER_DETAIL: (id: string) => `/auth/admin/user/${id}`,
+    USER_ROLE_UPDATE: (id: string) => `/auth/admin/user/${id}`,
+    USER_DELETE: (id: string) => `/auth/admin/user/${id}`,
+  },
+
   MEMBERSHIP: {
     PLANS: "/membership/plans",
     CURRENT: "/membership/current",

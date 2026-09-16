@@ -123,6 +123,17 @@ export default function ProfileScreen() {
               </View>
             </View>
 
+            {user?.role === "admin" && (
+              <View style={[styles.group, { borderColor: colors.line }]}>
+                <Row
+                  icon="shield-checkmark-outline"
+                  label="Admin Panel"
+                  onPress={() => router.push("/admin")}
+                  last
+                />
+              </View>
+            )}
+
             <View style={[styles.group, { borderColor: colors.line }]}>
               <Row
                 icon="cube-outline"

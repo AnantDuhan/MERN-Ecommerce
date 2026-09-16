@@ -10,6 +10,7 @@ import { radii, type } from "@/theme/tokens";
 
 interface Review {
   id: string;
+  userId?: string;
   user: string;
   rating: number;
   comment: string;
@@ -20,6 +21,8 @@ interface Props {
   rating: number;
   reviewsCount: number;
   reviews: Review[];
+  currentUserId?: string;
+  onDelete?: (reviewId: string) => void;
   onSeeAll?: () => void;
 }
 
@@ -27,6 +30,8 @@ export default function ReviewsPreview({
   rating,
   reviewsCount,
   reviews,
+  currentUserId,
+  onDelete,
   onSeeAll,
 }: Props) {
   const { colors } = useTheme();
@@ -90,6 +95,11 @@ export default function ReviewsPreview({
               </View>
 
               {review.date ? <Caption tone="faint">{review.date}</Caption> : null}
+              {onDelete && review.userId && review.userId === currentUserId ? (
+                <Pressable onPress={() => onDelete(review.id)} hitSlop={8} style={{ marginLeft: 10 }}>
+                  <Ionicons name="trash-outline" size={16} color={colors.inkFaint} />
+                </Pressable>
+              ) : null}
             </View>
 
             <Body tone="soft" style={{ marginTop: 12 }}>

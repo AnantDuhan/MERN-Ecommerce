@@ -30,6 +30,9 @@ import { ADD_PRODUCT_TO_WISHLIST_FAIL,
     PRODUCT_DETAILS_FAIL, 
     PRODUCT_DETAILS_REQUEST, 
     PRODUCT_DETAILS_SUCCESS, 
+    RECENTLY_VIEWED_REQUEST,
+    RECENTLY_VIEWED_SUCCESS,
+    RECENTLY_VIEWED_FAIL,
     REMOVE_PRODUCT_FROM_WISHLIST_FAIL, 
     REMOVE_PRODUCT_FROM_WISHLIST_REQUEST, 
     REMOVE_PRODUCT_FROM_WISHLIST_SUCCESS, 
@@ -321,24 +324,27 @@ export const removeProductFromWishlist = id => async dispatch => {
            }
        };
 
-// export const getProductsByIds = (ids) => async dispatch => {
-//     try {
-//         dispatch({ type: RECOMMENDED_PRODUCTS_REQUEST });
+export const getProductsByIds = (ids) => async dispatch => {
+    if (!ids || ids.length === 0) {
+        dispatch({ type: RECENTLY_VIEWED_SUCCESS, payload: [] });
+        return;
+    }
+    try {
+        dispatch({ type: RECENTLY_VIEWED_REQUEST });
 
-//         const { data } = await axios.post(`/api/v1/products/batch`, { ids });
+        const { data } = await axios.post(`/api/v1/products/batch`, { ids });
 
-//         dispatch({
-//             type: RECOMMENDED_PRODUCTS_SUCCESS,
-//             payload: data.products
-//         });
-//     } catch (error) {
-//         dispatch({
-//             type: RECOMMENDED_PRODUCTS_FAIL,
-//             payload: error.response.data.message
-//         });
-//         return [];
-//     }
-// };
+        dispatch({
+            type: RECENTLY_VIEWED_SUCCESS,
+            payload: data.products
+        });
+    } catch (error) {
+        dispatch({
+            type: RECENTLY_VIEWED_FAIL,
+            payload: error.response?.data?.message || 'Could not load recently viewed products'
+        });
+    }
+};
 
 export const searchProducts = (filters = {}) => async (dispatch) => {
     try {

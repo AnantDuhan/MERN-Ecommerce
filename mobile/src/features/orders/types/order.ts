@@ -85,6 +85,7 @@ export interface OrderVM {
     price: number;
     quantity: number;
     image?: { uri: string };
+    images: { uri: string }[];
     product: string;
   }[];
 }

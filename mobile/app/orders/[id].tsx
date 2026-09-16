@@ -1,11 +1,12 @@
 import React from "react";
-import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { router, useLocalSearchParams } from "expo-router";
 
 import TopBar from "@/components/common/TopBar";
 import StatusPill from "@/components/orders/StatusPill";
+import OrderItemThumb from "@/components/orders/OrderItemThumb";
 import ReturnRequestCard from "@/components/orders/ReturnRequestCard";
 import DeliveryCountdownCard from "@/components/orders/DeliveryCountdownCard";
 import { useDeliveryReviewPrompt } from "@/features/reviews/hooks/useDeliveryReviewPrompt";
@@ -92,7 +93,7 @@ export default function OrderDetailScreen() {
             }
             style={[styles.itemRow, index !== order.items.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.line }]}
           >
-            {item.image ? <Image source={item.image} resizeMode="contain" style={styles.thumb} /> : <View style={[styles.thumb, { backgroundColor: colors.surface2 }]} />}
+            <OrderItemThumb images={item.images} />
             <View style={{ flex: 1, marginLeft: spacing.md }}>
               <BodySm numberOfLines={1} style={{ fontFamily: type.h3.fontFamily }}>{item.name}</BodySm>
               <Caption tone="faint" style={{ marginTop: 2 }}>{`Qty ${item.quantity}`}</Caption>

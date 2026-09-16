@@ -22,6 +22,7 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useToggleWishlist } from "@/features/wishlist/hooks/useToggleWishlist";
 import { useProductReviews } from "@/features/reviews/hooks/useProductReviews";
+import { useDeleteReview } from "@/features/reviews/hooks/useDeleteReview";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useRecentlyViewedStore } from "@/store/recentlyViewed.store";
@@ -37,6 +38,8 @@ export default function ProductDetailsScreen() {
   const toggleWishlist = useToggleWishlist();
   const { data: reviews = [] } = useProductReviews(id);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const authUser = useAuthStore((s) => s.user);
+  const deleteReview = useDeleteReview(id);
   const addToCart = useCartStore((s) => s.add);
 
   const [size, setSize] = useState<string | undefined>();
@@ -133,10 +136,13 @@ export default function ProductDetailsScreen() {
           reviewsCount={product.reviews}
           reviews={reviews.map((r) => ({
             id: r._id,
+            userId: r.user,
             user: r.name,
             rating: r.rating,
             comment: r.comment,
           }))}
+          currentUserId={authUser?._id}
+          onDelete={(reviewId) => deleteReview.mutate(reviewId)}
           onSeeAll={() => {}}
         />
 

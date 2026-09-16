@@ -6,6 +6,9 @@ export function toOrder(api: ApiOrder): OrderVM {
     price: i.price,
     quantity: i.quantity,
     image: i.images?.[0]?.url ? { uri: i.images[0].url } : undefined,
+    images: (i.images ?? [])
+      .filter((img) => !!img?.url)
+      .map((img) => ({ uri: img.url })),
     product: i.product,
   }));
 
