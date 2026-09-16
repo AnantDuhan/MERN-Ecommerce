@@ -12,6 +12,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 import { addItemsToCart } from '../../actions/cartAction';
 import { addProductToWishlist, clearErrors, getProductDetails, newReview, summarizeProductReviews } from '../../actions/productAction';
+import { recordProductView } from '../../utils/recentlyViewed';
 import { NEW_REVIEW_RESET, REALTIME_PRODUCT_UPDATE, SUMMARIZE_REVIEWS_RESET } from '../../constants/productConstants';
 import MetaData from '../layout/MetaData';
 import ReviewCard from './ReviewCard';
@@ -151,6 +152,10 @@ const ProductDetails = () => {
             socket.disconnect();
         };
     }, [dispatch, id]);
+
+    useEffect(() => {
+        recordProductView(id);
+    }, [id]);
 
     const inStock = product?.Stock >= 1;
 

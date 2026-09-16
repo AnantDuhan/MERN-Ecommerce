@@ -1,4 +1,6 @@
-const nodemailer = require('nodemailer');
+const path = require("path");
+const transporter = require("./transporter");
+const { getCompiledTemplate } = require("./templateCache");
 
 /**
  * A single pooled SMTP transport for the whole process.
@@ -9,7 +11,7 @@ const nodemailer = require('nodemailer');
  * Nodemailer's pool keeps sockets open and reuses them, so only the first
  * message pays that cost.
  */
-let transporter = null;
+// let transporter = null;
 
 const getTransporter = () => {
     if (transporter) return transporter;

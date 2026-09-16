@@ -18,6 +18,9 @@ import {
     DELETE_PRODUCT_FAIL,
     DELETE_PRODUCT_RESET,
     PRODUCT_DETAILS_REQUEST,
+    RECENTLY_VIEWED_REQUEST,
+    RECENTLY_VIEWED_SUCCESS,
+    RECENTLY_VIEWED_FAIL,
     PRODUCT_DETAILS_FAIL,
     PRODUCT_DETAILS_SUCCESS,
     NEW_REVIEW_REQUEST,
@@ -347,27 +350,28 @@ export const wishlistReducer = (state = initialState, action) => {
     }
 };
 
-// export const recommendedProductsReducer = (state = { products: [] }, action) => {
-//     switch (action.type) {
-//         case RECOMMENDED_PRODUCTS_REQUEST:
-//             return {
-//                 loading: true,
-//                 products: [],
-//             };
-//         case RECOMMENDED_PRODUCTS_SUCCESS:
-//             return {
-//                 loading: false,
-//                 products: action.payload,
-//             };
-//         case RECOMMENDED_PRODUCTS_FAIL:
-//             return {
-//                 loading: false,
-//                 error: action.payload,
-//             };
-//         default:
-//             return state;
-//     }
-// };
+export const recentlyViewedReducer = (state = { products: [] }, action) => {
+    switch (action.type) {
+        case RECENTLY_VIEWED_REQUEST:
+            return {
+                loading: true,
+                products: [],
+            };
+        case RECENTLY_VIEWED_SUCCESS:
+            return {
+                loading: false,
+                products: action.payload,
+            };
+        case RECENTLY_VIEWED_FAIL:
+            return {
+                loading: false,
+                products: [],
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+};
 
 export const searchResultsReducer = (state = { products: [], facets: {} }, action) => {
     switch (action.type) {

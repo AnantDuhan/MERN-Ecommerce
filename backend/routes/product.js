@@ -3,6 +3,7 @@ const {
    getAllProducts,
    getAdminProducts,
    getProductDetails,
+   getProductsByIds,
    createProductReview,
    getProductReviews,
    deleteReview,
@@ -37,6 +38,7 @@ router
     .get(isAuthUser, authRoles('admin'), getAdminProducts);
 
 router.route('/product/:id').get(getProductDetails);
+router.route('/products/batch').post(getProductsByIds);
 
 router.route('/review').post(isAuthUser, createProductReview);
 

@@ -54,6 +54,42 @@ export const getAdminProducts = async (req, res, next) => {
 };
 
 // get product details
+// Fetch a specific set of products by id, in one request — used by
+// Recently Viewed (and anywhere else that already has a list of ids and
+// just needs current details for them, e.g. a saved wishlist snapshot).
+export const getProductsByIds = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(200).json({ success: true, products: [] });
+        }
+
+        // Keep this bounded regardless of what the client sends.
+        const safeIds = ids.slice(0, 50);
+
+        const products = await Product.find({ _id: { $in: safeIds } });
+
+        // Preserve the caller's original (most-recent-first) order —
+        // Mongo's $in does not guarantee it.
+        const byId = new Map(products.map(p => [p._id.toString(), p]));
+        const ordered = safeIds
+            .map(id => byId.get(id))
+            .filter(Boolean);
+
+        res.status(200).json({
+            success: true,
+            products: ordered
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch products',
+            error: error.message
+        });
+    }
+};
+
 export const getProductDetails = async (req, res, next) => {
 
     const redisClient = redisClientPromise;

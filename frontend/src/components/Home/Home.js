@@ -9,6 +9,7 @@ import LoadingBar from 'react-top-loading-bar';
 import MetaData from '../layout/MetaData';
 import ProductCard from './ProductCard';
 import ProductGridItem from './ProductGridItem';
+import RecentlyViewed from './RecentlyViewed';
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -127,6 +128,9 @@ const Home = () => {
                                 ))}
                         </div>
                     </section>
+
+                    {/* ── Recently Viewed ─────────────────────────── */}
+                    <RecentlyViewed />
 
                     {/* ── Shop All (editorial grid) ──────────────── */}
                     <section className='editorial-shell mt-24'>
