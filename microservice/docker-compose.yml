@@ -1,0 +1,51 @@
+# Local orchestration. As each service is extracted it gets an entry here and a
+# route in the gateway registry — nothing else changes. Mongo runs one instance
+# with a database per service (separate DB names), which keeps the
+# database-per-service boundary without paying for many clusters in dev.
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: ["mongo-data:/data/db"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  api-gateway:
+    build: { context: ., dockerfile: services/api-gateway/Dockerfile }
+    ports: ["4000:4000"]
+    environment:
+      PORT: "4000"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-dev-secret-change-me}"
+      AUTH_SERVICE_URL: "http://auth-service:4001"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:4006"
+    depends_on: [auth-service, notification-service]
+
+  auth-service:
+    build: { context: ., dockerfile: services/auth-service/Dockerfile }
+    ports: ["4001:4001"]
+    environment:
+      PORT: "4001"
+      AUTH_MONGO_URI: "mongodb://mongo:27017/order-planning-auth"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-dev-secret-change-me}"
+      JWT_EXPIRES_IN: "${JWT_EXPIRES_IN:-90d}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+    depends_on: [mongo, redis]
+
+  notification-service:
+    build: { context: ., dockerfile: services/notification-service/Dockerfile }
+    ports: ["4006:4006"]
+    environment:
+      PORT: "4006"
+      NOTIFICATION_MONGO_URI: "mongodb://mongo:27017/order-planning-notifications"
+      REDIS_URL: "redis://redis:6379"
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      RESEND_FROM_EMAIL: "${RESEND_FROM_EMAIL:-Maison <hello@example.com>}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+    depends_on: [mongo, redis]
+
+volumes:
+  mongo-data:

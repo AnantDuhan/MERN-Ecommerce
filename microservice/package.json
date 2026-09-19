@@ -1,0 +1,20 @@
+{
+  "name": "order-planning-microservices",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MAISON / Order Planning — microservices platform (TypeScript)",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:gateway": "npm run dev -w @order-planning/api-gateway",
+    "dev:auth": "npm run dev -w @order-planning/auth-service",
+    "dev:notifications": "npm run dev -w @order-planning/notification-service",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down -v"
+  },
+  "author": "Anant Duhan",
+  "license": "ISC"
+}
