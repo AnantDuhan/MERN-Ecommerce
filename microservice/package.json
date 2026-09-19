@@ -11,9 +11,18 @@
     "build": "npm run build --workspaces --if-present",
     "dev:gateway": "npm run dev -w @order-planning/api-gateway",
     "dev:auth": "npm run dev -w @order-planning/auth-service",
+    "dev:catalog": "npm run dev -w @order-planning/catalog-service",
+    "dev:search": "npm run dev -w @order-planning/search-service",
+    "dev:order": "npm run dev -w @order-planning/order-service",
+    "dev:payment": "npm run dev -w @order-planning/payment-service",
+    "dev:analytics": "npm run dev -w @order-planning/analytics-service",
     "dev:notifications": "npm run dev -w @order-planning/notification-service",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down -v"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.6.3"
   },
   "author": "Anant Duhan",
   "license": "ISC"

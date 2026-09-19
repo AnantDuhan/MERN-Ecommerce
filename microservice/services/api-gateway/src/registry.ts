@@ -43,4 +43,9 @@ export const routes: RouteRule[] = [
     target: process.env.NOTIFICATION_SERVICE_URL ?? "http://notification-service:4006",
     requireAuth: false,
   },
+  {
+    prefix: "/api/v1/analytics",
+    target: process.env.ANALYTICS_SERVICE_URL ?? "http://analytics-service:4007",
+    requireAuth: true,
+  },
 ];

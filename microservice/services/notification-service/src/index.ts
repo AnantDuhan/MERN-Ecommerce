@@ -15,7 +15,7 @@ const log = createLogger("notification-service");
 async function bootstrap(): Promise<void> {
   await connectDB();
 
-  const bus = new EventBus(config.redisUrl);
+  const bus = new EventBus(config.redisUrl, "notification-service");
   await startEventConsumers(bus);
   const worker = startEmailWorker();
 

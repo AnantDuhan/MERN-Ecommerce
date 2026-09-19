@@ -3,8 +3,9 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "lib": ["ES2022"],
+    "types": ["node"],
     "declaration": true,
     "sourceMap": true,
     "strict": true,

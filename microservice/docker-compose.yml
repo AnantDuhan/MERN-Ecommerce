@@ -12,6 +12,14 @@ services:
     image: redis:7-alpine
     ports: ["6379:6379"]
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports: ["9200:9200"]
+
   api-gateway:
     build: { context: ., dockerfile: services/api-gateway/Dockerfile }
     ports: ["4000:4000"]
@@ -19,8 +27,13 @@ services:
       PORT: "4000"
       JWT_SECRET_KEY: "${JWT_SECRET_KEY:-dev-secret-change-me}"
       AUTH_SERVICE_URL: "http://auth-service:4001"
+      CATALOG_SERVICE_URL: "http://catalog-service:4002"
+      SEARCH_SERVICE_URL: "http://search-service:4003"
+      ORDER_SERVICE_URL: "http://order-service:4004"
+      PAYMENT_SERVICE_URL: "http://payment-service:4005"
       NOTIFICATION_SERVICE_URL: "http://notification-service:4006"
-    depends_on: [auth-service, notification-service]
+      ANALYTICS_SERVICE_URL: "http://analytics-service:4007"
+    depends_on: [auth-service, catalog-service, search-service, order-service, payment-service, notification-service, analytics-service]
 
   auth-service:
     build: { context: ., dockerfile: services/auth-service/Dockerfile }
@@ -35,6 +48,51 @@ services:
       FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
     depends_on: [mongo, redis]
 
+  catalog-service:
+    build: { context: ., dockerfile: services/catalog-service/Dockerfile }
+    ports: ["4002:4002"]
+    environment:
+      PORT: "4002"
+      CATALOG_MONGO_URI: "mongodb://mongo:27017/order-planning-catalog"
+      REDIS_URL: "redis://redis:6379"
+      RESULT_PER_PAGE: "${RESULT_PER_PAGE:-12}"
+    depends_on: [mongo, redis]
+
+  search-service:
+    build: { context: ., dockerfile: services/search-service/Dockerfile }
+    ports: ["4003:4003"]
+    environment:
+      PORT: "4003"
+      REDIS_URL: "redis://redis:6379"
+      ELASTICSEARCH_NODE: "http://elasticsearch:9200"
+      CATALOG_SERVICE_URL: "http://catalog-service:4002"
+    depends_on: [redis, elasticsearch]
+
+  order-service:
+    build: { context: ., dockerfile: services/order-service/Dockerfile }
+    ports: ["4004:4004"]
+    environment:
+      PORT: "4004"
+      ORDER_MONGO_URI: "mongodb://mongo:27017/order-planning-orders"
+      REDIS_URL: "redis://redis:6379"
+      AUTH_SERVICE_URL: "http://auth-service:4001"
+      PAYMENT_SERVICE_URL: "http://payment-service:4005"
+    depends_on: [mongo, redis]
+
+  payment-service:
+    build: { context: ., dockerfile: services/payment-service/Dockerfile }
+    ports: ["4005:4005"]
+    environment:
+      PORT: "4005"
+      PAYMENT_MONGO_URI: "mongodb://mongo:27017/order-planning-payments"
+      REDIS_URL: "redis://redis:6379"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+      CASHFREE_APP_ID: "${CASHFREE_APP_ID:-}"
+      CASHFREE_SECRET_KEY: "${CASHFREE_SECRET_KEY:-}"
+      CASHFREE_ENVIRONMENT: "${CASHFREE_ENVIRONMENT:-sandbox}"
+      CASHFREE_WEBHOOK_URL: "${CASHFREE_WEBHOOK_URL:-}"
+    depends_on: [mongo, redis]
+
   notification-service:
     build: { context: ., dockerfile: services/notification-service/Dockerfile }
     ports: ["4006:4006"]
@@ -45,6 +103,15 @@ services:
       RESEND_API_KEY: "${RESEND_API_KEY:-}"
       RESEND_FROM_EMAIL: "${RESEND_FROM_EMAIL:-Maison <hello@example.com>}"
       FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+    depends_on: [mongo, redis]
+
+  analytics-service:
+    build: { context: ., dockerfile: services/analytics-service/Dockerfile }
+    ports: ["4007:4007"]
+    environment:
+      PORT: "4007"
+      ANALYTICS_MONGO_URI: "mongodb://mongo:27017/order-planning-analytics"
+      REDIS_URL: "redis://redis:6379"
     depends_on: [mongo, redis]
 
 volumes:
